@@ -11,9 +11,12 @@ dotenv_1.default.config();
 const app = (0, express_1.default)();
 const port = process.env.EXPRESS_PORT || 3000;
 app.use(express_1.default.json());
+
+
 // Test database connections
 (0, db_1.connectToDatabases)();
 app.use('/api', routing_1.default);
+
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });

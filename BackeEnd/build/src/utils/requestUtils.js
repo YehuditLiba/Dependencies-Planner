@@ -1,4 +1,5 @@
 "use strict";
+
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAllRequests = void 0;
 const db_1 = require("../config/db");
@@ -15,3 +16,4 @@ const getAllRequests = (callback) => {
     });
 };
 exports.getAllRequests = getAllRequests;
+

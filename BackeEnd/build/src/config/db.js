@@ -1,4 +1,6 @@
 "use strict";
+
+
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -21,7 +23,9 @@ const pool = new pg_1.Pool({
     port: Number(process.env.DB_PORT),
     idleTimeoutMillis: 0,
     connectionTimeoutMillis: 0,
+
     ssl: { rejectUnauthorized: false }
+
 });
 exports.pool = pool;
 // Second database configuration
@@ -33,7 +37,9 @@ const poolG = new pg_1.Pool({
     port: Number(process.env.DB_PORT_G),
     idleTimeoutMillis: 0,
     connectionTimeoutMillis: 0,
+
     ssl: { rejectUnauthorized: false }
+
 });
 exports.poolG = poolG;
 // Function to connect to both databases
