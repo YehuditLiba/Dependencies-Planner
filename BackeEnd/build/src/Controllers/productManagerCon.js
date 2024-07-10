@@ -1,6 +1,5 @@
 "use strict";
-
-
+// import { Request, Response } from 'express';
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -10,24 +9,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRequestorNames = void 0;
-const productManagerTypes_1 = __importDefault(require("../types/productManagerTypes"));
-const getRequestorNames = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log('controller');
+exports.getAllProductManagerNames = void 0;
+const db_1 = require("../config/db");
+const getAllProductManagerNames = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const productManagerNames = yield productManagerTypes_1.default.getAllProductManagerNames();
-
-        res.json(productManagerNames);
+        console.log('Entering getAllProductManagerNames method');
+        const result = yield db_1.pool.query('SELECT name FROM productmanager');
+        console.log('Query executed successfully, result:', result.rows);
+        return result.rows;
     }
-    catch (error) {
-        console.error('Error fetching requestor names:', error);
-        res.status(500).send('Internal Server Error');
+    catch (err) {
+        console.error('Error executing query in getAllProductManagerNames:', err);
+        throw err;
     }
 });
-exports.getRequestorNames = getRequestorNames;
+exports.getAllProductManagerNames = getAllProductManagerNames;

@@ -25,4 +25,4 @@ export interface Request {
     jiraLink: string;
 }
 
-export { Request };
+
