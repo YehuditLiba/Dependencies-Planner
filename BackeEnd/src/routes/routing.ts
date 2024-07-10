@@ -6,5 +6,4 @@ const router = express.Router();
 
 router.get('/requests', getAllRequestsController);
 router.get('/groups', getAllGroupsController); 
-
 export default router;
