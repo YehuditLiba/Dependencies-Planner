@@ -2,7 +2,7 @@
 import { Request, Response } from 'express';
 import { getAllRequests } from '../Utils/requestUtils';
 
-// Controller function to get all requests
+//  get all requests
 export const getAllRequestsController = (req: Request, res: Response) => {
     getAllRequests((err, requests) => {
         if (err) {

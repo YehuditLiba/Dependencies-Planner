@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAllRequestsController = void 0;
 const requestUtils_1 = require("../Utils/requestUtils");
-// Controller function to get all requests
+//  get all requests
 const getAllRequestsController = (req, res) => {
     (0, requestUtils_1.getAllRequests)((err, requests) => {
         if (err) {

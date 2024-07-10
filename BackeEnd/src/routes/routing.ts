@@ -1,9 +1,10 @@
-import { Router } from 'express';
+import express from 'express';
 import { getAllRequestsController } from '../Controllers/requestCon';
+import { getAllGroupsController } from '../Controllers/GroupCon.'; 
 
-const router = Router();
+const router = express.Router();
 
-// Route to fetch all requests
 router.get('/requests', getAllRequestsController);
+router.get('/groups', getAllGroupsController); 
 
 export default router;

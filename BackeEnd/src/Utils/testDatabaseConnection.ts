@@ -1,5 +1,4 @@
 // src/Utils/testDatabaseConnection.ts
-
 import { pool, poolG } from '../config/db';
 
 const testDatabaseConnection = () => {
