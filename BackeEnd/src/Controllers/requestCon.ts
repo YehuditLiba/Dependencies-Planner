@@ -1,4 +1,8 @@
-import { Request, Priority } from '../types/requestTypes';
+
+// requestCon.ts
+
+import { Request } from '../types/requestTypes';
+import { Priority } from '../types/priorityTypes';
 import { pool } from '../config/db';
 
 // Function to fetch all requests
@@ -6,7 +10,7 @@ const GetAllReq = async () => {
   try {
     const client = await pool.connect();
     const sql = `
-      SELECT * FROM request;
+      SELECT * FROM requests;
     `;
     const { rows } = await client.query(sql);
     client.release();

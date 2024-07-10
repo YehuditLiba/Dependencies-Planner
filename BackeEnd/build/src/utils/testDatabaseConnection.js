@@ -1,6 +1,6 @@
 "use strict";
-// src/Utils/testDatabaseConnection.ts
 Object.defineProperty(exports, "__esModule", { value: true });
+// src/Utils/testDatabaseConnection.ts
 const db_1 = require("../config/db");
 const testDatabaseConnection = () => {
     // Test connection to first database
