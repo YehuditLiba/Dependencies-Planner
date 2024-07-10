@@ -1,14 +1,36 @@
-// src/Controllers/requestCon.ts
-import { Request, Response } from 'express';
-import { getAllRequests } from '../Utils/requestUtils';
 
-//  get all requests
-export const getAllRequestsController = (req: Request, res: Response) => {
-    getAllRequests((err, requests) => {
-        if (err) {
-            console.error('Error fetching requests:', err);
-            return res.status(500).json({ error: 'Failed to fetch requests' });
-        }
-        res.status(200).json(requests);
-    });
+// requestCon.ts
+
+import { Request } from '../types/requestTypes';
+import { Priority } from '../types/priorityTypes';
+import { pool } from '../config/db';
+
+// Function to fetch all requests
+const GetAllReq = async () => {
+  try {
+    const client = await pool.connect();
+    const sql = `
+      SELECT * FROM requests;
+    `;
+    const { rows } = await client.query(sql);
+    client.release();
+    return rows.map((row: any) => ({
+      ID: row.id,
+      title: row.title,
+      requestGroup: row.request_group,
+      description: row.description,
+      priority: row.priority as Priority, // Assuming row.priority is a string that matches the enum values
+      finalDecision: row.final_decision,
+      planned: row.planned,
+      comments: row.comments,
+      dateTime: row.date_time,
+      affectedGroupList: row.affected_group_list,
+      jiraLink: row.jira_link
+    })) as Request[];
+  } catch (err) {
+    console.error('Error fetching requests:', err);
+    throw err;
+  }
 };
+
+export { GetAllReq };
