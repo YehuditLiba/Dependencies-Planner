@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "tsc && node ./build/app.js"
+
+    "start": "tsc && nodemon ./build/app.js"
+
   },
   "keywords": [],
   "author": "",
@@ -21,4 +23,6 @@
     "@types/pg": "^8.11.6",
     "tsx": "^4.16.2"
   }
+
 }
+

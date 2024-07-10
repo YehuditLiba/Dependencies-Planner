@@ -1,4 +1,5 @@
 import { Router } from 'express';
+
 import { GetAllReq } from '../Controllers/requestCon';
 import { getRequestorNames } from '../Controllers/productManagerCon';
 
@@ -16,5 +17,6 @@ router.get('/requests', async (req, res) => {
 
 // Endpoint to fetch product manager names
 router.get('/requestor-names', getRequestorNames);
+
 
 export default router;

@@ -1,13 +1,17 @@
 import { AffectedGroup } from "./affectedGroupsTypes";
 
+
 export enum Priority {
+
     Low = 'Low',
     Medium = 'Medium',
     High = 'High',
     Critical = 'Critical'
 }
 
+
 export interface Request {
+
     ID: number;
     title: string;
     requestGroup: string[];
@@ -17,6 +21,8 @@ export interface Request {
     planned: string;
     comments: string;
     dateTime: Date;
-    affectedGroupList:AffectedGroup[];
+    affectedGroupList: AffectedGroup[];
     jiraLink: string;
 }
+
+export { Request };
