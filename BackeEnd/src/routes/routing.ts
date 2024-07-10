@@ -1,7 +1,9 @@
 import { Router } from 'express';
-import {getRequestorNames } from '../Controllers/productManagerCon';
+import { getAllRequestsController } from '../Controllers/requestCon';
 
 const router = Router();
-router.get('/requestor-names', getRequestorNames);
+
+// Route to fetch all requests
+router.get('/requests', getAllRequestsController);
 
 export default router;

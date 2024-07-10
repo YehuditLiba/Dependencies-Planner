@@ -1,14 +1,14 @@
-// config/db.ts
-
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
 
 dotenv.config();
+
 console.log('Database user:', process.env.DB_USER);
 console.log('Database host:', process.env.DB_HOST);
 console.log('Database name:', process.env.DB_DATABASE);
-console.log('Database password:', process.env.DB_PASSWORD); 
+console.log('Database password:', process.env.DB_PASSWORD);
 console.log('Database port:', process.env.DB_PORT);
+
 // First database configuration
 const pool = new Pool({
   user: process.env.DB_USER,
@@ -18,9 +18,7 @@ const pool = new Pool({
   port: Number(process.env.DB_PORT),
   idleTimeoutMillis: 0,
   connectionTimeoutMillis: 0,
-  ssl: {
-    rejectUnauthorized: false
-  }
+   ssl:{ rejectUnauthorized: false }
 });
 
 // Second database configuration
@@ -32,9 +30,7 @@ const poolG = new Pool({
   port: Number(process.env.DB_PORT_G),
   idleTimeoutMillis: 0,
   connectionTimeoutMillis: 0,
-  ssl: {
-    rejectUnauthorized: false
-  }
+  ssl: { rejectUnauthorized: false } 
 });
 
 // Function to connect to both databases
