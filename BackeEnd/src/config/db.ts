@@ -62,3 +62,4 @@ const connectToDatabases = () => {
 
 // Exporting pools and connection function
 export { pool, poolG, connectToDatabases };
+

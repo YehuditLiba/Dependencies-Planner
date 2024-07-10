@@ -1,18 +1,20 @@
 
-import { Request, Response } from 'express';
-import producManagerTyeps from '../types/productManagerTypes';
+// import { Request, Response } from 'express';
+
+import { pool } from '../config/db';
 
 
 
-export const getRequestorNames = async (req: Request, res: Response): Promise<void> => {
-    console.log('controller')
-    try {
-      const productManagerNames = await producManagerTyeps.getAllProductManagerNames();
-      res.json(productManagerNames);
-    } catch (error) {
-      console.error('Error fetching requestor names:', error);
-      res.status(500).send('Internal Server Error');
-    }
-  };
+export const getAllProductManagerNames = async (): Promise<{ name: string }[]> => {
+  try {
+    console.log('Entering getAllProductManagerNames method');
+    const result = await pool.query('SELECT name FROM productmanager');
+    console.log('Query executed successfully, result:', result.rows);
+    return result.rows;
+  } catch (err) {
+    console.error('Error executing query in getAllProductManagerNames:', err);
+    throw err;
+  }
+};
   
 

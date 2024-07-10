@@ -1,12 +1,11 @@
 "use strict";
-
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllRequests = void 0;
+exports.GetAllReq = void 0;
 const db_1 = require("../config/db");
 // פונקציה לשיפור כל הבקשות ממסד הנתונים
-const getAllRequests = (callback) => {
+const GetAllReq = (callback) => {
     console.log("DPRequest");
-    const query = 'SELECT * FROM requests';
+    const query = 'SELECT * FROM request';
     db_1.pool.query(query, (error, results) => {
         if (error) {
             callback(error);
@@ -15,5 +14,4 @@ const getAllRequests = (callback) => {
         callback(null, results.rows);
     });
 };
-exports.getAllRequests = getAllRequests;
-
+exports.GetAllReq = GetAllReq;
