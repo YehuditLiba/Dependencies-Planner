@@ -1,13 +1,13 @@
 import { AffectedGroup } from "./affectedGroupsTypes";
 
-enum Priority {
+export enum Priority {
     Low = 'Low',
     Medium = 'Medium',
     High = 'High',
     Critical = 'Critical'
 }
 
-interface Request {
+export interface Request {
     ID: number;
     title: string;
     requestGroup: string[];
