@@ -1,8 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
 
-
-
 import { connectToDatabases } from './src/config/db';
 import routing from './src/routes/routing';
 

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { fetchAllRequests, getRequestById } from '../Utils/requestUtils';
+import { fetchAllRequests, getRequestById, deleteRequestsByGroupId, getRequestsByGroupId } from '../Utils/requestUtils';
 
 const getAllRequests = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -31,7 +31,25 @@ const getRequestByIdController = async (req: Request, res: Response): Promise<vo
   }
 };
 
+export const deleteRequestsByGroupIdController = async (req: Request, res: Response): Promise<void> => {
+  const groupId = parseInt(req.params.groupId, 10);
 
+  if (isNaN(groupId)) {
+     res.status(400).json({ error: 'Invalid group ID' });
+  }
 
+  try {
+    const requests = await getRequestsByGroupId(groupId);
+    if (requests.length === 0) {
+       res.status(404).json({ error: 'No requests found for this group ID' });
+    }
+
+    await deleteRequestsByGroupId(groupId);
+     res.json({ message: 'Requests deleted successfully' });
+  } catch (error) {
+    console.error('Error in deleteRequestsByGroupId:', error);
+     res.status(500).json({ error: 'Internal server error' });
+  }
+};
 
 export { getAllRequests, getRequestByIdController };

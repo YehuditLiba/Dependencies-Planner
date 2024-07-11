@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRequestByIdController = exports.getAllRequests = void 0;
+exports.getRequestByIdController = exports.getAllRequests = exports.deleteRequestsByGroupIdController = void 0;
 const requestUtils_1 = require("../Utils/requestUtils");
 const getAllRequests = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -42,3 +42,22 @@ const getRequestByIdController = (req, res) => __awaiter(void 0, void 0, void 0,
     }
 });
 exports.getRequestByIdController = getRequestByIdController;
+const deleteRequestsByGroupIdController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const groupId = parseInt(req.params.groupId, 10);
+    if (isNaN(groupId)) {
+        res.status(400).json({ error: 'Invalid group ID' });
+    }
+    try {
+        const requests = yield (0, requestUtils_1.getRequestsByGroupId)(groupId);
+        if (requests.length === 0) {
+            res.status(404).json({ error: 'No requests found for this group ID' });
+        }
+        yield (0, requestUtils_1.deleteRequestsByGroupId)(groupId);
+        res.json({ message: 'Requests deleted successfully' });
+    }
+    catch (error) {
+        console.error('Error in deleteRequestsByGroupId:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+exports.deleteRequestsByGroupIdController = deleteRequestsByGroupIdController;

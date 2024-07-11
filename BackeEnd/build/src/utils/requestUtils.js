@@ -9,14 +9,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRequestById = exports.fetchAllRequests = void 0;
+exports.deleteRequestsByGroupId = exports.getRequestsByGroupId = exports.getRequestById = exports.fetchAllRequests = void 0;
 const db_1 = require("../config/db");
 const fetchAllRequests = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const client = yield db_1.pool.connect();
-        const sql = `
-            SELECT * FROM request;
-        `;
+        const sql = 'SELECT * FROM request;';
         const { rows } = yield client.query(sql);
         client.release();
         return rows.map((row) => ({
@@ -43,10 +41,7 @@ const getRequestById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     console.log({ id });
     try {
         const client = yield db_1.pool.connect();
-        const sql = `
-            SELECT * FROM request
-            WHERE id = $1;
-        `;
+        const sql = 'SELECT * FROM request WHERE id = $1;';
         const { rows } = yield client.query(sql, [id]);
         client.release();
         if (rows.length === 0) {
@@ -73,3 +68,60 @@ const getRequestById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.getRequestById = getRequestById;
+const getRequestsByGroupId = (groupId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const client = yield db_1.pool.connect();
+        const sql = `
+      SELECT * FROM request
+      WHERE $1 = ANY(request_group);
+    `;
+        const { rows } = yield client.query(sql, [groupId]);
+        client.release();
+        return rows.map((row) => ({
+            ID: row.id,
+            title: row.title,
+            requestGroup: row.request_group,
+            description: row.description,
+            priority: row.priority,
+            finalDecision: row.final_decision,
+            planned: row.planned,
+            comments: row.comments,
+            dateTime: row.date_time,
+            affectedGroupList: row.affected_group_list,
+            jiraLink: row.jira_link
+        }));
+    }
+    catch (err) {
+        console.error('Error fetching requests by group ID:', err);
+        throw err;
+    }
+});
+exports.getRequestsByGroupId = getRequestsByGroupId;
+const deleteRequestsByGroupId = (groupId) => __awaiter(void 0, void 0, void 0, function* () {
+    const client = yield db_1.pool.connect();
+    try {
+        yield client.query('BEGIN'); // התחלת טרנזקציה
+        // מחיקת הרשומות מהטבלה התלויה
+        yield client.query(`
+      DELETE FROM affected_group
+      WHERE request_id IN (
+        SELECT id FROM request
+        WHERE $1 = ANY(request_group)
+      )
+    `, [groupId]);
+        // מחיקת הרשומות מהטבלה הראשית
+        yield client.query(`
+      DELETE FROM request
+      WHERE $1 = ANY(request_group)
+    `, [groupId]);
+        yield client.query('COMMIT'); // סיום הטרנזקציה בהצלחה
+    }
+    catch (error) {
+        yield client.query('ROLLBACK'); // חזרה למצב הקודם במקרה של שגיאה
+        throw error; // זריקת השגיאה כדי לטפל בה ברמה גבוהה יותר
+    }
+    finally {
+        client.release();
+    }
+});
+exports.deleteRequestsByGroupId = deleteRequestsByGroupId;
