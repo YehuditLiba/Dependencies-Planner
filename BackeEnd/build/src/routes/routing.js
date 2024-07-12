@@ -14,6 +14,7 @@ router.get('/groups', GroupCon_1.getAllGroupsController);
 router.get('/requests', requestCon_1.getAllRequests);
 router.get('/requests/:id', requestCon_1.getRequestByIdController);
 router.delete('/requests/group/:groupId', requestCon_1.deleteRequestsByGroupIdController);
+router.put('/requests/:id', requestCon_1.updateRequest);
 //ProductManager routings
 router.get('/productManagers', productManagerCon_1.getAllProductManagers);
 router.get('/requests/:groupId', productManagerCon_1.getAllRequestsByProductManager);

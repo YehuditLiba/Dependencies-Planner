@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRequestByIdController = exports.getAllRequests = exports.deleteRequestsByGroupIdController = void 0;
+exports.getRequestByIdController = exports.getAllRequests = exports.updateRequest = exports.deleteRequestsByGroupIdController = void 0;
 const requestUtils_1 = require("../Utils/requestUtils");
 const getAllRequests = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -61,3 +61,22 @@ const deleteRequestsByGroupIdController = (req, res) => __awaiter(void 0, void 0
     }
 });
 exports.deleteRequestsByGroupIdController = deleteRequestsByGroupIdController;
+//עדכון שדות בקשה
+const updateRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const id = parseInt(req.params.id);
+        const updatedFields = req.body;
+        const updatedRequest = yield (0, requestUtils_1.updateRequestFields)(id, updatedFields);
+        if (updatedRequest) {
+            res.json(updatedRequest);
+        }
+        else {
+            res.status(404).json({ error: 'Request not found' });
+        }
+    }
+    catch (err) {
+        console.error('Error in updateRequest:', err);
+        res.status(500).json({ error: 'Failed to update request' });
+    }
+});
+exports.updateRequest = updateRequest;

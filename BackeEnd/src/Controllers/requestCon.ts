@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { fetchAllRequests, getRequestById, deleteRequestsByGroupId, getRequestsByGroupId } from '../Utils/requestUtils';
+import { updateRequestFields ,fetchAllRequests, getRequestById, deleteRequestsByGroupId, getRequestsByGroupId } from '../Utils/requestUtils';
 
 const getAllRequests = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -51,5 +51,23 @@ export const deleteRequestsByGroupIdController = async (req: Request, res: Respo
      res.status(500).json({ error: 'Internal server error' });
   }
 };
+//עדכון שדות בקשה
+export const updateRequest = async (req: Request, res: Response): Promise<void> => {
+  try {
+      const id = parseInt(req.params.id);
+      const updatedFields = req.body;
+      const updatedRequest = await updateRequestFields(id, updatedFields);
+      if (updatedRequest) {
+          res.json(updatedRequest);
+      } else {
+          res.status(404).json({ error: 'Request not found' });
+      }
+  } catch (err) {
+      console.error('Error in updateRequest:', err);
+      res.status(500).json({ error: 'Failed to update request' });
+  }
+};
+
+
 
 export { getAllRequests, getRequestByIdController };
