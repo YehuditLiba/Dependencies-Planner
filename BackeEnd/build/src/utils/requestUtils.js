@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteRequestsByGroupId = exports.getRequestsByGroupId = exports.getRequestById = exports.fetchAllRequests = exports.updateRequestFields = void 0;
+exports.deleteRequestsByGroupId = exports.getRequestsByGroupId = exports.getRequestById = exports.fetchAllRequests = exports.updateAffectedGroupList = exports.updateRequestFields = void 0;
 const db_1 = require("../config/db");
 const fetchAllRequests = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -157,3 +157,33 @@ const updateRequestFields = (id, updatedFields) => __awaiter(void 0, void 0, voi
     }
 });
 exports.updateRequestFields = updateRequestFields;
+const updateAffectedGroupList = (id, affectedGroupList) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const client = yield db_1.pool.connect();
+        const sql = 'UPDATE request SET affected_group_list = $1 WHERE id = $2 RETURNING *;';
+        const { rows } = yield client.query(sql, [affectedGroupList, id]);
+        client.release();
+        if (rows.length === 0) {
+            return null;
+        }
+        const row = rows[0];
+        return {
+            ID: row.id,
+            title: row.title,
+            requestGroup: row.request_group,
+            description: row.description,
+            priority: row.priority,
+            finalDecision: row.final_decision,
+            planned: row.planned,
+            comments: row.comments,
+            dateTime: row.date_time,
+            affectedGroupList: row.affected_group_list,
+            jiraLink: row.jira_link
+        };
+    }
+    catch (err) {
+        console.error('Error updating affected group list:', err);
+        throw err;
+    }
+});
+exports.updateAffectedGroupList = updateAffectedGroupList;

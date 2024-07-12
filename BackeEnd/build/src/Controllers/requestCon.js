@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRequestByIdController = exports.getAllRequests = exports.updateRequest = exports.deleteRequestsByGroupIdController = void 0;
+exports.getRequestByIdController = exports.getAllRequests = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequestsByGroupIdController = void 0;
 const requestUtils_1 = require("../Utils/requestUtils");
 const getAllRequests = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -80,3 +80,22 @@ const updateRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.updateRequest = updateRequest;
+//עידכון רשימת מושפעים
+const updateAffectedGroups = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const id = parseInt(req.params.id);
+        const { affectedGroupList } = req.body;
+        const updatedRequest = yield (0, requestUtils_1.updateAffectedGroupList)(id, affectedGroupList);
+        if (updatedRequest) {
+            res.json(updatedRequest);
+        }
+        else {
+            res.status(404).json({ error: 'Request not found' });
+        }
+    }
+    catch (err) {
+        console.error('Error in updateAffectedGroups:', err);
+        res.status(500).json({ error: 'Failed to update affected group list' });
+    }
+});
+exports.updateAffectedGroups = updateAffectedGroups;
