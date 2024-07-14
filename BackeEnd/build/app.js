@@ -10,9 +10,11 @@ const routing_1 = __importDefault(require("./src/routes/routing"));
 var cors = require('cors');
 dotenv_1.default.config();
 const app = (0, express_1.default)();
+app.use(express_1.default.json());
 const port = process.env.EXPRESS_PORT || 3001;
 app.use(express_1.default.json());
 app.use(cors());
+app.use(express_1.default.urlencoded({ extended: true }));
 (0, db_1.connectToDatabases)();
 app.use('/api', routing_1.default);
 // app.get('/', (req, res) => {

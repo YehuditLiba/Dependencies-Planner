@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { fetchAllRequests, getRequestById, deleteRequestsByGroupId, getRequestsByGroupId } from '../Utils/requestUtils';
+import { fetchAllRequests, getRequestById,deleteRequestById } from '../Utils/requestUtils';
 
 const getAllRequests = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -31,24 +31,34 @@ const getRequestByIdController = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const deleteRequestsByGroupIdController = async (req: Request, res: Response): Promise<void> => {
-  const groupId = parseInt(req.params.groupId, 10);
 
-  if (isNaN(groupId)) {
-     res.status(400).json({ error: 'Invalid group ID' });
+export const deleteRequestByAdmin = async (req: Request, res: Response): Promise<void> => {
+  const requestId = parseInt(req.params.id, 10);
+  const requestorEmail = req.body.requestorEmail; // שימוש בכתובת הדוא"ל שנשלחת מהלקוח
+
+  console.log("Request ID:", requestId);
+  console.log("Requestor Email:", requestorEmail);
+
+  if (isNaN(requestId)) {
+    res.status(400).json({ error: 'Invalid request ID' });
+    return;
+  }
+
+  if (!requestorEmail) {
+    res.status(400).json({ error: 'Requestor email is required' });
+    return;
   }
 
   try {
-    const requests = await getRequestsByGroupId(groupId);
-    if (requests.length === 0) {
-       res.status(404).json({ error: 'No requests found for this group ID' });
+    await deleteRequestById(requestId, requestorEmail);
+    res.json({ message: 'Request deleted successfully' });
+  } catch (error: any) {
+    if (error.message === 'Unauthorized: Only the requestor can delete this request') {
+      res.status(403).json({ error: 'Unauthorized' });
+    } else {
+      console.error('Error in deleteRequestByAdmin:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
-
-    await deleteRequestsByGroupId(groupId);
-     res.json({ message: 'Requests deleted successfully' });
-  } catch (error) {
-    console.error('Error in deleteRequestsByGroupId:', error);
-     res.status(500).json({ error: 'Internal server error' });
   }
 };
 

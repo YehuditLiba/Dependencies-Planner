@@ -13,7 +13,8 @@ router.get('/groups', GroupCon_1.getAllGroupsController);
 //Requests routings
 router.get('/requests', requestCon_1.getAllRequests);
 router.get('/requests/:id', requestCon_1.getRequestByIdController);
-router.delete('/requests/group/:groupId', requestCon_1.deleteRequestsByGroupIdController);
+//router.delete('/requests/group/:groupId', deleteRequestsByGroupIdController);
+router.delete('/requests/:id', requestCon_1.deleteRequestByAdmin);
 //ProductManager routings
 router.get('/productManagers', productManagerCon_1.getAllProductManagers);
 router.get('/requests/:groupId', productManagerCon_1.getAllRequestsByProductManager);

@@ -8,10 +8,12 @@ var cors = require('cors')
 dotenv.config();
 
 const app = express();
+app.use(express.json());
 const port = process.env.EXPRESS_PORT || 3001;
 
 app.use(express.json());
 app.use(cors())
+app.use(express.urlencoded({ extended: true }));
 connectToDatabases();
 
 app.use('/api', routing);

@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteRequestsByGroupId = exports.getRequestsByGroupId = exports.getRequestById = exports.fetchAllRequests = void 0;
+exports.getRequestsByGroupId = exports.getRequestById = exports.fetchAllRequests = exports.deleteRequestById = void 0;
 const db_1 = require("../config/db");
 const fetchAllRequests = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -97,31 +97,34 @@ const getRequestsByGroupId = (groupId) => __awaiter(void 0, void 0, void 0, func
     }
 });
 exports.getRequestsByGroupId = getRequestsByGroupId;
-const deleteRequestsByGroupId = (groupId) => __awaiter(void 0, void 0, void 0, function* () {
+const deleteRequestById = (requestId, requestorEmail) => __awaiter(void 0, void 0, void 0, function* () {
     const client = yield db_1.pool.connect();
     try {
-        yield client.query('BEGIN'); // התחלת טרנזקציה
-        // מחיקת הרשומות מהטבלה התלויה
-        yield client.query(`
-      DELETE FROM affected_group
-      WHERE request_id IN (
-        SELECT id FROM request
-        WHERE $1 = ANY(request_group)
-      )
-    `, [groupId]);
-        // מחיקת הרשומות מהטבלה הראשית
-        yield client.query(`
-      DELETE FROM request
-      WHERE $1 = ANY(request_group)
-    `, [groupId]);
-        yield client.query('COMMIT'); // סיום הטרנזקציה בהצלחה
+        yield client.query('BEGIN');
+        // Check if the requestor exists and matches the provided email
+        const checkRequestorQuery = `
+            SELECT COUNT(*) FROM product_manager
+            WHERE email = $1;
+        `;
+        const { rows } = yield client.query(checkRequestorQuery, [requestorEmail]);
+        const requestorExists = parseInt(rows[0].count, 10) > 0;
+        if (!requestorExists) {
+            throw new Error('Unauthorized: Only the requestor can delete this request');
+        }
+        // Delete request by ID
+        const deleteRequestQuery = `
+            DELETE FROM request
+            WHERE id = $1;
+        `;
+        yield client.query(deleteRequestQuery, [requestId]);
+        yield client.query('COMMIT');
     }
     catch (error) {
-        yield client.query('ROLLBACK'); // חזרה למצב הקודם במקרה של שגיאה
-        throw error; // זריקת השגיאה כדי לטפל בה ברמה גבוהה יותר
+        yield client.query('ROLLBACK');
+        throw error;
     }
     finally {
         client.release();
     }
 });
-exports.deleteRequestsByGroupId = deleteRequestsByGroupId;
+exports.deleteRequestById = deleteRequestById;

@@ -86,33 +86,36 @@ const getRequestsByGroupId = async (groupId: number): Promise<Request[]> => {
     }
 };
 
-const deleteRequestsByGroupId = async (groupId: number): Promise<void> => {
+export const deleteRequestById = async (requestId: number, requestorEmail: string): Promise<void> => {
     const client = await pool.connect();
     try {
-        await client.query('BEGIN'); // התחלת טרנזקציה
+        await client.query('BEGIN');
 
-        // מחיקת הרשומות מהטבלה התלויה
-        await client.query(`
-      DELETE FROM affected_group
-      WHERE request_id IN (
-        SELECT id FROM request
-        WHERE $1 = ANY(request_group)
-      )
-    `, [groupId]);
+        // Check if the requestor exists and matches the provided email
+        const checkRequestorQuery = `
+            SELECT COUNT(*) FROM product_manager
+            WHERE email = $1;
+        `;
+        const { rows } = await client.query(checkRequestorQuery, [requestorEmail]);
+        const requestorExists = parseInt(rows[0].count, 10) > 0;
 
-        // מחיקת הרשומות מהטבלה הראשית
-        await client.query(`
-      DELETE FROM request
-      WHERE $1 = ANY(request_group)
-    `, [groupId]);
+        if (!requestorExists) {
+            throw new Error('Unauthorized: Only the requestor can delete this request');
+        }
 
-        await client.query('COMMIT'); // סיום הטרנזקציה בהצלחה
+        // Delete request by ID
+        const deleteRequestQuery = `
+            DELETE FROM request
+            WHERE id = $1;
+        `;
+        await client.query(deleteRequestQuery, [requestId]);
+
+        await client.query('COMMIT');
     } catch (error) {
-        await client.query('ROLLBACK'); // חזרה למצב הקודם במקרה של שגיאה
-        throw error; // זריקת השגיאה כדי לטפל בה ברמה גבוהה יותר
+        await client.query('ROLLBACK');
+        throw error;
     } finally {
         client.release();
     }
 };
-
-export { fetchAllRequests, getRequestById, getRequestsByGroupId, deleteRequestsByGroupId };
+export { fetchAllRequests, getRequestById, getRequestsByGroupId};

@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRequestByIdController = exports.getAllRequests = exports.deleteRequestsByGroupIdController = void 0;
+exports.getRequestByIdController = exports.getAllRequests = exports.deleteRequestByAdmin = void 0;
 const requestUtils_1 = require("../Utils/requestUtils");
 const getAllRequests = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -42,22 +42,31 @@ const getRequestByIdController = (req, res) => __awaiter(void 0, void 0, void 0,
     }
 });
 exports.getRequestByIdController = getRequestByIdController;
-const deleteRequestsByGroupIdController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const groupId = parseInt(req.params.groupId, 10);
-    if (isNaN(groupId)) {
-        res.status(400).json({ error: 'Invalid group ID' });
+const deleteRequestByAdmin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const requestId = parseInt(req.params.id, 10);
+    const requestorEmail = req.body.requestorEmail; // שימוש בכתובת הדוא"ל שנשלחת מהלקוח
+    console.log("Request ID:", requestId);
+    console.log("Requestor Email:", requestorEmail);
+    if (isNaN(requestId)) {
+        res.status(400).json({ error: 'Invalid request ID' });
+        return;
+    }
+    if (!requestorEmail) {
+        res.status(400).json({ error: 'Requestor email is required' });
+        return;
     }
     try {
-        const requests = yield (0, requestUtils_1.getRequestsByGroupId)(groupId);
-        if (requests.length === 0) {
-            res.status(404).json({ error: 'No requests found for this group ID' });
-        }
-        yield (0, requestUtils_1.deleteRequestsByGroupId)(groupId);
-        res.json({ message: 'Requests deleted successfully' });
+        yield (0, requestUtils_1.deleteRequestById)(requestId, requestorEmail);
+        res.json({ message: 'Request deleted successfully' });
     }
     catch (error) {
-        console.error('Error in deleteRequestsByGroupId:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        if (error.message === 'Unauthorized: Only the requestor can delete this request') {
+            res.status(403).json({ error: 'Unauthorized' });
+        }
+        else {
+            console.error('Error in deleteRequestByAdmin:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
     }
 });
-exports.deleteRequestsByGroupIdController = deleteRequestsByGroupIdController;
+exports.deleteRequestByAdmin = deleteRequestByAdmin;
