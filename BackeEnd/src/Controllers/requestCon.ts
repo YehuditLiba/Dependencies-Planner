@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 // import { fetchAllRequests, getRequestById,deleteRequestById } from '../Utils/requestUtils';
-import { updateRequestFields, fetchAllRequests, getRequestById, updateAffectedGroupList, deleteRequestById } from '../Utils/requestUtils';
+import { updateRequestFields, fetchAllRequests, getRequestById, getRequestByIdForUp, updateAffectedGroupList, deleteRequestById, updateRequestById } from '../Utils/requestUtils';
 
 const getAllRequests = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -64,35 +64,67 @@ export const deleteRequestByAdmin = async (req: Request, res: Response): Promise
 //עדכון שדות בקשה
 export const updateRequest = async (req: Request, res: Response): Promise<void> => {
   try {
-      const id = parseInt(req.params.id);
-      const updatedFields = req.body;
-      const updatedRequest = await updateRequestFields(id, updatedFields);
-      if (updatedRequest) {
-          res.json(updatedRequest);
-      } else {
-          res.status(404).json({ error: 'Request not found' });
-      }
+    const id = parseInt(req.params.id);
+    const updatedFields = req.body;
+    const updatedRequest = await updateRequestFields(id, updatedFields);
+    if (updatedRequest) {
+      res.json(updatedRequest);
+    } else {
+      res.status(404).json({ error: 'Request not found' });
+    }
   } catch (err) {
-      console.error('Error in updateRequest:', err);
-      res.status(500).json({ error: 'Failed to update request' });
+    console.error('Error in updateRequest:', err);
+    res.status(500).json({ error: 'Failed to update request' });
   }
 };
 //עידכון רשימת מושפעים
 export const updateAffectedGroups = async (req: Request, res: Response): Promise<void> => {
   try {
-      const id = parseInt(req.params.id);
-      const { affectedGroupList } = req.body;
-      const updatedRequest = await updateAffectedGroupList(id, affectedGroupList);
-      if (updatedRequest) {
-          res.json(updatedRequest);
-      } else {
-          res.status(404).json({ error: 'Request not found' });
-      }
+    const id = parseInt(req.params.id);
+    const { affectedGroupList } = req.body;
+    const updatedRequest = await updateAffectedGroupList(id, affectedGroupList);
+    if (updatedRequest) {
+      res.json(updatedRequest);
+    } else {
+      res.status(404).json({ error: 'Request not found' });
+    }
   } catch (err) {
-      console.error('Error in updateAffectedGroups:', err);
-      res.status(500).json({ error: 'Failed to update affected group list' });
+    console.error('Error in updateAffectedGroups:', err);
+    res.status(500).json({ error: 'Failed to update affected group list' });
   }
 };
 
+export const updateRequestByIdController = async (req: Request, res: Response): Promise<void> => {
+  const requestId = parseInt(req.params.id, 10);
+  const { email, ...updateFields } = req.body;
 
+  if (isNaN(requestId)) {
+    res.status(400).json({ error: 'Invalid request ID' });
+    return;
+  }
+
+  if (!email) {
+    res.status(400).json({ error: 'Email is required' });
+    return;
+  }
+
+  try {
+    const request = await getRequestByIdForUp(requestId);
+    if (!request) {
+      res.status(404).json({ error: 'Request not found' });
+      return;
+    }
+
+    if (request.email !== email) {
+      res.status(403).json({ error: 'Unauthorized: Only the requestor can modify this request' });
+      return;
+    }
+
+    await updateRequestById(requestId, updateFields);
+    res.json({ message: 'Request updated successfully' });
+  } catch (error) {
+    console.error('Error in updateRequestByIdController:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
 export { getAllRequests, getRequestByIdController };

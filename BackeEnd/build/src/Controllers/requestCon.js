@@ -8,12 +8,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-<<<<<<< HEAD
-exports.getRequestByIdController = exports.getAllRequests = exports.deleteRequestByAdmin = void 0;
-=======
-exports.getRequestByIdController = exports.getAllRequests = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequestsByGroupIdController = void 0;
->>>>>>> 99b82b3c4cfd3875491d13c7e0aaaeb6611ef1aa
+exports.getRequestByIdController = exports.getAllRequests = exports.updateRequestByIdController = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequestByAdmin = void 0;
+// import { fetchAllRequests, getRequestById,deleteRequestById } from '../Utils/requestUtils';
 const requestUtils_1 = require("../Utils/requestUtils");
 const getAllRequests = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -73,10 +81,7 @@ const deleteRequestByAdmin = (req, res) => __awaiter(void 0, void 0, void 0, fun
         }
     }
 });
-<<<<<<< HEAD
 exports.deleteRequestByAdmin = deleteRequestByAdmin;
-=======
-exports.deleteRequestsByGroupIdController = deleteRequestsByGroupIdController;
 //עדכון שדות בקשה
 const updateRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -115,4 +120,33 @@ const updateAffectedGroups = (req, res) => __awaiter(void 0, void 0, void 0, fun
     }
 });
 exports.updateAffectedGroups = updateAffectedGroups;
->>>>>>> 99b82b3c4cfd3875491d13c7e0aaaeb6611ef1aa
+const updateRequestByIdController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const requestId = parseInt(req.params.id, 10);
+    const _a = req.body, { email } = _a, updateFields = __rest(_a, ["email"]);
+    if (isNaN(requestId)) {
+        res.status(400).json({ error: 'Invalid request ID' });
+        return;
+    }
+    if (!email) {
+        res.status(400).json({ error: 'Email is required' });
+        return;
+    }
+    try {
+        const request = yield (0, requestUtils_1.getRequestByIdForUp)(requestId);
+        if (!request) {
+            res.status(404).json({ error: 'Request not found' });
+            return;
+        }
+        if (request.email !== email) {
+            res.status(403).json({ error: 'Unauthorized: Only the requestor can modify this request' });
+            return;
+        }
+        yield (0, requestUtils_1.updateRequestById)(requestId, updateFields);
+        res.json({ message: 'Request updated successfully' });
+    }
+    catch (error) {
+        console.error('Error in updateRequestByIdController:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+exports.updateRequestByIdController = updateRequestByIdController;

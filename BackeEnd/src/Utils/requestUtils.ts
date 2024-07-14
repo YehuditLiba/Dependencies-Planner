@@ -177,5 +177,17 @@ export const updateAffectedGroupList = async (id: number, affectedGroupList: str
         throw err;
     }
 };
+export const getRequestByIdForUp = async (id: number): Promise<any> => {
+    const query = 'SELECT * FROM requests WHERE id = $1';
+    const { rows } = await pool.query(query, [id]);
+    return rows[0];
+};
 
+export const updateRequestById = async (id: number, updateFields: any): Promise<void> => {
+    const setString = Object.keys(updateFields).map((key, index) => `${key} = $${index + 2}`).join(', ');
+    const query = `UPDATE requests SET ${setString} WHERE id = $1`;
+    const values = [id, ...Object.values(updateFields)];
+
+    await pool.query(query, values);
+};
 export { fetchAllRequests, getRequestById, getRequestsByGroupId };

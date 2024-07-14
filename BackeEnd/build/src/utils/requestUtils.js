@@ -9,11 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-<<<<<<< HEAD
-exports.getRequestsByGroupId = exports.getRequestById = exports.fetchAllRequests = exports.deleteRequestById = void 0;
-=======
-exports.deleteRequestsByGroupId = exports.getRequestsByGroupId = exports.getRequestById = exports.fetchAllRequests = exports.updateAffectedGroupList = exports.updateRequestFields = void 0;
->>>>>>> 99b82b3c4cfd3875491d13c7e0aaaeb6611ef1aa
+exports.getRequestsByGroupId = exports.getRequestById = exports.fetchAllRequests = exports.updateRequestById = exports.getRequestByIdForUp = exports.updateAffectedGroupList = exports.updateRequestFields = exports.deleteRequestById = void 0;
 const db_1 = require("../config/db");
 const fetchAllRequests = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -131,10 +127,7 @@ const deleteRequestById = (requestId, requestorEmail) => __awaiter(void 0, void 
         client.release();
     }
 });
-<<<<<<< HEAD
 exports.deleteRequestById = deleteRequestById;
-=======
-exports.deleteRequestsByGroupId = deleteRequestsByGroupId;
 //עריכת כותרת ותיאור
 const updateRequestFields = (id, updatedFields) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -197,4 +190,16 @@ const updateAffectedGroupList = (id, affectedGroupList) => __awaiter(void 0, voi
     }
 });
 exports.updateAffectedGroupList = updateAffectedGroupList;
->>>>>>> 99b82b3c4cfd3875491d13c7e0aaaeb6611ef1aa
+const getRequestByIdForUp = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = 'SELECT * FROM requests WHERE id = $1';
+    const { rows } = yield db_1.pool.query(query, [id]);
+    return rows[0];
+});
+exports.getRequestByIdForUp = getRequestByIdForUp;
+const updateRequestById = (id, updateFields) => __awaiter(void 0, void 0, void 0, function* () {
+    const setString = Object.keys(updateFields).map((key, index) => `${key} = $${index + 2}`).join(', ');
+    const query = `UPDATE requests SET ${setString} WHERE id = $1`;
+    const values = [id, ...Object.values(updateFields)];
+    yield db_1.pool.query(query, values);
+});
+exports.updateRequestById = updateRequestById;

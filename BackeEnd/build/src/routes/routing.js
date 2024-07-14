@@ -7,21 +7,24 @@ const express_1 = __importDefault(require("express"));
 const GroupCon_1 = require("../Controllers/GroupCon.");
 const requestCon_1 = require("../Controllers/requestCon");
 const productManagerCon_1 = require("../Controllers/productManagerCon");
+const StatusCon_1 = require("../Controllers/StatusCon");
+const PriorityCon_1 = require("../Controllers/PriorityCon");
 const router = express_1.default.Router();
 //groups routings
 router.get('/groups', GroupCon_1.getAllGroupsController);
 //Requests routings
 router.get('/requests', requestCon_1.getAllRequests);
 router.get('/requests/:id', requestCon_1.getRequestByIdController);
-<<<<<<< HEAD
-//router.delete('/requests/group/:groupId', deleteRequestsByGroupIdController);
 router.delete('/requests/:id', requestCon_1.deleteRequestByAdmin);
-=======
-router.delete('/requests/group/:groupId', requestCon_1.deleteRequestsByGroupIdController);
 router.put('/requests/:id', requestCon_1.updateRequest);
+router.put('/requests/:id', requestCon_1.updateRequestByIdController);
+//Requests AffectedGroups
 router.put('/requests/:id/affectedGroups', requestCon_1.updateAffectedGroups);
->>>>>>> 99b82b3c4cfd3875491d13c7e0aaaeb6611ef1aa
-//ProductManager routings
+//routings ProductManager
 router.get('/productManagers', productManagerCon_1.getAllProductManagers);
 router.get('/requests/:groupId', productManagerCon_1.getAllRequestsByProductManager);
+//status routings
+router.get('/status', StatusCon_1.getAllStatusController);
+//priority routings
+router.get('/priority', PriorityCon_1.getAllPrioritiesController);
 exports.default = router;
