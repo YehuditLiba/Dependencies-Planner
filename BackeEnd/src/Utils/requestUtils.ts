@@ -118,4 +118,64 @@ export const deleteRequestById = async (requestId: number, requestorEmail: strin
         client.release();
     }
 };
-export { fetchAllRequests, getRequestById, getRequestsByGroupId};
+
+//עריכת כותרת ותיאור
+export const updateRequestFields = async (id: number, updatedFields: Partial<Pick<Request, 'title' | 'description'>>): Promise<Request | null> => {
+    try {
+        const client = await pool.connect();
+        const { title, description } = updatedFields;
+        const sql = 'UPDATE request SET title = $1, description = $2 WHERE id = $3 RETURNING *;';
+        const { rows } = await client.query(sql, [title, description, id]);
+        client.release();
+        if (rows.length === 0) {
+            return null;
+        }
+        const row = rows[0];
+        return {
+            ID: row.id,
+            title: row.title,
+            requestGroup: row.request_group,
+            description: row.description,
+            priority: row.priority,
+            finalDecision: row.final_decision,
+            planned: row.planned,
+            comments: row.comments,
+            dateTime: row.date_time,
+            affectedGroupList: row.affected_group_list,
+            jiraLink: row.jira_link
+        } as Request;
+    } catch (err) {
+        console.error('Error updating request:', err);
+        throw err;
+    }
+};
+export const updateAffectedGroupList = async (id: number, affectedGroupList: string[]): Promise<Request | null> => {
+    try {
+        const client = await pool.connect();
+        const sql = 'UPDATE request SET affected_group_list = $1 WHERE id = $2 RETURNING *;';
+        const { rows } = await client.query(sql, [affectedGroupList, id]);
+        client.release();
+        if (rows.length === 0) {
+            return null;
+        }
+        const row = rows[0];
+        return {
+            ID: row.id,
+            title: row.title,
+            requestGroup: row.request_group,
+            description: row.description,
+            priority: row.priority,
+            finalDecision: row.final_decision,
+            planned: row.planned,
+            comments: row.comments,
+            dateTime: row.date_time,
+            affectedGroupList: row.affected_group_list,
+            jiraLink: row.jira_link
+        } as Request;
+    } catch (err) {
+        console.error('Error updating affected group list:', err);
+        throw err;
+    }
+};
+
+export { fetchAllRequests, getRequestById, getRequestsByGroupId };

@@ -13,8 +13,14 @@ router.get('/groups', GroupCon_1.getAllGroupsController);
 //Requests routings
 router.get('/requests', requestCon_1.getAllRequests);
 router.get('/requests/:id', requestCon_1.getRequestByIdController);
+<<<<<<< HEAD
 //router.delete('/requests/group/:groupId', deleteRequestsByGroupIdController);
 router.delete('/requests/:id', requestCon_1.deleteRequestByAdmin);
+=======
+router.delete('/requests/group/:groupId', requestCon_1.deleteRequestsByGroupIdController);
+router.put('/requests/:id', requestCon_1.updateRequest);
+router.put('/requests/:id/affectedGroups', requestCon_1.updateAffectedGroups);
+>>>>>>> 99b82b3c4cfd3875491d13c7e0aaaeb6611ef1aa
 //ProductManager routings
 router.get('/productManagers', productManagerCon_1.getAllProductManagers);
 router.get('/requests/:groupId', productManagerCon_1.getAllRequestsByProductManager);

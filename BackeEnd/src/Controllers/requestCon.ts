@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
-import { fetchAllRequests, getRequestById,deleteRequestById } from '../Utils/requestUtils';
+// import { fetchAllRequests, getRequestById,deleteRequestById } from '../Utils/requestUtils';
+import { updateRequestFields, fetchAllRequests, getRequestById, updateAffectedGroupList, deleteRequestById } from '../Utils/requestUtils';
 
 const getAllRequests = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -31,7 +32,6 @@ const getRequestByIdController = async (req: Request, res: Response): Promise<vo
   }
 };
 
-
 export const deleteRequestByAdmin = async (req: Request, res: Response): Promise<void> => {
   const requestId = parseInt(req.params.id, 10);
   const requestorEmail = req.body.requestorEmail; // שימוש בכתובת הדוא"ל שנשלחת מהלקוח
@@ -61,5 +61,38 @@ export const deleteRequestByAdmin = async (req: Request, res: Response): Promise
     }
   }
 };
+//עדכון שדות בקשה
+export const updateRequest = async (req: Request, res: Response): Promise<void> => {
+  try {
+      const id = parseInt(req.params.id);
+      const updatedFields = req.body;
+      const updatedRequest = await updateRequestFields(id, updatedFields);
+      if (updatedRequest) {
+          res.json(updatedRequest);
+      } else {
+          res.status(404).json({ error: 'Request not found' });
+      }
+  } catch (err) {
+      console.error('Error in updateRequest:', err);
+      res.status(500).json({ error: 'Failed to update request' });
+  }
+};
+//עידכון רשימת מושפעים
+export const updateAffectedGroups = async (req: Request, res: Response): Promise<void> => {
+  try {
+      const id = parseInt(req.params.id);
+      const { affectedGroupList } = req.body;
+      const updatedRequest = await updateAffectedGroupList(id, affectedGroupList);
+      if (updatedRequest) {
+          res.json(updatedRequest);
+      } else {
+          res.status(404).json({ error: 'Request not found' });
+      }
+  } catch (err) {
+      console.error('Error in updateAffectedGroups:', err);
+      res.status(500).json({ error: 'Failed to update affected group list' });
+  }
+};
+
 
 export { getAllRequests, getRequestByIdController };
