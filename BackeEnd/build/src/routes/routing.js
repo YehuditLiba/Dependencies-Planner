@@ -20,6 +20,7 @@ router.put('/requests/:id', requestCon_1.updateRequest);
 router.put('/requests/:id', requestCon_1.updateRequestByIdController);
 router.put('/requests/updateFinalDecision/:id', requestCon_1.updateFinalDecisionController);
 router.post('/requests/createRequest', requestCon_1.createRequest);
+router.put('/requests/:ID/planned', requestCon_1.updatePlannedField);
 //Requests AffectedGroups
 router.put('/requests/:id/affectedGroups', requestCon_1.updateAffectedGroups);
 //routings ProductManager

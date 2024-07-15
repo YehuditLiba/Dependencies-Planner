@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 // import { fetchAllRequests, getRequestById,deleteRequestById } from '../Utils/requestUtils';
-import { updateRequestFields, fetchAllRequests, getRequestById, getRequestByIdForUp, updateAffectedGroupList, deleteRequestById, updateRequestById,updateFinalDecision, addRequest } from '../Utils/requestUtils';
+import { updateRequestFields, fetchAllRequests, getRequestById, getRequestByIdForUp, updateAffectedGroupList, deleteRequestById, updateRequestById,updateFinalDecision, addRequest ,updatePlanned} from '../Utils/requestUtils';
 import { RequestT } from '../types/requestTypes';
 
 const getAllRequests = async (req: Request, res: Response): Promise<void> => {
@@ -175,4 +175,26 @@ export const createRequest = async (req: CustomRequest<RequestT>, res: Response)
     res.status(500).json({ message: 'Failed to add request' });
   }
 };
+
+//עדכון רבעון
+interface CustomRequest<T> extends Request {
+  body: T;
+}
+
+interface UpdatePlannedBody {
+  planned: string;
+}
+export const updatePlannedField = async (req: CustomRequest<UpdatePlannedBody>, res: Response): Promise<void> => {
+  try {
+    const { ID } = req.params;
+    const { planned } = req.body;
+
+    await updatePlanned(Number(ID), planned);
+    res.status(200).json({ message: 'Planned field updated successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Failed to update planned field' });
+  }
+};
+
 export { getAllRequests, getRequestByIdController };

@@ -251,4 +251,18 @@ export const addRequest = async (request: RequestT): Promise<void> => {
   
     await pool.query(query, values);
   };
+
+  //עידכון רבעון
+  export const updatePlanned = async (ID: number, planned: string): Promise<void> => {
+    const query = `
+      UPDATE request
+      SET planned = $1
+      WHERE ID = $2
+    `;
+  
+    const values = [planned, ID];
+  
+    await pool.query(query, values);
+  };
+
 export { fetchAllRequests, getRequestById, getRequestsByGroupId };

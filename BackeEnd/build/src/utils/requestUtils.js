@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRequestsByGroupId = exports.getRequestById = exports.fetchAllRequests = exports.addRequest = exports.updateFinalDecision = exports.updateRequestById = exports.getRequestByIdForUp = exports.updateAffectedGroupList = exports.updateRequestFields = exports.deleteRequestById = void 0;
+exports.getRequestsByGroupId = exports.getRequestById = exports.fetchAllRequests = exports.updatePlanned = exports.addRequest = exports.updateFinalDecision = exports.updateRequestById = exports.getRequestByIdForUp = exports.updateAffectedGroupList = exports.updateRequestFields = exports.deleteRequestById = void 0;
 const db_1 = require("../config/db");
 const fetchAllRequests = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -262,3 +262,14 @@ const addRequest = (request) => __awaiter(void 0, void 0, void 0, function* () {
     yield db_1.pool.query(query, values);
 });
 exports.addRequest = addRequest;
+//עידכון רבעון
+const updatePlanned = (ID, planned) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = `
+      UPDATE request
+      SET planned = $1
+      WHERE ID = $2
+    `;
+    const values = [planned, ID];
+    yield db_1.pool.query(query, values);
+});
+exports.updatePlanned = updatePlanned;
