@@ -1,7 +1,7 @@
 import { pool } from '../config/db';
-import { Request } from '../types/requestTypes';
+import { RequestT } from '../types/requestTypes';
 
-const fetchAllRequests = async (): Promise<Request[]> => {
+const fetchAllRequests = async (): Promise<RequestT[]> => {
     try {
         const client = await pool.connect();
         const sql = 'SELECT * FROM request;';
@@ -18,15 +18,18 @@ const fetchAllRequests = async (): Promise<Request[]> => {
             comments: row.comments,
             dateTime: row.date_time,
             affectedGroupList: row.affected_group_list,
-            jiraLink: row.jira_link
-        })) as Request[];
+            jiraLink: row.jira_link,
+            requestorName:row.requestorName,
+            emailRequestor:row.emailRequestor,
+
+        })) as RequestT[];
     } catch (err) {
         console.error('Error fetching requests:', err);
         throw err;
     }
 };
 
-const getRequestById = async (id: number): Promise<Request | null> => {
+const getRequestById = async (id: number): Promise<RequestT | null> => {
     console.log({ id });
     try {
         const client = await pool.connect();
@@ -50,15 +53,17 @@ const getRequestById = async (id: number): Promise<Request | null> => {
             comments: row.comments,
             dateTime: row.date_time,
             affectedGroupList: row.affected_group_list,
-            jiraLink: row.jira_link
-        } as Request;
+            jiraLink: row.jira_link,
+            requestorName:row.requestorName,
+            emailRequestor:row.emailRequestor,
+        } as RequestT;
     } catch (err) {
         console.error('Error fetching request by ID:', err);
         throw err;
     }
 };
 
-const getRequestsByGroupId = async (groupId: number): Promise<Request[]> => {
+const getRequestsByGroupId = async (groupId: number): Promise<RequestT[]> => {
     try {
         const client = await pool.connect();
         const sql = `
@@ -78,8 +83,10 @@ const getRequestsByGroupId = async (groupId: number): Promise<Request[]> => {
             comments: row.comments,
             dateTime: row.date_time,
             affectedGroupList: row.affected_group_list,
-            jiraLink: row.jira_link
-        })) as Request[];
+            jiraLink: row.jira_link,
+            requestorName:row.requestorName,
+            emailRequestor:row.emailRequestor,
+        })) as RequestT[];
     } catch (err) {
         console.error('Error fetching requests by group ID:', err);
         throw err;
@@ -120,7 +127,7 @@ export const deleteRequestById = async (requestId: number, requestorEmail: strin
 };
 
 //עריכת כותרת ותיאור
-export const updateRequestFields = async (id: number, updatedFields: Partial<Pick<Request, 'title' | 'description'>>): Promise<Request | null> => {
+export const updateRequestFields = async (id: number, updatedFields: Partial<Pick<RequestT, 'title' | 'description'>>): Promise<RequestT | null> => {
     try {
         const client = await pool.connect();
         const { title, description } = updatedFields;
@@ -143,13 +150,13 @@ export const updateRequestFields = async (id: number, updatedFields: Partial<Pic
             dateTime: row.date_time,
             affectedGroupList: row.affected_group_list,
             jiraLink: row.jira_link
-        } as Request;
+        } as RequestT;
     } catch (err) {
         console.error('Error updating request:', err);
         throw err;
     }
 };
-export const updateAffectedGroupList = async (id: number, affectedGroupList: string[]): Promise<Request | null> => {
+export const updateAffectedGroupList = async (id: number, affectedGroupList: string[]): Promise<RequestT | null> => {
     try {
         const client = await pool.connect();
         const sql = 'UPDATE request SET affected_group_list = $1 WHERE id = $2 RETURNING *;';
@@ -171,7 +178,7 @@ export const updateAffectedGroupList = async (id: number, affectedGroupList: str
             dateTime: row.date_time,
             affectedGroupList: row.affected_group_list,
             jiraLink: row.jira_link
-        } as Request;
+        } as RequestT;
     } catch (err) {
         console.error('Error updating affected group list:', err);
         throw err;
@@ -190,4 +197,58 @@ export const updateRequestById = async (id: number, updateFields: any): Promise<
 
     await pool.query(query, values);
 };
+
+export const updateFinalDecision = async (id: number, finalDecision: boolean): Promise<RequestT | null> => {
+    try {
+        const client = await pool.connect();
+        const sql = 'UPDATE request SET final_decision = $1 WHERE id = $2 RETURNING *;';
+        const { rows } = await client.query(sql, [finalDecision, id]);
+        client.release();
+        if (rows.length === 0) {
+            return null;
+        }
+        const row = rows[0];
+        return {
+            ID: row.id,
+            title: row.title,
+            requestGroup: row.request_group,
+            description: row.description,
+            priority: row.priority,
+            finalDecision: row.final_decision,
+            planned: row.planned,
+            comments: row.comments,
+            dateTime: row.date_time,
+            affectedGroupList: row.affected_group_list,
+            jiraLink: row.jira_link
+        } as RequestT;
+    } catch (err) {
+        console.error('Error updating final decision:', err);
+        throw err;
+    }
+};
+
+//הוספת בקשה חדשה
+export const addRequest = async (request: RequestT): Promise<void> => {
+    const query = `
+      INSERT INTO request (ID, title, request_group, description, priority, planned, comments, date_time, affected_group_list, jira_link, requestor_name,requestor_email)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+    `;
+  
+    const values = [
+      request.ID,
+      request.title,
+      request.requestGroup,
+      request.description,
+      request.priority,
+      request.planned,
+      request.comments,
+      request.dateTime,
+      request.affectedGroupList,
+      request.jiraLink,
+      request.requestorName,
+      request.emailRequestor,
+    ];
+  
+    await pool.query(query, values);
+  };
 export { fetchAllRequests, getRequestById, getRequestsByGroupId };

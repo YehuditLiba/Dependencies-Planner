@@ -18,6 +18,8 @@ router.get('/requests/:id', requestCon_1.getRequestByIdController);
 router.delete('/requests/:id', requestCon_1.deleteRequestByAdmin);
 router.put('/requests/:id', requestCon_1.updateRequest);
 router.put('/requests/:id', requestCon_1.updateRequestByIdController);
+router.put('/requests/updateFinalDecision/:id', requestCon_1.updateFinalDecisionController);
+router.post('/requests/createRequest', requestCon_1.createRequest);
 //Requests AffectedGroups
 router.put('/requests/:id/affectedGroups', requestCon_1.updateAffectedGroups);
 //routings ProductManager

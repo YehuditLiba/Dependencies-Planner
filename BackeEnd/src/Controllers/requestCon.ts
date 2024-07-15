@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 // import { fetchAllRequests, getRequestById,deleteRequestById } from '../Utils/requestUtils';
-import { updateRequestFields, fetchAllRequests, getRequestById, getRequestByIdForUp, updateAffectedGroupList, deleteRequestById, updateRequestById } from '../Utils/requestUtils';
+import { updateRequestFields, fetchAllRequests, getRequestById, getRequestByIdForUp, updateAffectedGroupList, deleteRequestById, updateRequestById,updateFinalDecision, addRequest } from '../Utils/requestUtils';
+import { RequestT } from '../types/requestTypes';
 
 const getAllRequests = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -125,6 +126,53 @@ export const updateRequestByIdController = async (req: Request, res: Response): 
   } catch (error) {
     console.error('Error in updateRequestByIdController:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+export const updateFinalDecisionController = async (req: Request, res: Response): Promise<void> => {
+  try {
+      const id = parseInt(req.params.id);
+      const { finalDecision } = req.body;
+      const updatedRequest = await updateFinalDecision(id, finalDecision);
+      if (updatedRequest) {
+          res.json(updatedRequest);
+      } else {
+          res.status(404).json({ error: 'Request not found' });
+      }
+  } catch (err) {
+      console.error('Error in updateFinalDecision:', err);
+      res.status(500).json({ error: 'Failed to update final decision' });
+  }
+};
+//הוספת בקשה חדשה
+interface CustomRequest<T> extends Request {
+  body: T;
+}
+
+export const createRequest = async (req: CustomRequest<RequestT>, res: Response): Promise<void> => {
+  try {
+    const request: RequestT = {
+      ID: req.body.ID, // כולל את ה-ID
+      title: req.body.title,
+      requestorName: req.body.requestorName,
+      requestGroup: req.body.requestGroup,
+      description: req.body.description,
+      priority: req.body.priority,
+      finalDecision: req.body.finalDecision,
+      planned: req.body.planned,
+      comments: req.body.comments,
+      dateTime: new Date(req.body.dateTime),
+      affectedGroupList: req.body.affectedGroupList,
+      jiraLink: req.body.jiraLink,
+      emailRequestor: req.body.emailRequestor
+    };
+
+    await addRequest(request);
+    res.status(201).json({ message: 'Request added successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Failed to add request' });
   }
 };
 export { getAllRequests, getRequestByIdController };

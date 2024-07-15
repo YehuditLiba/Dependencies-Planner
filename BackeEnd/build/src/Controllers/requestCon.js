@@ -20,7 +20,7 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRequestByIdController = exports.getAllRequests = exports.updateRequestByIdController = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequestByAdmin = void 0;
+exports.getRequestByIdController = exports.getAllRequests = exports.createRequest = exports.updateFinalDecisionController = exports.updateRequestByIdController = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequestByAdmin = void 0;
 // import { fetchAllRequests, getRequestById,deleteRequestById } from '../Utils/requestUtils';
 const requestUtils_1 = require("../Utils/requestUtils");
 const getAllRequests = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -150,3 +150,47 @@ const updateRequestByIdController = (req, res) => __awaiter(void 0, void 0, void
     }
 });
 exports.updateRequestByIdController = updateRequestByIdController;
+const updateFinalDecisionController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const id = parseInt(req.params.id);
+        const { finalDecision } = req.body;
+        const updatedRequest = yield (0, requestUtils_1.updateFinalDecision)(id, finalDecision);
+        if (updatedRequest) {
+            res.json(updatedRequest);
+        }
+        else {
+            res.status(404).json({ error: 'Request not found' });
+        }
+    }
+    catch (err) {
+        console.error('Error in updateFinalDecision:', err);
+        res.status(500).json({ error: 'Failed to update final decision' });
+    }
+});
+exports.updateFinalDecisionController = updateFinalDecisionController;
+const createRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const request = {
+            ID: req.body.ID,
+            title: req.body.title,
+            requestorName: req.body.requestorName,
+            requestGroup: req.body.requestGroup,
+            description: req.body.description,
+            priority: req.body.priority,
+            finalDecision: req.body.finalDecision,
+            planned: req.body.planned,
+            comments: req.body.comments,
+            dateTime: new Date(req.body.dateTime),
+            affectedGroupList: req.body.affectedGroupList,
+            jiraLink: req.body.jiraLink,
+            emailRequestor: req.body.emailRequestor
+        };
+        yield (0, requestUtils_1.addRequest)(request);
+        res.status(201).json({ message: 'Request added successfully' });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to add request' });
+    }
+});
+exports.createRequest = createRequest;

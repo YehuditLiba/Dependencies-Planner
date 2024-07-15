@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRequestsByGroupId = exports.getRequestById = exports.fetchAllRequests = exports.updateRequestById = exports.getRequestByIdForUp = exports.updateAffectedGroupList = exports.updateRequestFields = exports.deleteRequestById = void 0;
+exports.getRequestsByGroupId = exports.getRequestById = exports.fetchAllRequests = exports.addRequest = exports.updateFinalDecision = exports.updateRequestById = exports.getRequestByIdForUp = exports.updateAffectedGroupList = exports.updateRequestFields = exports.deleteRequestById = void 0;
 const db_1 = require("../config/db");
 const fetchAllRequests = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -28,7 +28,9 @@ const fetchAllRequests = () => __awaiter(void 0, void 0, void 0, function* () {
             comments: row.comments,
             dateTime: row.date_time,
             affectedGroupList: row.affected_group_list,
-            jiraLink: row.jira_link
+            jiraLink: row.jira_link,
+            requestorName: row.requestorName,
+            emailRequestor: row.emailRequestor,
         }));
     }
     catch (err) {
@@ -59,7 +61,9 @@ const getRequestById = (id) => __awaiter(void 0, void 0, void 0, function* () {
             comments: row.comments,
             dateTime: row.date_time,
             affectedGroupList: row.affected_group_list,
-            jiraLink: row.jira_link
+            jiraLink: row.jira_link,
+            requestorName: row.requestorName,
+            emailRequestor: row.emailRequestor,
         };
     }
     catch (err) {
@@ -88,7 +92,9 @@ const getRequestsByGroupId = (groupId) => __awaiter(void 0, void 0, void 0, func
             comments: row.comments,
             dateTime: row.date_time,
             affectedGroupList: row.affected_group_list,
-            jiraLink: row.jira_link
+            jiraLink: row.jira_link,
+            requestorName: row.requestorName,
+            emailRequestor: row.emailRequestor,
         }));
     }
     catch (err) {
@@ -203,3 +209,56 @@ const updateRequestById = (id, updateFields) => __awaiter(void 0, void 0, void 0
     yield db_1.pool.query(query, values);
 });
 exports.updateRequestById = updateRequestById;
+const updateFinalDecision = (id, finalDecision) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const client = yield db_1.pool.connect();
+        const sql = 'UPDATE request SET final_decision = $1 WHERE id = $2 RETURNING *;';
+        const { rows } = yield client.query(sql, [finalDecision, id]);
+        client.release();
+        if (rows.length === 0) {
+            return null;
+        }
+        const row = rows[0];
+        return {
+            ID: row.id,
+            title: row.title,
+            requestGroup: row.request_group,
+            description: row.description,
+            priority: row.priority,
+            finalDecision: row.final_decision,
+            planned: row.planned,
+            comments: row.comments,
+            dateTime: row.date_time,
+            affectedGroupList: row.affected_group_list,
+            jiraLink: row.jira_link
+        };
+    }
+    catch (err) {
+        console.error('Error updating final decision:', err);
+        throw err;
+    }
+});
+exports.updateFinalDecision = updateFinalDecision;
+//הוספת בקשה חדשה
+const addRequest = (request) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = `
+      INSERT INTO request (ID, title, request_group, description, priority, planned, comments, date_time, affected_group_list, jira_link, requestor_name,requestor_email)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+    `;
+    const values = [
+        request.ID,
+        request.title,
+        request.requestGroup,
+        request.description,
+        request.priority,
+        request.planned,
+        request.comments,
+        request.dateTime,
+        request.affectedGroupList,
+        request.jiraLink,
+        request.requestorName,
+        request.emailRequestor,
+    ];
+    yield db_1.pool.query(query, values);
+});
+exports.addRequest = addRequest;
