@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import { updateRequestFields, fetchAllRequests, getRequestById, getRequestByIdForUp, updateAffectedGroupList, deleteRequestById, updateRequestById,updateFinalDecision, addRequest } from '../Utils/requestUtils';
 import { RequestT } from '../types/requestTypes';
 
-const getAllRequests = async (req: Request, res: Response): Promise<void> => {
+export const getAllRequests = async (req: Request, res: Response): Promise<void> => {
   try {
     const requests = await fetchAllRequests();
     res.json(requests);
@@ -129,7 +129,6 @@ export const updateRequestByIdController = async (req: Request, res: Response): 
   }
 };
 
-
 export const updateFinalDecisionController = async (req: Request, res: Response): Promise<void> => {
   try {
       const id = parseInt(req.params.id);
@@ -175,4 +174,4 @@ export const createRequest = async (req: CustomRequest<RequestT>, res: Response)
     res.status(500).json({ message: 'Failed to add request' });
   }
 };
-export { getAllRequests, getRequestByIdController };
+export {  getRequestByIdController };

@@ -20,7 +20,7 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRequestByIdController = exports.getAllRequests = exports.createRequest = exports.updateFinalDecisionController = exports.updateRequestByIdController = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequestByAdmin = void 0;
+exports.getRequestByIdController = exports.createRequest = exports.updateFinalDecisionController = exports.updateRequestByIdController = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequestByAdmin = exports.getAllRequests = void 0;
 // import { fetchAllRequests, getRequestById,deleteRequestById } from '../Utils/requestUtils';
 const requestUtils_1 = require("../Utils/requestUtils");
 const getAllRequests = (req, res) => __awaiter(void 0, void 0, void 0, function* () {

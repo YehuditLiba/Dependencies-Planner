@@ -9,6 +9,8 @@ const requestCon_1 = require("../Controllers/requestCon");
 const productManagerCon_1 = require("../Controllers/productManagerCon");
 const StatusCon_1 = require("../Controllers/StatusCon");
 const PriorityCon_1 = require("../Controllers/PriorityCon");
+const T_SizeCon_1 = require("../Controllers/T_SizeCon");
+const final_decisionCon_1 = require("../Controllers/final_decisionCon");
 const router = express_1.default.Router();
 //groups routings
 router.get('/groups', GroupCon_1.getAllGroupsController);
@@ -27,6 +29,11 @@ router.get('/productManagers', productManagerCon_1.getAllProductManagers);
 router.get('/requests/:groupId', productManagerCon_1.getAllRequestsByProductManager);
 //status routings
 router.get('/status', StatusCon_1.getAllStatusController);
+router.get('/Getstatus', StatusCon_1.getAllStatus);
 //priority routings
 router.get('/priority', PriorityCon_1.getAllPrioritiesController);
+//T_Size routings
+router.get('/GetTSize', T_SizeCon_1.getAllTSize);
+//Decisions routings
+router.get('/decisions', final_decisionCon_1.getAllDecisionsController);
 exports.default = router;

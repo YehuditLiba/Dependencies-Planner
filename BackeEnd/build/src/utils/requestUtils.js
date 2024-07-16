@@ -17,9 +17,11 @@ const fetchAllRequests = () => __awaiter(void 0, void 0, void 0, function* () {
         const sql = 'SELECT * FROM request;';
         const { rows } = yield client.query(sql);
         client.release();
+        // Mapping rows to RequestT type
         return rows.map((row) => ({
             ID: row.id,
             title: row.title,
+            requestorName: row.requestorName,
             requestGroup: row.request_group,
             description: row.description,
             priority: row.priority,
@@ -29,7 +31,6 @@ const fetchAllRequests = () => __awaiter(void 0, void 0, void 0, function* () {
             dateTime: row.date_time,
             affectedGroupList: row.affected_group_list,
             jiraLink: row.jira_link,
-            requestorName: row.requestorName,
             emailRequestor: row.emailRequestor,
         }));
     }

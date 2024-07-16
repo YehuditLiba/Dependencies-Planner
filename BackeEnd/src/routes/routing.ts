@@ -2,8 +2,10 @@ import express from 'express';
 import { getAllGroupsController } from '../Controllers/GroupCon.';
 import { getAllRequests, getRequestByIdController, updateRequest, updateAffectedGroups, deleteRequestByAdmin, updateRequestByIdController,updateFinalDecisionController ,createRequest} from '../Controllers/requestCon';
 import { getAllProductManagers, getAllRequestsByProductManager } from '../Controllers/productManagerCon';
-import { getAllStatusController } from '../Controllers/StatusCon';
+import { getAllStatusController, getAllStatus } from '../Controllers/StatusCon';
 import { getAllPrioritiesController } from '../Controllers/PriorityCon';
+import { getAllTSize } from '../Controllers/T_SizeCon';
+import { getAllDecisionsController } from '../Controllers/final_decisionCon'
 
 const router = express.Router();
 //groups routings
@@ -26,8 +28,15 @@ router.get('/requests/:groupId', getAllRequestsByProductManager);
 
 //status routings
 router.get('/status', getAllStatusController);
+router.get('/Getstatus', getAllStatus);
 
 //priority routings
 router.get('/priority', getAllPrioritiesController);
+
+//T_Size routings
+router.get('/GetTSize', getAllTSize);
+
+//Decisions routings
+router.get('/decisions', getAllDecisionsController);
 
 export default router;

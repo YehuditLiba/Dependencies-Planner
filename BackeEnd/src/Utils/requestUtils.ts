@@ -7,9 +7,12 @@ const fetchAllRequests = async (): Promise<RequestT[]> => {
         const sql = 'SELECT * FROM request;';
         const { rows } = await client.query(sql);
         client.release();
+
+        // Mapping rows to RequestT type
         return rows.map((row: any) => ({
             ID: row.id,
             title: row.title,
+            requestorName: row.requestorName,
             requestGroup: row.request_group,
             description: row.description,
             priority: row.priority,
@@ -19,9 +22,7 @@ const fetchAllRequests = async (): Promise<RequestT[]> => {
             dateTime: row.date_time,
             affectedGroupList: row.affected_group_list,
             jiraLink: row.jira_link,
-            requestorName:row.requestorName,
-            emailRequestor:row.emailRequestor,
-
+            emailRequestor: row.emailRequestor,
         })) as RequestT[];
     } catch (err) {
         console.error('Error fetching requests:', err);
