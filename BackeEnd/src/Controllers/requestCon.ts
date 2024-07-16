@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
-// import { fetchAllRequests, getRequestById,deleteRequestById } from '../Utils/requestUtils';
-import { updateRequestFields, fetchAllRequests, getRequestById, getRequestByIdForUp, updateAffectedGroupList, deleteRequestById, updateRequestById,updateFinalDecision, addRequest ,updatePlanned} from '../Utils/requestUtils';
+import { updateRequestFields, fetchAllRequests, getRequestById, getRequestByIdForUp, 
+updateAffectedGroupList, deleteRequestById, updateRequestById,updateFinalDecision,
+  addRequest, updatePlanned, fetchRequests} from '../Utils/requestUtils';
 import { RequestT } from '../types/requestTypes';
 
 export const getAllRequests = async (req: Request, res: Response): Promise<void> => {
@@ -13,7 +14,17 @@ export const getAllRequests = async (req: Request, res: Response): Promise<void>
   }
 };
 
-const getRequestByIdController = async (req: Request, res: Response): Promise<void> => {
+// export const getAllRequests = async (req: Request, res: Response): Promise<void> => {
+//   try {
+//     const requests = await fetchAllRequests();
+//     const totalRequestsCount = await fetchTotalRequestsCount(); // קבלת כמות הבקשות הכוללת
+//     res.json({ requests, totalRequestsCount }); // הוספת כמות הבקשות הכוללת לתגובה
+//   } catch (err) {
+//     console.error('Error in getAllRequests:', err);
+//     res.status(500).json({ error: 'Failed to fetch requests' });
+//   }
+// };
+export const getRequestByIdController = async (req: Request, res: Response): Promise<void> => {
   const id = parseInt(req.params.id, 10);
   if (isNaN(id)) {
     res.status(400).json({ error: 'Invalid ID supplied' });
@@ -174,9 +185,7 @@ export const createRequest = async (req: CustomRequest<RequestT>, res: Response)
     res.status(500).json({ message: 'Failed to add request' });
   }
 };
-<<<<<<< HEAD
-export {  getRequestByIdController };
-=======
+
 
 //עדכון רבעון
 interface CustomRequest<T> extends Request {
@@ -198,6 +207,20 @@ export const updatePlannedField = async (req: CustomRequest<UpdatePlannedBody>, 
     res.status(500).json({ message: 'Failed to update planned field' });
   }
 };
+export const getRequestsWithPagination = async (req: Request, res: Response) => {
+  const limit = parseInt(req.query.limit as string) || 10;
+  const offset = parseInt(req.query.offset as string) || 0;
 
-export { getAllRequests, getRequestByIdController };
->>>>>>> a78227de23ec9d3d338b9c1c4423d504500d7dd6
+  try {
+    const requests = await fetchRequests(limit, offset);
+
+    res.json({
+      limit,
+      offset,
+      requests,
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Error fetching requests with limit and offset' });
+  }
+};
+

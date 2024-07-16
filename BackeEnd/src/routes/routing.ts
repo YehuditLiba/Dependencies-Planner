@@ -1,6 +1,8 @@
 import express from 'express';
 import { getAllGroupsController } from '../Controllers/GroupCon.';
-import { getAllRequests, getRequestByIdController, updateRequest, updateAffectedGroups, deleteRequestByAdmin, updateRequestByIdController,updateFinalDecisionController ,createRequest,updatePlannedField} from '../Controllers/requestCon';
+import { getAllRequests, getRequestByIdController, updateRequest, updateAffectedGroups, 
+    deleteRequestByAdmin, updateRequestByIdController,updateFinalDecisionController ,
+    createRequest, updatePlannedField, getRequestsWithPagination} from '../Controllers/requestCon';
 import { getAllProductManagers, getAllRequestsByProductManager } from '../Controllers/productManagerCon';
 import { getAllStatusController, getAllStatus } from '../Controllers/StatusCon';
 import { getAllPrioritiesController } from '../Controllers/PriorityCon';
@@ -12,7 +14,7 @@ const router = express.Router();
 router.get('/groups', getAllGroupsController);
 
 //Requests routings
-router.get('/requests', getAllRequests);
+router.get('/Allrequests', getAllRequests);
 router.get('/requests/:id', getRequestByIdController);
 router.delete('/requests/:id', deleteRequestByAdmin);
 router.put('/requests/:id', updateRequest);
@@ -20,6 +22,8 @@ router.put('/requests/:id', updateRequestByIdController);
 router.put('/requests/updateFinalDecision/:id', updateFinalDecisionController);
 router.post('/requests/createRequest', createRequest);
 router.put('/requests/:ID/planned', updatePlannedField);
+router.get('/requests', getRequestsWithPagination);
+
 
 //Requests AffectedGroups
 router.put('/requests/:id/affectedGroups', updateAffectedGroups);

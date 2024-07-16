@@ -55,8 +55,8 @@ const getRequestById = async (id: number): Promise<RequestT | null> => {
             dateTime: row.date_time,
             affectedGroupList: row.affected_group_list,
             jiraLink: row.jira_link,
-            requestorName:row.requestorName,
-            emailRequestor:row.emailRequestor,
+            requestorName: row.requestorName,
+            emailRequestor: row.emailRequestor,
         } as RequestT;
     } catch (err) {
         console.error('Error fetching request by ID:', err);
@@ -85,8 +85,8 @@ const getRequestsByGroupId = async (groupId: number): Promise<RequestT[]> => {
             dateTime: row.date_time,
             affectedGroupList: row.affected_group_list,
             jiraLink: row.jira_link,
-            requestorName:row.requestorName,
-            emailRequestor:row.emailRequestor,
+            requestorName: row.requestorName,
+            emailRequestor: row.emailRequestor,
         })) as RequestT[];
     } catch (err) {
         console.error('Error fetching requests by group ID:', err);
@@ -234,36 +234,65 @@ export const addRequest = async (request: RequestT): Promise<void> => {
       INSERT INTO request (ID, title, request_group, description, priority, planned, comments, date_time, affected_group_list, jira_link, requestor_name,requestor_email)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
     `;
-  
-    const values = [
-      request.ID,
-      request.title,
-      request.requestGroup,
-      request.description,
-      request.priority,
-      request.planned,
-      request.comments,
-      request.dateTime,
-      request.affectedGroupList,
-      request.jiraLink,
-      request.requestorName,
-      request.emailRequestor,
-    ];
-  
-    await pool.query(query, values);
-  };
 
-  //עידכון רבעון
-  export const updatePlanned = async (ID: number, planned: string): Promise<void> => {
+    const values = [
+        request.ID,
+        request.title,
+        request.requestGroup,
+        request.description,
+        request.priority,
+        request.planned,
+        request.comments,
+        request.dateTime,
+        request.affectedGroupList,
+        request.jiraLink,
+        request.requestorName,
+        request.emailRequestor,
+    ];
+
+    await pool.query(query, values);
+};
+
+//עידכון רבעון
+export const updatePlanned = async (ID: number, planned: string): Promise<void> => {
     const query = `
       UPDATE request
       SET planned = $1
       WHERE ID = $2
     `;
-  
-    const values = [planned, ID];
-  
-    await pool.query(query, values);
-  };
 
+    const values = [planned, ID];
+
+    await pool.query(query, values);
+};
+
+// Function to fetch requests with limit and offset
+export const fetchRequests = async (limit: number, offset: number): Promise<RequestT[]> => {
+    try {
+        const client = await pool.connect();
+        const sql = 'SELECT * FROM request ORDER BY id LIMIT $1 OFFSET $2;';
+        const { rows } = await client.query(sql, [limit, offset]);
+        client.release();
+
+        // Mapping rows to RequestT type
+        return rows.map((row: any) => ({
+            ID: row.id,
+            title: row.title,
+            requestorName: row.requestor_name,
+            requestGroup: row.request_group,
+            description: row.description,
+            priority: row.priority,
+            finalDecision: row.final_decision,
+            planned: row.planned,
+            comments: row.comments,
+            dateTime: row.date_time,
+            affectedGroupList: row.affected_group_list,
+            jiraLink: row.jira_link,
+            emailRequestor: row.email_requestor,
+        })) as RequestT[];
+    } catch (err) {
+        console.error('Error fetching requests with limit and offset:', err);
+        throw err;
+    }
+};
 export { fetchAllRequests, getRequestById, getRequestsByGroupId };
