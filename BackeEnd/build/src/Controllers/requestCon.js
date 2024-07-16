@@ -20,7 +20,11 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+<<<<<<< HEAD
 exports.getRequestByIdController = exports.createRequest = exports.updateFinalDecisionController = exports.updateRequestByIdController = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequestByAdmin = exports.getAllRequests = void 0;
+=======
+exports.getRequestByIdController = exports.getAllRequests = exports.updatePlannedField = exports.createRequest = exports.updateFinalDecisionController = exports.updateRequestByIdController = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequestByAdmin = void 0;
+>>>>>>> a78227de23ec9d3d338b9c1c4423d504500d7dd6
 // import { fetchAllRequests, getRequestById,deleteRequestById } from '../Utils/requestUtils';
 const requestUtils_1 = require("../Utils/requestUtils");
 const getAllRequests = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -194,3 +198,16 @@ const createRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.createRequest = createRequest;
+const updatePlannedField = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { ID } = req.params;
+        const { planned } = req.body;
+        yield (0, requestUtils_1.updatePlanned)(Number(ID), planned);
+        res.status(200).json({ message: 'Planned field updated successfully' });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to update planned field' });
+    }
+});
+exports.updatePlannedField = updatePlannedField;
