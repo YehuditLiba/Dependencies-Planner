@@ -13,7 +13,7 @@ export const getAllRequests = async (req: Request, res: Response): Promise<void>
   }
 };
 
-const getRequestByIdController = async (req: Request, res: Response): Promise<void> => {
+export const getRequestByIdController = async (req: Request, res: Response): Promise<void> => {
   const id = parseInt(req.params.id, 10);
   if (isNaN(id)) {
     res.status(400).json({ error: 'Invalid ID supplied' });
@@ -174,9 +174,7 @@ export const createRequest = async (req: CustomRequest<RequestT>, res: Response)
     res.status(500).json({ message: 'Failed to add request' });
   }
 };
-<<<<<<< HEAD
-export {  getRequestByIdController };
-=======
+
 
 //עדכון רבעון
 interface CustomRequest<T> extends Request {
@@ -199,5 +197,4 @@ export const updatePlannedField = async (req: CustomRequest<UpdatePlannedBody>, 
   }
 };
 
-export { getAllRequests, getRequestByIdController };
->>>>>>> a78227de23ec9d3d338b9c1c4423d504500d7dd6
+
