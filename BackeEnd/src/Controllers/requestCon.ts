@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
-// import { fetchAllRequests, getRequestById,deleteRequestById } from '../Utils/requestUtils';
-import { updateRequestFields, fetchAllRequests, getRequestById, getRequestByIdForUp, updateAffectedGroupList, deleteRequestById, updateRequestById,updateFinalDecision, addRequest ,updatePlanned} from '../Utils/requestUtils';
+import { updateRequestFields, fetchAllRequests, getRequestById, getRequestByIdForUp, 
+updateAffectedGroupList, deleteRequestById, updateRequestById,updateFinalDecision,
+  addRequest, updatePlanned, fetchRequests} from '../Utils/requestUtils';
 import { RequestT } from '../types/requestTypes';
 
 export const getAllRequests = async (req: Request, res: Response): Promise<void> => {
@@ -12,6 +13,7 @@ export const getAllRequests = async (req: Request, res: Response): Promise<void>
     res.status(500).json({ error: 'Failed to fetch requests' });
   }
 };
+
 
 export const getRequestByIdController = async (req: Request, res: Response): Promise<void> => {
   const id = parseInt(req.params.id, 10);
@@ -194,6 +196,22 @@ export const updatePlannedField = async (req: CustomRequest<UpdatePlannedBody>, 
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Failed to update planned field' });
+  }
+};
+export const getRequestsWithPagination = async (req: Request, res: Response) => {
+  const limit = parseInt(req.query.limit as string) || 10;
+  const offset = parseInt(req.query.offset as string) || 0;
+
+  try {
+    const requests = await fetchRequests(limit, offset);
+
+    res.json({
+      limit,
+      offset,
+      requests,
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Error fetching requests with limit and offset' });
   }
 };
 

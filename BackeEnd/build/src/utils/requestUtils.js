@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRequestsByGroupId = exports.getRequestById = exports.fetchAllRequests = exports.updatePlanned = exports.addRequest = exports.updateFinalDecision = exports.updateRequestById = exports.getRequestByIdForUp = exports.updateAffectedGroupList = exports.updateRequestFields = exports.deleteRequestById = void 0;
+exports.getRequestsByGroupId = exports.getRequestById = exports.fetchAllRequests = exports.fetchRequests = exports.updatePlanned = exports.addRequest = exports.updateFinalDecision = exports.updateRequestById = exports.getRequestByIdForUp = exports.updateAffectedGroupList = exports.updateRequestFields = exports.deleteRequestById = void 0;
 const db_1 = require("../config/db");
 const fetchAllRequests = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -274,3 +274,33 @@ const updatePlanned = (ID, planned) => __awaiter(void 0, void 0, void 0, functio
     yield db_1.pool.query(query, values);
 });
 exports.updatePlanned = updatePlanned;
+// Function to fetch requests with limit and offset
+const fetchRequests = (limit, offset) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const client = yield db_1.pool.connect();
+        const sql = 'SELECT * FROM request ORDER BY id LIMIT $1 OFFSET $2;';
+        const { rows } = yield client.query(sql, [limit, offset]);
+        client.release();
+        // Mapping rows to RequestT type
+        return rows.map((row) => ({
+            ID: row.id,
+            title: row.title,
+            requestorName: row.requestor_name,
+            requestGroup: row.request_group,
+            description: row.description,
+            priority: row.priority,
+            finalDecision: row.final_decision,
+            planned: row.planned,
+            comments: row.comments,
+            dateTime: row.date_time,
+            affectedGroupList: row.affected_group_list,
+            jiraLink: row.jira_link,
+            emailRequestor: row.email_requestor,
+        }));
+    }
+    catch (err) {
+        console.error('Error fetching requests with limit and offset:', err);
+        throw err;
+    }
+});
+exports.fetchRequests = fetchRequests;
