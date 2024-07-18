@@ -243,23 +243,44 @@ exports.updateFinalDecision = updateFinalDecision;
 //הוספת בקשה חדשה
 const addRequest = (request) => __awaiter(void 0, void 0, void 0, function* () {
     const query = `
-      INSERT INTO request (ID, title, request_group, description, priority, planned, comments, date_time, affected_group_list, jira_link, requestor_name,requestor_email)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+      INSERT INTO request ( title, request_group, description, priority, planned, comments, date_time, affected_group_list, jira_link, requestor_name,requestor_email)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
     `;
+    const today = new Date();
+    const formattedToday = today.toISOString();
+    console.log(request.affectedGroupList);
+    console.log(request.title);
+    console.log(request.description);
+    console.log(request.priority);
+    console.log(request.planned);
+    console.log(request.dateTime);
+    console.log(request.affectedGroupList);
+    console.log(request.jiraLink);
+    console.log(request.requestorName);
+    console.log(request.emailRequestor);
     const values = [
-        request.ID,
         request.title,
         request.requestGroup,
         request.description,
         request.priority,
         request.planned,
         request.comments,
-        request.dateTime,
+        formattedToday,
         request.affectedGroupList,
         request.jiraLink,
         request.requestorName,
         request.emailRequestor,
     ];
+    console.log(request.affectedGroupList);
+    console.log(request.title);
+    console.log(request.description);
+    console.log(request.priority);
+    console.log(request.planned);
+    console.log(request.dateTime);
+    console.log(request.affectedGroupList);
+    console.log(request.jiraLink);
+    console.log(request.requestorName);
+    console.log(request.emailRequestor);
     yield db_1.pool.query(query, values);
 });
 exports.addRequest = addRequest;
