@@ -232,7 +232,7 @@ export const updateFinalDecision = async (id: number, finalDecision: boolean): P
 export const addRequest = async (request: RequestT): Promise<void> => {
     const query = `
       INSERT INTO request ( title, request_group, description, priority, planned, comments, date_time, affected_group_list, jira_link, requestor_name,requestor_email)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11 )
     `;
     const today = new Date();
     const formattedToday = today.toISOString();

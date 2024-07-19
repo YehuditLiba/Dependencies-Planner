@@ -22,7 +22,8 @@ const columns = [
   { id: 'finalDecision', label: 'Final Decision', minWidth: 100 },
   { id: 'planned', label: 'Planned', minWidth: 100 },
   { id: 'comments', label: 'Comments', minWidth: 100 },
-  { id: 'dateTime', label: 'DateTime', minWidth: 150 }
+  { id: 'dateTime', label: 'DateTime', minWidth: 150 },
+  { id: 'jiraLink', label: 'Jira Link', minWidth: 150 }
 ];
 
 const modalStyle = {
