@@ -14,7 +14,7 @@ export default function RequestForm({ onClose }) {
   const [affectedGroupList, setAffectedGroupList] = useState([]);
   const [requestGroup, setRequestGroup] = useState('');
   const [planned, setPlanned] = useState('');
-
+  const[jiraLink,setJiraLink] =useState('')
   useEffect(() => {
     // Fetch groups from the server
     const fetchGroups = async () => {
@@ -42,6 +42,7 @@ export default function RequestForm({ onClose }) {
         affectedGroupList,
         requestGroup,
         planned,
+        jiraLink
       });
       // איפוס השדות לאחר ההוספה המוצלחת
       setTitle('');
@@ -195,6 +196,17 @@ export default function RequestForm({ onClose }) {
         </Select>
       </FormControl>
       
+      {/* קישור לגירה */}
+      <TextField
+        required
+        id="jiraLink"
+        label="jiraLink"
+        fullWidth
+        margin="normal"
+        value={jiraLink}
+        onChange={(e) => setJiraLink(e.target.value)}
+      />
+
       <Button variant="contained" color="primary" type="submit" sx={{ marginTop: 2 }}>
         הוספת בקשה
       </Button>
