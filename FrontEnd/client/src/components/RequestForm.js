@@ -15,6 +15,7 @@ export default function RequestForm({ onClose }) {
   const [requestGroup, setRequestGroup] = useState('');
   const [planned, setPlanned] = useState('');
   const[jiraLink,setJiraLink] =useState('')
+  const[pm,setPm]=useState([])
   useEffect(() => {
     // Fetch groups from the server
     const fetchGroups = async () => {
@@ -25,9 +26,19 @@ export default function RequestForm({ onClose }) {
         console.error('Failed to fetch groups', error);
       }
     };
-
+    const fetchPm = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/api/productManagers');
+        setPm(response.data);
+      } catch (error) {
+        console.error('Failed to fetch pm', error);
+      }
+    };
+    fetchPm();
     fetchGroups();
   }, []);
+
+  
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -97,15 +108,21 @@ export default function RequestForm({ onClose }) {
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
-      <TextField
-        required
+       <FormControl fullWidth margin="normal">
+       <InputLabel id="requestorName-label">Requestor Name</InputLabel>
+       <Select
+        labelId="requestorName-label"
         id="requestorName"
-        label="Requestor Name"
-        fullWidth
-        margin="normal"
         value={requestorName}
         onChange={(e) => setRequestorName(e.target.value)}
-      />
+      >
+        {pm.map((pm) => (
+            <MenuItem key={pm.id} value={pm.name}>
+              {pm.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
       <TextField
         required
         id="emailRequestor"
