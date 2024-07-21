@@ -248,16 +248,6 @@ const addRequest = (request) => __awaiter(void 0, void 0, void 0, function* () {
     `;
     const today = new Date();
     const formattedToday = today.toISOString();
-    console.log(request.affectedGroupList);
-    console.log(request.title);
-    console.log(request.description);
-    console.log(request.priority);
-    console.log(request.planned);
-    console.log(request.dateTime);
-    console.log(request.affectedGroupList);
-    console.log(request.jiraLink);
-    console.log(request.requestorName);
-    console.log(request.emailRequestor);
     const values = [
         request.title,
         request.requestGroup,
@@ -271,16 +261,6 @@ const addRequest = (request) => __awaiter(void 0, void 0, void 0, function* () {
         request.requestorName,
         request.emailRequestor,
     ];
-    console.log(request.affectedGroupList);
-    console.log(request.title);
-    console.log(request.description);
-    console.log(request.priority);
-    console.log(request.planned);
-    console.log(request.dateTime);
-    console.log(request.affectedGroupList);
-    console.log(request.jiraLink);
-    console.log(request.requestorName);
-    console.log(request.emailRequestor);
     yield db_1.pool.query(query, values);
 });
 exports.addRequest = addRequest;

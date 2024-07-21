@@ -22,8 +22,9 @@ const columns = [
   { id: 'finalDecision', label: 'Final Decision', minWidth: 100 },
   { id: 'planned', label: 'Planned', minWidth: 100 },
   { id: 'comments', label: 'Comments', minWidth: 100 },
-  { id: 'dateTime', label: 'DateTime', minWidth: 150 },
-  { id: 'jiraLink', label: 'Jira Link', minWidth: 150 }
+  { id: 'jiraLink', label: 'Jira Link', minWidth: 150 },
+  { id: 'dateTime', label: 'DateTime', minWidth: 150 }
+ 
 ];
 
 const modalStyle = {
@@ -36,6 +37,20 @@ const modalStyle = {
   border: '2px solid #000',
   boxShadow: 24,
   p: 4,
+};
+
+const stylePending = {
+  display: 'inline-block',
+  backgroundColor: 'rgba(255, 165, 0, 0.1)',
+  borderRadius: '4px',
+  padding: '2px 6px',
+};
+
+const styleNotRequired = {
+  display: 'inline-block',
+  backgroundColor: 'rgba(128, 128, 128, 0.1)',
+  borderRadius: '4px',
+  padding: '2px 6px',
 };
 
 export default function MainTable() {
@@ -84,12 +99,11 @@ export default function MainTable() {
     setShowGroupColumns(!showGroupColumns);
   };
 
-  const allColumns = [...columns, ...groups.map(group => ({
-    id: `group_${group.id}`,
-    label: group.name,
-    minWidth: 100
-  }))];
-
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getFullYear()).slice(-2)}`;
+  };
+  
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 4 }}>
       <Paper sx={{ width: '80%', padding: 2 }}>
@@ -122,21 +136,25 @@ export default function MainTable() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row) => (
-                <TableRow hover role="checkbox" tabIndex={-1} key={row.ID}>
-                  {columns.map((column) => {
-                    const value = row[column.id] || '';
-                    return (
-                      <TableCell key={column.id} align={column.align || 'left'}>
-                        {Array.isArray(value) ? value.join(', ') : value}
-                      </TableCell>
-                    );
-                  })}
-                  {showGroupColumns && groups.map(group => (
-                    <TableCell key={`group_${group.id}`} align="left">
-                      {(row[`group_${group.id}`] || []).join(', ')}
-                    </TableCell>
-                  ))}
+            {rows.map((row) => (
+    <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
+      {columns.map((column) => {
+        const value = row[column.id] || '';
+        return (
+          <TableCell key={column.id} align={column.align || 'left'}>
+            {column.id === 'dateTime' ? formatDate(value) : (Array.isArray(value) ? value.join(', ') : value)}
+          </TableCell>
+        );
+      })}
+              {showGroupColumns && groups.map(group => (
+                <TableCell key={`group_${group.id}`} align="left">
+                  {row.affectedGroupList && row.affectedGroupList.includes(group.id) ? (
+                    <span style={stylePending}>Pending Response</span>
+                    ) : (
+                    <span style={styleNotRequired}>Not Required</span>
+                  )}
+                </TableCell>
+            ))}
                 </TableRow>
               ))}
             </TableBody>
