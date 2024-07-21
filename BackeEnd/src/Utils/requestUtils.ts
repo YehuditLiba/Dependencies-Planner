@@ -236,16 +236,6 @@ export const addRequest = async (request: RequestT): Promise<void> => {
     `;
     const today = new Date();
     const formattedToday = today.toISOString();
-    console.log(request.affectedGroupList);
-    console.log(request.title);
-    console.log(request.description);
-    console.log(request.priority);
-    console.log(request.planned);
-    console.log(request.dateTime);
-    console.log(request.affectedGroupList);
-    console.log(request.jiraLink);
-    console.log(request.requestorName);
-    console.log(request.emailRequestor);
 
     const values = [
         request.title,
@@ -260,16 +250,6 @@ export const addRequest = async (request: RequestT): Promise<void> => {
         request.requestorName,
         request.emailRequestor,
     ];
-    console.log(request.affectedGroupList);
-    console.log(request.title);
-    console.log(request.description);
-    console.log(request.priority);
-    console.log(request.planned);
-    console.log(request.dateTime);
-    console.log(request.affectedGroupList);
-    console.log(request.jiraLink);
-    console.log(request.requestorName);
-    console.log(request.emailRequestor);
 
     await pool.query(query, values);
 };
