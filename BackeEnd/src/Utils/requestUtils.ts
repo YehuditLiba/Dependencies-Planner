@@ -1,7 +1,11 @@
 import { pool } from '../config/db';
 import { RequestT } from '../types/requestTypes';
+
+export const fetchAllRequests = async (): Promise<RequestT[]> => {
+
 import { format } from 'date-fns';
 const fetchAllRequests = async (): Promise<RequestT[]> => {
+
     try {
         const client = await pool.connect();
         const sql = 'SELECT * FROM request;';
@@ -261,7 +265,7 @@ export const addRequest = async (request: RequestT): Promise<void> => {
     `;
     const today = new Date();
     const formattedToday = today.toISOString();
-<<<<<<< HEAD
+
     console.log(request.affectedGroupList);
     console.log(request.title);
     console.log(request.description);
@@ -272,8 +276,8 @@ export const addRequest = async (request: RequestT): Promise<void> => {
     console.log(request.jiraLink);
     console.log(request.requestorName);
     console.log(request.emailRequestor);
-=======
->>>>>>> 15f2bfb543d6472ea38ea33c6871e60e348508aa
+
+
 
     const values = [
         request.title,
@@ -316,19 +320,53 @@ export const updatePlanned = async (ID: number, planned: string): Promise<void> 
     await pool.query(query, values);
 };
 
-// Function to fetch requests with limit and offset
-export const fetchRequests = async (limit: number, offset: number): Promise<RequestT[]> => {
+// Function to filter requests with optional parameters by requestor name and/or requestor group with limit and offset
+export const filterRequests = async (
+    requestorName: string | undefined,
+    requestorGroup: string | undefined,
+    affectedGroupList: string | undefined, // נוסיף כאן את הפילטר החדש
+    limit: number,
+    offset: number
+): Promise<RequestT[]> => {
+    console.log('Filtering requests with parameters:', requestorName, requestorGroup, affectedGroupList);
+
+    let sql = `
+      SELECT * FROM request
+      WHERE 1 = 1
+    `;
+    const values: any[] = [];
+
+    if (requestorName) {
+        sql += ` AND requestor_name ILIKE $${values.length + 1}`;
+        values.push(`%${requestorName}%`);
+    }
+
+    if (requestorGroup) {
+        sql += ` AND request_group ILIKE $${values.length + 1}`;
+        values.push(`%${requestorGroup}%`);
+    }
+
+    if (affectedGroupList) {
+        sql += ` AND affected_group_list && $${values.length + 1}`; // מחפש אם יש חפיפות בין המערכים
+        values.push(`{${affectedGroupList}}`); // הפיכת המערך למבנה מתאים לשאילתה
+    }
+
+    sql += `
+      ORDER BY id
+      LIMIT $${values.length + 1} OFFSET $${values.length + 2};
+    `;
+    values.push(limit, offset);
+
+    console.log('Generated SQL:', sql, 'with values:', values);
+
     try {
         const client = await pool.connect();
-        const sql = 'SELECT * FROM request ORDER BY id LIMIT $1 OFFSET $2;';
-        const { rows } = await client.query(sql, [limit, offset]);
+        const { rows } = await client.query(sql, values);
         client.release();
 
-        // Mapping rows to RequestT type
         return rows.map((row: any) => ({
             ID: row.id,
             title: row.title,
-            requestorName: row.requestor_name,
             requestGroup: row.request_group,
             description: row.description,
             priority: row.priority,
@@ -338,11 +376,13 @@ export const fetchRequests = async (limit: number, offset: number): Promise<Requ
             dateTime: row.date_time,
             affectedGroupList: row.affected_group_list,
             jiraLink: row.jira_link,
+            requestorName: row.requestor_name,
             emailRequestor: row.email_requestor,
         })) as RequestT[];
     } catch (err) {
-        console.error('Error fetching requests with limit and offset:', err);
+        console.error('Error filtering requests:', err);
         throw err;
     }
 };
-export { fetchAllRequests, getRequestById, getRequestsByGroupId };
+
+export { getRequestById, getRequestsByGroupId };

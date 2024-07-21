@@ -1,7 +1,15 @@
 import { Request, Response } from 'express';
+
+import { updateRequestFields, fetchAllRequests, getRequestById, getRequestByIdForUp, 
+updateAffectedGroupList, deleteRequestById, updateRequestById,updateFinalDecision,
+  addRequest, updatePlanned, filterRequests
+} from '../Utils/requestUtils';
+
 import { updateRequestFields, fetchAllRequests, getRequestById, getRequestByIdForUp, deleteRequestById, updateRequestById,updateFinalDecision,
   addRequest, updatePlanned, fetchRequests, updateAffectedGroupList} from '../Utils/requestUtils';
+
 import { RequestT } from '../types/requestTypes';
+
 
 export const getAllRequests = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -197,21 +205,32 @@ export const updatePlannedField = async (req: CustomRequest<UpdatePlannedBody>, 
     res.status(500).json({ message: 'Failed to update planned field' });
   }
 };
-export const getRequestsWithPagination = async (req: Request, res: Response) => {
+
+export const getAllFilteredRequestsWithPagination = async (req: Request, res: Response): Promise<void> => {
+  console.log('Controller function called');
+
   const limit = parseInt(req.query.limit as string) || 10;
   const offset = parseInt(req.query.offset as string) || 0;
 
   try {
-    const requests = await fetchRequests(limit, offset);
+    const requestorName = req.query.requestorName as string | undefined;
+    const requestorGroup = req.query.requestorGroup as string | undefined;
+    const affectedGroupList = req.query.affectedGroupList as string | undefined;
+
+    const requests = await filterRequests(requestorName, requestorGroup, affectedGroupList, limit, offset);
 
     res.json({
       limit,
       offset,
       requests,
     });
-  } catch (err) {
-    res.status(500).json({ error: 'Error fetching requests with limit and offset' });
+  } catch (error) {
+    console.error('Error fetching filtered requests with pagination:', error);
+    res.status(500).send('Internal Server Error');
   }
+
+};
+
 };
 
 
