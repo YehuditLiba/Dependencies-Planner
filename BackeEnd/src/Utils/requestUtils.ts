@@ -1,6 +1,6 @@
 import { pool } from '../config/db';
 import { RequestT } from '../types/requestTypes';
-
+import { format } from 'date-fns';
 const fetchAllRequests = async (): Promise<RequestT[]> => {
     try {
         const client = await pool.connect();
@@ -261,6 +261,7 @@ export const addRequest = async (request: RequestT): Promise<void> => {
     `;
     const today = new Date();
     const formattedToday = today.toISOString();
+<<<<<<< HEAD
     console.log(request.affectedGroupList);
     console.log(request.title);
     console.log(request.description);
@@ -271,6 +272,8 @@ export const addRequest = async (request: RequestT): Promise<void> => {
     console.log(request.jiraLink);
     console.log(request.requestorName);
     console.log(request.emailRequestor);
+=======
+>>>>>>> 15f2bfb543d6472ea38ea33c6871e60e348508aa
 
     const values = [
         request.title,

@@ -13,16 +13,7 @@ export const getAllRequests = async (req: Request, res: Response): Promise<void>
   }
 };
 
-// export const getAllRequests = async (req: Request, res: Response): Promise<void> => {
-//   try {
-//     const requests = await fetchAllRequests();
-//     const totalRequestsCount = await fetchTotalRequestsCount(); // קבלת כמות הבקשות הכוללת
-//     res.json({ requests, totalRequestsCount }); // הוספת כמות הבקשות הכוללת לתגובה
-//   } catch (err) {
-//     console.error('Error in getAllRequests:', err);
-//     res.status(500).json({ error: 'Failed to fetch requests' });
-//   }
-// };
+
 export const getRequestByIdController = async (req: Request, res: Response): Promise<void> => {
   const id = parseInt(req.params.id, 10);
   if (isNaN(id)) {
@@ -222,4 +213,5 @@ export const getRequestsWithPagination = async (req: Request, res: Response) => 
     res.status(500).json({ error: 'Error fetching requests with limit and offset' });
   }
 };
+
 
