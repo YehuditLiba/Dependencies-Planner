@@ -1,12 +1,11 @@
 import { Request, Response } from 'express';
 
-import { updateRequestFields, fetchAllRequests, getRequestById, getRequestByIdForUp, 
+import {
+  updateRequestFields, fetchAllRequests ,getRequestById, getRequestByIdForUp, 
 updateAffectedGroupList, deleteRequestById, updateRequestById,updateFinalDecision,
   addRequest, updatePlanned, filterRequests
 } from '../Utils/requestUtils';
 
-import { updateRequestFields, fetchAllRequests, getRequestById, getRequestByIdForUp, deleteRequestById, updateRequestById,updateFinalDecision,
-  addRequest, updatePlanned, fetchRequests, updateAffectedGroupList} from '../Utils/requestUtils';
 
 import { RequestT } from '../types/requestTypes';
 
@@ -231,6 +230,5 @@ export const getAllFilteredRequestsWithPagination = async (req: Request, res: Re
 
 };
 
-};
 
 

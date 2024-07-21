@@ -1,10 +1,8 @@
 import { pool } from '../config/db';
 import { RequestT } from '../types/requestTypes';
 
+//import { format } from 'date-fns';
 export const fetchAllRequests = async (): Promise<RequestT[]> => {
-
-import { format } from 'date-fns';
-const fetchAllRequests = async (): Promise<RequestT[]> => {
 
     try {
         const client = await pool.connect();

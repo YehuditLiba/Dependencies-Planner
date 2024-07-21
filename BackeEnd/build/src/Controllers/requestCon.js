@@ -100,7 +100,6 @@ const updateRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.updateRequest = updateRequest;
-//עידכון רשימת מושפעים
 const updateAffectedGroups = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = parseInt(req.params.id);
