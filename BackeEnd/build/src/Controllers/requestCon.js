@@ -20,9 +20,7 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-
 exports.getRequestsWithPagination = exports.updatePlannedField = exports.createRequest = exports.updateFinalDecisionController = exports.updateRequestByIdController = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequestByAdmin = exports.getRequestByIdController = exports.getAllRequests = void 0;
-
 const requestUtils_1 = require("../Utils/requestUtils");
 const getAllRequests = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -35,16 +33,6 @@ const getAllRequests = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.getAllRequests = getAllRequests;
-// export const getAllRequests = async (req: Request, res: Response): Promise<void> => {
-//   try {
-//     const requests = await fetchAllRequests();
-//     const totalRequestsCount = await fetchTotalRequestsCount(); // קבלת כמות הבקשות הכוללת
-//     res.json({ requests, totalRequestsCount }); // הוספת כמות הבקשות הכוללת לתגובה
-//   } catch (err) {
-//     console.error('Error in getAllRequests:', err);
-//     res.status(500).json({ error: 'Failed to fetch requests' });
-//   }
-// };
 const getRequestByIdController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = parseInt(req.params.id, 10);
     if (isNaN(id)) {
