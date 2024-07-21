@@ -1,13 +1,15 @@
 import express from 'express';
 import { getAllGroupsController } from '../Controllers/GroupCon.';
-import { getAllRequests, getRequestByIdController, updateRequest, updateAffectedGroups, 
+import { getAllRequests, getRequestByIdController, updateRequest, 
     deleteRequestByAdmin, updateRequestByIdController,updateFinalDecisionController ,
     createRequest, updatePlannedField, getRequestsWithPagination} from '../Controllers/requestCon';
 import { getAllProductManagers, getAllRequestsByProductManager } from '../Controllers/productManagerCon';
 import { getAllStatusController, getAllStatus } from '../Controllers/StatusCon';
 import { getAllPrioritiesController } from '../Controllers/PriorityCon';
-import { getAllTSize } from '../Controllers/T_SizeCon';
-import { getAllDecisionsController } from '../Controllers/final_decisionCon'
+// import { getAllTSize } from '../Controllers/T_SizeCon';
+import { getAllDecisionsController } from '../Controllers/final_decisionCon';
+import { getAllAffectedGroupsController } from '../Controllers/affectedGroupCon';
+import { updateAffectedGroupStatusController } from '../Controllers/affectedGroupCon';
 
 const router = express.Router();
 //groups routings
@@ -24,9 +26,11 @@ router.post('/requests/createRequest', createRequest);
 router.put('/requests/:ID/planned', updatePlannedField);
 router.get('/requests', getRequestsWithPagination);
 
-
-//Requests AffectedGroups
-router.put('/requests/:id/affectedGroups', updateAffectedGroups);
+// // Affected_Groups:
+// router.get('/affectedGroups',getAllAffectedGroupsController);
+// router.put('/affectedGroups/:id', updateAffectedGroups);
+router.get('/affectedGroups', getAllAffectedGroupsController);
+router.put('/affectedGroups/:id', updateAffectedGroupStatusController);
 
 //routings ProductManager
 router.get('/productManagers', getAllProductManagers);
@@ -40,7 +44,7 @@ router.get('/Getstatus', getAllStatus);
 router.get('/priority', getAllPrioritiesController);
 
 //T_Size routings
-router.get('/GetTSize', getAllTSize);
+// router.get('/GetTSize', getAllTSize);
 
 //Decisions routings
 router.get('/decisions', getAllDecisionsController);

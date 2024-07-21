@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
-import { updateRequestFields, fetchAllRequests, getRequestById, getRequestByIdForUp, 
-updateAffectedGroupList, deleteRequestById, updateRequestById,updateFinalDecision,
-  addRequest, updatePlanned, fetchRequests} from '../Utils/requestUtils';
+import { updateRequestFields, fetchAllRequests, getRequestById, getRequestByIdForUp, deleteRequestById, updateRequestById,updateFinalDecision,
+  addRequest, updatePlanned, fetchRequests, updateAffectedGroupList} from '../Utils/requestUtils';
 import { RequestT } from '../types/requestTypes';
 
 export const getAllRequests = async (req: Request, res: Response): Promise<void> => {
@@ -89,7 +88,7 @@ export const updateRequest = async (req: Request, res: Response): Promise<void> 
     res.status(500).json({ error: 'Failed to update request' });
   }
 };
-//עידכון רשימת מושפעים
+
 export const updateAffectedGroups = async (req: Request, res: Response): Promise<void> => {
   try {
     const id = parseInt(req.params.id);

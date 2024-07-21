@@ -14,6 +14,8 @@ export interface RequestT {
     comments: string;
     dateTime: Date;
     affectedGroupList: AffectedGroup[];
+    // avital:
+    // affectedGroupList: number[];
     jiraLink: string;
     emailRequestor: string;
 }
