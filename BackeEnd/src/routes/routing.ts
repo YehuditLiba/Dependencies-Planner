@@ -2,7 +2,7 @@ import express from 'express';
 import { getAllGroupsController } from '../Controllers/GroupCon.';
 import { getAllRequests, getRequestByIdController, updateRequest, updateAffectedGroups, 
     deleteRequestByAdmin, updateRequestByIdController,updateFinalDecisionController ,
-    createRequest, updatePlannedField, getRequestsWithPagination} from '../Controllers/requestCon';
+    createRequest, updatePlannedField, getAllFilteredRequestsWithPagination} from '../Controllers/requestCon';
 import { getAllProductManagers, getAllRequestsByProductManager } from '../Controllers/productManagerCon';
 import { getAllStatusController, getAllStatus } from '../Controllers/StatusCon';
 import { getAllPrioritiesController } from '../Controllers/PriorityCon';
@@ -22,7 +22,9 @@ router.put('/requests/:id', updateRequestByIdController);
 router.put('/requests/updateFinalDecision/:id', updateFinalDecisionController);
 router.post('/requests/createRequest', createRequest);
 router.put('/requests/:ID/planned', updatePlannedField);
-router.get('/requests', getRequestsWithPagination);
+//router.get('/requestsA', getRequestsWithPagination);
+//filter:
+router.get('/requests', getAllFilteredRequestsWithPagination);
 
 
 //Requests AffectedGroups
@@ -43,6 +45,6 @@ router.get('/priority', getAllPrioritiesController);
 router.get('/GetTSize', getAllTSize);
 
 //Decisions routings
-router.get('/decisions', getAllDecisionsController);
+//router.get('/decisions', getAllFilteredRequestsWithPagination);
 
 export default router;
