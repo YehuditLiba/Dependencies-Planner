@@ -5,8 +5,8 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
-import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
+import TablePagination from '@mui/material/TablePagination';
 import Button from '@mui/material/Button';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
@@ -15,6 +15,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Checkbox from '@mui/material/Checkbox';
 import axios from 'axios';
 import RequestForm from './RequestForm'; // נניח שהטופס נמצא באותו תיקייה
+import '../designs/TableStyles.scss'; // וודא שהמסלול נכון
 
 const columns = [
   { id: 'title', label: 'Title', minWidth: 100 },
@@ -66,7 +67,7 @@ export default function MainTable() {
             offset: rowsPerPage === -1 ? 0 : page * rowsPerPage,
             requestorGroup: selectedGroup || undefined,
             requestorName: selectedManager || undefined,
-            affectedGroupList: selectedAffectedGroups.join(',') || undefined
+            affectedGroupList: selectedAffectedGroups.length ? selectedAffectedGroups.join(',') : undefined
           }
         });
         setRows(response.data.requests);
@@ -161,81 +162,75 @@ export default function MainTable() {
     );
   };
 
-  const applyFilter = async () => {
-    try {
-      const response = await axios.get('http://localhost:3001/api/requests', {
-        params: {
-          affectedGroupList: selectedAffectedGroups.join(','),
-        }
-      });
-      setRows(response.data.requests);
-      setTotalRows(response.data.totalCount || 0);
-    } catch (error) {
-      console.error("Failed to apply filter", error);
-    }
+  const applyFilter = () => {
     handleCloseMenu('affectedGroup');
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 4 }}>
-      <Paper sx={{ width: '80%', padding: 2 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Button variant="contained" color="primary" onClick={() => setOpen(true)}>
-            הוספת בקשה
-          </Button>
-          <Button variant="contained" onClick={handleToggleColumns}>
-            {showGroupColumns ? 'צמצם עמודות' : 'הרחב עמודות'}
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <Box className="header">
+        <img src="/path/to/logo.png" alt="Logo" className="logo" />
+        <h1>Dependencies-Planner</h1>
+      </Box>
+      <Paper className="table-paper">
+        <Box className="table-controls">
+          <Button
+            className="add-request-button"
+            variant="contained"
+            onClick={() => setOpen(true)}
+          >
+            הוסף בקשה
           </Button>
           <Button
+            className="toggle-columns-button"
+            variant="contained"
+            onClick={handleToggleColumns}
+          >
+            {showGroupColumns ? 'הסתר עמודות' : 'הצג עמודות'}
+          </Button>
+          <Button
+            className="filter-group-button"
             variant="contained"
             onClick={(event) => handleOpenMenu(event, 'group')}
             sx={{ backgroundColor: selectedGroup ? 'lightblue' : 'default' }}
           >
-            מיין לפי קבוצה
+            מיין לפי קבוצות
           </Button>
           <Menu
             anchorEl={anchorElGroup}
             open={Boolean(anchorElGroup)}
             onClose={() => handleCloseMenu('group')}
           >
-            <MenuItem onClick={() => handleGroupSelect({ id: '' })}>הצג הכל</MenuItem>
-            {groups.map((group) => (
-              <MenuItem
-                key={group.id}
-                onClick={() => handleGroupSelect(group)}
-                selected={group.id === selectedGroup}
-              >
+            {groups.map(group => (
+              <MenuItem key={group.id} onClick={() => handleGroupSelect(group)}>
                 {group.name}
               </MenuItem>
             ))}
           </Menu>
           <Button
+            className="filter-manager-button"
             variant="contained"
             onClick={(event) => handleOpenMenu(event, 'manager')}
             sx={{ backgroundColor: selectedManager ? 'lightblue' : 'default' }}
           >
-            מיין לפי שם מבקש
+            מיין לפי מנהלי מוצר
           </Button>
           <Menu
             anchorEl={anchorElManager}
             open={Boolean(anchorElManager)}
             onClose={() => handleCloseMenu('manager')}
           >
-            <MenuItem onClick={() => handleManagerSelect({ name: '' })}>הצג הכל</MenuItem>
-            {managers.map((manager) => (
-              <MenuItem
-                key={manager.id}
-                onClick={() => handleManagerSelect(manager)}
-                selected={manager.name === selectedManager}
-              >
+            {managers.map(manager => (
+              <MenuItem key={manager.name} onClick={() => handleManagerSelect(manager)}>
                 {manager.name}
               </MenuItem>
             ))}
           </Menu>
           <Button
+            className="filter-affected-groups-button"
             variant="contained"
             onClick={(event) => handleOpenMenu(event, 'affectedGroup')}
-            sx={{ backgroundColor: selectedAffectedGroups.length > 0 ? 'lightblue' : 'default' }}
+            sx={{ backgroundColor: selectedAffectedGroups.length ? 'lightblue' : 'default' }}
           >
             מיין לפי קבוצות מושפעות
           </Button>
@@ -244,8 +239,7 @@ export default function MainTable() {
             open={Boolean(anchorElAffectedGroup)}
             onClose={() => handleCloseMenu('affectedGroup')}
           >
-            <MenuItem onClick={applyFilter}>החל פילטר</MenuItem>
-            {groups.map((group) => (
+            {groups.map(group => (
               <MenuItem key={group.id}>
                 <Checkbox
                   checked={selectedAffectedGroups.includes(group.id)}
@@ -254,38 +248,40 @@ export default function MainTable() {
                 {group.name}
               </MenuItem>
             ))}
+            <MenuItem onClick={applyFilter}>סנן</MenuItem>
           </Menu>
         </Box>
-        <TableContainer sx={{ maxHeight: 400, maxWidth: '100%', overflow: 'auto' }}>
+        <TableContainer className="table-container">
           <Table>
             <TableHead>
               <TableRow>
-                {columns.map((column) => (
-                  showGroupColumns || column.id !== 'requestorGroup' ? (
-                    <TableCell key={column.id} align="left">
+                {columns.map(column => (
+                  showGroupColumns && (
+                    <TableCell key={column.id} style={{ minWidth: column.minWidth }}>
                       {column.label}
                     </TableCell>
-                  ) : null
+                  )
                 ))}
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row) => (
-                <TableRow key={row.id}>
-                  {columns.map((column) => (
-                    (showGroupColumns || column.id !== 'requestorGroup') ? (
-                      <TableCell key={column.id} align="left">
+              {rows.map((row, index) => (
+                <TableRow key={index}>
+                  {columns.map(column => (
+                    showGroupColumns && (
+                      <TableCell key={column.id}>
                         {row[column.id]}
                       </TableCell>
-                    ) : null
+                    )
                   ))}
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
+        {rows.length === 0 && <p>No results found.</p>}
         <TablePagination
-          rowsPerPageOptions={[4, 8, 12, { label: 'All', value: -1 }]}
+          rowsPerPageOptions={[4, 10, 25, { label: 'All', value: -1 }]}
           component="div"
           count={totalRows}
           rowsPerPage={rowsPerPage}
@@ -294,13 +290,9 @@ export default function MainTable() {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
-
-      <Modal
-        open={open}
-        onClose={() => setOpen(false)}
-      >
+      <Modal open={open} onClose={() => setOpen(false)}>
         <Box sx={modalStyle}>
-          <RequestForm onClose={() => setOpen(false)} />
+          <RequestForm />
         </Box>
       </Modal>
     </Box>

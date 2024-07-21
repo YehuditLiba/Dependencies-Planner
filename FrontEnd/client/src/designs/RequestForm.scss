@@ -1,0 +1,125 @@
+$body-bg: #c1bdba;
+$form-bg: #4c6050;
+$white: #e1f0e1;
+
+$main: #1ab188;
+$main-light: lighten($main, 5%);
+$main-dark: darken($main, 5%);
+
+$gray-light: #a0b3b0;
+$gray-dark: #606060; // גוון כהה יותר של אפור
+$gray: #ddd;
+
+$thin: 300;
+$normal: 400;
+$bold: 600;
+$br: 8px; // עיגול פינות יותר
+
+*,
+*:before,
+*:after {
+    box-sizing: border-box;
+}
+
+html {
+    overflow-y: scroll;
+}
+
+body {
+    background: $body-bg;
+    font-family: 'Titillium Web', sans-serif;
+}
+
+a {
+    text-decoration: none;
+    color: $main;
+    transition: 0.5s ease;
+
+    &:hover {
+        color: $main-dark;
+    }
+}
+
+.form {
+    background: rgba($form-bg, 0.9);
+    padding: 15px;
+    max-width: 100%;
+    width: 300px; // הקטנה נוספת
+    margin: 20px auto;
+    border-radius: $br;
+    box-shadow: 0 4px 10px 4px rgba($form-bg, 0.3);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto; // מאפשר גלילה במקרה הצורך
+
+    h2 {
+        font-size: 16px; // הקטנה נוספת של גובה כותרת
+        font-weight: $bold;
+        color: $white;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    .field-wrap {
+        margin-bottom: 10px; // הקטנה של המרווחים בין השדות
+    }
+
+    .button {
+        padding: 10px 0;
+        font-size: 1rem; // הקטנה נוספת של גובה הפונט
+        border: 1px solid $main;
+        background: $white;
+        color: $main;
+        box-shadow: 0 2px 5px rgba($gray-dark, 0.3);
+        transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+        border-radius: $br;
+
+        &:hover,
+        &:focus {
+            background: $main-light;
+            color: $white;
+            box-shadow: 0 4px 10px rgba($main, 0.3);
+        }
+    }
+
+    input,
+    textarea,
+    .MuiSelect-select {
+        background: $gray-light;
+        color: $white;
+        border: 1px solid $gray-dark;
+        border-radius: $br;
+        padding: 8px; // הקטנה נוספת של padding
+        font-size: 14px; // הקטנה של גובה הפונט
+        transition: border-color 0.25s ease, box-shadow 0.25s ease;
+
+        &:focus {
+            border-color: $main;
+            box-shadow: 0 0 0 2px rgba($main, 0.5);
+            outline: none;
+        }
+
+        ::placeholder {
+            color: $white;
+        }
+    }
+
+    textarea {
+        border: 1px solid $gray-dark;
+        resize: vertical;
+        min-height: 80px; // גובה מינימלי קטן יותר
+    }
+
+    .request-group-select {
+        background: $gray-light;
+        color: $white;
+        border: 1px solid $gray-dark;
+        border-radius: $br;
+        box-shadow: 0 0 0 2px rgba($main, 0.25);
+
+        &:focus {
+            border-color: $main;
+            box-shadow: 0 0 0 2px rgba($main, 0.5);
+        }
+    }
+}
