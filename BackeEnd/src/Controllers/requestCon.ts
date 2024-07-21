@@ -1,8 +1,13 @@
 import { Request, Response } from 'express';
+
 import { updateRequestFields, fetchAllRequests, getRequestById, getRequestByIdForUp, 
 updateAffectedGroupList, deleteRequestById, updateRequestById,updateFinalDecision,
   addRequest, updatePlanned, filterRequests
 } from '../Utils/requestUtils';
+
+import { updateRequestFields, fetchAllRequests, getRequestById, getRequestByIdForUp, deleteRequestById, updateRequestById,updateFinalDecision,
+  addRequest, updatePlanned, fetchRequests, updateAffectedGroupList} from '../Utils/requestUtils';
+
 import { RequestT } from '../types/requestTypes';
 
 
@@ -16,16 +21,7 @@ export const getAllRequests = async (req: Request, res: Response): Promise<void>
   }
 };
 
-// export const getAllRequests = async (req: Request, res: Response): Promise<void> => {
-//   try {
-//     const requests = await fetchAllRequests();
-//     const totalRequestsCount = await fetchTotalRequestsCount(); // קבלת כמות הבקשות הכוללת
-//     res.json({ requests, totalRequestsCount }); // הוספת כמות הבקשות הכוללת לתגובה
-//   } catch (err) {
-//     console.error('Error in getAllRequests:', err);
-//     res.status(500).json({ error: 'Failed to fetch requests' });
-//   }
-// };
+
 export const getRequestByIdController = async (req: Request, res: Response): Promise<void> => {
   const id = parseInt(req.params.id, 10);
   if (isNaN(id)) {
@@ -91,7 +87,7 @@ export const updateRequest = async (req: Request, res: Response): Promise<void> 
     res.status(500).json({ error: 'Failed to update request' });
   }
 };
-//עידכון רשימת מושפעים
+
 export const updateAffectedGroups = async (req: Request, res: Response): Promise<void> => {
   try {
     const id = parseInt(req.params.id);
@@ -232,4 +228,9 @@ export const getAllFilteredRequestsWithPagination = async (req: Request, res: Re
     console.error('Error fetching filtered requests with pagination:', error);
     res.status(500).send('Internal Server Error');
   }
+
 };
+
+};
+
+
