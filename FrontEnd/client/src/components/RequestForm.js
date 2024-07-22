@@ -138,9 +138,9 @@ export default function RequestForm({ onClose }) {
           value={priority}
           onChange={(e) => setPriority(e.target.value)}
         >
-          <MenuItem value="Low">Low</MenuItem>
-          <MenuItem value="Medium">Medium</MenuItem>
-          <MenuItem value="High">High</MenuItem>
+          <MenuItem value="S">Low</MenuItem>
+          <MenuItem value="M">Medium</MenuItem>
+          <MenuItem value="L">High</MenuItem>
         </Select>
       </FormControl>
       <TextField
