@@ -14,13 +14,12 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Checkbox from '@mui/material/Checkbox';
 import axios from 'axios';
-import RequestForm from './RequestForm'; // נניח שהטופס נמצא באותו תיקייה
-import '../designs/TableStyles.scss'; // וודא שהמסלול נכון
+import '../designs/TableStyles.scss'; // Ensure this path is correct
 
 const columns = [
   { id: 'title', label: 'Title', minWidth: 100 },
   { id: 'requestorName', label: 'Requestor Name', minWidth: 100 },
-  { id: 'requestGroup', label: 'Request Group', minWidth: 100 },
+  { id: 'requestGroup', label: 'Request Group', minWidth: 100, show: true },
   { id: 'description', label: 'Description', minWidth: 150 },
   { id: 'priority', label: 'Priority', minWidth: 70 },
   { id: 'finalDecision', label: 'Final Decision', minWidth: 100 },
@@ -51,12 +50,15 @@ export default function MainTable() {
   const [affectedGroups, setAffectedGroups] = useState([]);
   const [showGroupColumns, setShowGroupColumns] = useState(true);
   const [open, setOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const [anchorElGroup, setAnchorElGroup] = useState(null);
   const [anchorElManager, setAnchorElManager] = useState(null);
   const [anchorElAffectedGroup, setAnchorElAffectedGroup] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState('');
   const [selectedManager, setSelectedManager] = useState('');
   const [selectedAffectedGroups, setSelectedAffectedGroups] = useState([]);
+  const [statuses, setStatuses] = useState([]);
+  const [editValue, setEditValue] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -95,9 +97,19 @@ export default function MainTable() {
       }
     };
 
+    const fetchStatuses = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/api/statuses');
+        setStatuses(response.data);
+      } catch (error) {
+        console.error("Failed to fetch statuses", error);
+      }
+    };
+
     fetchData();
     fetchGroups();
     fetchManagers();
+    fetchStatuses();
   }, [page, rowsPerPage, selectedGroup, selectedManager, selectedAffectedGroups]);
 
   const handleChangePage = (event, newPage) => {
@@ -166,6 +178,16 @@ export default function MainTable() {
     handleCloseMenu('affectedGroup');
   };
 
+  const handleEditSave = (value) => {
+    console.log('Saving edited value:', value);
+    setEditOpen(false);
+  };
+
+  const formatDate = (value) => {
+    const date = new Date(value);
+    return date.toLocaleDateString('he-IL');
+  };
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <Box className="header">
@@ -179,22 +201,21 @@ export default function MainTable() {
             variant="contained"
             onClick={() => setOpen(true)}
           >
-            הוסף בקשה
+            Add Request
           </Button>
           <Button
             className="toggle-columns-button"
             variant="contained"
             onClick={handleToggleColumns}
           >
-            {showGroupColumns ? 'הסתר עמודות' : 'הצג עמודות'}
+            {showGroupColumns ? 'Hide Group Columns' : 'Show Group Columns'}
           </Button>
           <Button
             className="filter-group-button"
             variant="contained"
             onClick={(event) => handleOpenMenu(event, 'group')}
-            sx={{ backgroundColor: selectedGroup ? 'lightblue' : 'default' }}
           >
-            מיין לפי קבוצות
+            Filter by Groups
           </Button>
           <Menu
             anchorEl={anchorElGroup}
@@ -211,9 +232,8 @@ export default function MainTable() {
             className="filter-manager-button"
             variant="contained"
             onClick={(event) => handleOpenMenu(event, 'manager')}
-            sx={{ backgroundColor: selectedManager ? 'lightblue' : 'default' }}
           >
-            מיין לפי מנהלי מוצר
+            Filter by Manager
           </Button>
           <Menu
             anchorEl={anchorElManager}
@@ -227,12 +247,11 @@ export default function MainTable() {
             ))}
           </Menu>
           <Button
-            className="filter-affected-groups-button"
+            className="filter-affected-group-button"
             variant="contained"
             onClick={(event) => handleOpenMenu(event, 'affectedGroup')}
-            sx={{ backgroundColor: selectedAffectedGroups.length ? 'lightblue' : 'default' }}
           >
-            מיין לפי קבוצות מושפעות
+            Filter by Affected Groups
           </Button>
           <Menu
             anchorEl={anchorElAffectedGroup}
@@ -248,15 +267,17 @@ export default function MainTable() {
                 {group.name}
               </MenuItem>
             ))}
-            <MenuItem onClick={applyFilter}>סנן</MenuItem>
+            <MenuItem onClick={applyFilter}>
+              Apply Filter
+            </MenuItem>
           </Menu>
         </Box>
-        <TableContainer className="table-container">
+        <TableContainer>
           <Table>
             <TableHead>
               <TableRow>
                 {columns.map(column => (
-                  showGroupColumns && (
+                  (showGroupColumns || !column.id.includes('group')) && (
                     <TableCell key={column.id} style={{ minWidth: column.minWidth }}>
                       {column.label}
                     </TableCell>
@@ -265,12 +286,12 @@ export default function MainTable() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row, index) => (
-                <TableRow key={index}>
+              {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (
+                <TableRow key={row.id}>
                   {columns.map(column => (
-                    showGroupColumns && (
+                    (showGroupColumns || !column.id.includes('group')) && (
                       <TableCell key={column.id}>
-                        {row[column.id]}
+                        {column.id === 'dateTime' ? formatDate(row[column.id]) : row[column.id]}
                       </TableCell>
                     )
                   ))}
@@ -279,7 +300,6 @@ export default function MainTable() {
             </TableBody>
           </Table>
         </TableContainer>
-        {rows.length === 0 && <p>No results found.</p>}
         <TablePagination
           rowsPerPageOptions={[4, 10, 25, { label: 'All', value: -1 }]}
           component="div"
@@ -290,9 +310,25 @@ export default function MainTable() {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
-      <Modal open={open} onClose={() => setOpen(false)}>
+
+      <Modal
+        open={open}
+        onClose={() => setOpen(false)}
+      >
         <Box sx={modalStyle}>
-          <RequestForm />
+          {/* Your Add Request Form Here */}
+          <Button onClick={() => setOpen(false)}>Close</Button>
+        </Box>
+      </Modal>
+
+      <Modal
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+      >
+        <Box sx={modalStyle}>
+          {/* Your Edit Request Form Here */}
+          <Button onClick={() => handleEditSave(editValue)}>Save</Button>
+          <Button onClick={() => setEditOpen(false)}>Cancel</Button>
         </Box>
       </Modal>
     </Box>

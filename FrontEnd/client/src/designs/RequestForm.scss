@@ -1,125 +1,128 @@
-$body-bg: #c1bdba;
-$form-bg: #4c6050;
-$white: #e1f0e1;
-
-$main: #1ab188;
-$main-light: lighten($main, 5%);
-$main-dark: darken($main, 5%);
-
-$gray-light: #a0b3b0;
-$gray-dark: #606060; // גוון כהה יותר של אפור
-$gray: #ddd;
-
-$thin: 300;
-$normal: 400;
-$bold: 600;
-$br: 8px; // עיגול פינות יותר
-
-*,
-*:before,
-*:after {
-    box-sizing: border-box;
-}
-
-html {
-    overflow-y: scroll;
-}
-
-body {
-    background: $body-bg;
-    font-family: 'Titillium Web', sans-serif;
-}
-
-a {
-    text-decoration: none;
-    color: $main;
-    transition: 0.5s ease;
-
-    &:hover {
-        color: $main-dark;
-    }
-}
-
+/* טפסים */
 .form {
-    background: rgba($form-bg, 0.9);
-    padding: 15px;
+    background: rgba(173, 216, 230, 0.9);
+    /* צבע רקע תכלת בהיר עם שקיפות קלה */
+    padding: 20px;
     max-width: 100%;
-    width: 300px; // הקטנה נוספת
+    width: 300px;
+    /* רוחב הטופס */
     margin: 20px auto;
-    border-radius: $br;
-    box-shadow: 0 4px 10px 4px rgba($form-bg, 0.3);
+    border-radius: 8px;
+    /* עיגול פינות */
+    box-shadow: 0 4px 10px 4px rgba(173, 216, 230, 0.3);
+    /* צל עם גוון תכלת */
     display: flex;
     flex-direction: column;
-    overflow-y: auto; // מאפשר גלילה במקרה הצורך
+    overflow-y: auto;
+    /* מאפשר גלילה במקרה הצורך */
 
     h2 {
-        font-size: 16px; // הקטנה נוספת של גובה כותרת
-        font-weight: $bold;
-        color: $white;
+        font-size: 18px;
+        /* גובה כותרת */
+        font-weight: 600;
+        /* משקל הפונט */
+        color: #007BFF;
+        /* צבע טקסט כחול בהיר וזרחני */
         text-align: center;
-        margin-bottom: 10px;
+        margin-bottom: 15px;
     }
 
     .field-wrap {
-        margin-bottom: 10px; // הקטנה של המרווחים בין השדות
+        margin-bottom: 15px;
+        /* המרווחים בין השדות */
     }
 
     .button {
-        padding: 10px 0;
-        font-size: 1rem; // הקטנה נוספת של גובה הפונט
-        border: 1px solid $main;
-        background: $white;
-        color: $main;
-        box-shadow: 0 2px 5px rgba($gray-dark, 0.3);
+        padding: 12px 0;
+        font-size: 16px;
+        /* גובה הפונט */
+        border: 1px solid #007BFF;
+        /* צבע גבול כפתור כחול */
+        background: #E6F7FF;
+        /* צבע רקע כפתור תכלת בהיר מאוד */
+        color: #007BFF;
+        /* צבע טקסט כחול בהיר */
+        box-shadow: 0 2px 5px rgba(0, 123, 255, 0.3);
+        /* צל עם גוון כחול */
         transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
-        border-radius: $br;
+        border-radius: 8px;
+        /* עיגול פינות */
 
         &:hover,
         &:focus {
-            background: $main-light;
-            color: $white;
-            box-shadow: 0 4px 10px rgba($main, 0.3);
+            background: #007BFF;
+            /* צבע רקע בעת ריחוף כחול */
+            color: #FFF;
+            /* צבע טקסט לבן בעת ריחוף */
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.5);
+            /* צל עם גוון כחול בעת ריחוף */
         }
     }
 
     input,
     textarea,
     .MuiSelect-select {
-        background: $gray-light;
-        color: $white;
-        border: 1px solid $gray-dark;
-        border-radius: $br;
-        padding: 8px; // הקטנה נוספת של padding
-        font-size: 14px; // הקטנה של גובה הפונט
-        transition: border-color 0.25s ease, box-shadow 0.25s ease;
+        background: #FFF;
+        /* צבע רקע לבן */
+        color: #000;
+        /* צבע טקסט שחור */
+        border: 1px solid #007BFF;
+        /* צבע גבול כחול */
+        border-radius: 8px;
+        /* עיגול פינות */
+        padding: 12px;
+        /* ריפוד עבור השדות */
+        font-size: 16px;
+        /* גובה הפונט */
+        transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease, color 0.25s ease;
 
         &:focus {
-            border-color: $main;
-            box-shadow: 0 0 0 2px rgba($main, 0.5);
+            border-color: #0056b3;
+            /* צבע גבול בעת ריכוז כחול כהה */
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5);
+            /* צל עבור שדות בעת ריכוז */
             outline: none;
         }
 
         ::placeholder {
-            color: $white;
+            color: #6c757d;
+            /* צבע טקסט של הפלייסהולדר אפור כהה */
+        }
+
+        /* שינוי צבע הרקע וצבע הטקסט כאשר יש תוכן */
+        &:not(:placeholder-shown) {
+            background-color: #FFF;
+            /* צבע רקע לבן כאשר יש תוכן */
+            color: #000;
+            /* צבע טקסט שחור כאשר יש תוכן */
         }
     }
 
     textarea {
-        border: 1px solid $gray-dark;
+        border: 1px solid #007BFF;
+        /* צבע גבול של textarea כחול */
         resize: vertical;
-        min-height: 80px; // גובה מינימלי קטן יותר
+        min-height: 100px;
+        /* גובה מינימלי גדול יותר */
     }
 
     .request-group-select {
-        background: $gray-light;
-        color: $white;
-        border: 1px solid $gray-dark;
-        border-radius: $br;
-        box-shadow: 0 0 0 2px rgba($main, 0.25);
+        background: #FFF;
+        /* צבע הרקע של התפריט הנפתח לבן */
+        color: #000;
+        /* צבע טקסט של התפריט הנפתח */
+        border: 1px solid #007BFF;
+        /* צבע גבול של התפריט הנפתח כחול */
+        border-radius: 8px;
+        /* עיגול פינות */
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        /* צל עבור התפריט הנפתח */
 
         &:focus {
-            border-color: $main;
-            box-shadow: 0 0 0 2px rgba($main, 0.5);
+            border-color: #0056b3;
+            /* צבע גבול בעת ריכוז כחול כהה */
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5);
+            /* צל עבור התפריט הנפתח בעת ריכוז */
         }
     }
 }
