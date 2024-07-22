@@ -216,19 +216,24 @@ export const getAllFilteredRequestsWithPagination = async (req: Request, res: Re
     const requestorGroup = req.query.requestorGroup as string | undefined;
     const affectedGroupList = req.query.affectedGroupList as string | undefined;
 
-    const requests = await filterRequests(requestorName, requestorGroup, affectedGroupList, limit, offset);
+    const { totalCount, requests } = await filterRequests(
+      requestorName,
+      requestorGroup,
+      affectedGroupList,
+      limit,
+      offset
+    );
 
     res.json({
       limit,
       offset,
+      totalCount,
       requests,
     });
   } catch (error) {
     console.error('Error fetching filtered requests with pagination:', error);
     res.status(500).send('Internal Server Error');
   }
-
 };
-
 
 

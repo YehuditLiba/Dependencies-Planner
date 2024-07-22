@@ -14,7 +14,7 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Checkbox from '@mui/material/Checkbox';
 import axios from 'axios';
-import '../designs/TableStyles.scss'; // Ensure this path is correct
+import '../designs/TableStyles.scss'; 
 
 const columns = [
   { id: 'title', label: 'Title', minWidth: 100 },

@@ -322,7 +322,8 @@ const filterRequests = (requestorName, requestorGroup, affectedGroupList, // × ×
 limit, offset) => __awaiter(void 0, void 0, void 0, function* () {
     console.log('Filtering requests with parameters:', requestorName, requestorGroup, affectedGroupList);
     let sql = `
-      SELECT * FROM request
+      SELECT *, COUNT(*) OVER() AS total_count
+      FROM request
       WHERE 1 = 1
     `;
     const values = [];
@@ -348,7 +349,8 @@ limit, offset) => __awaiter(void 0, void 0, void 0, function* () {
         const client = yield db_1.pool.connect();
         const { rows } = yield client.query(sql, values);
         client.release();
-        return rows.map((row) => ({
+        const totalCount = rows.length > 0 ? parseInt(rows[0].total_count, 10) : 0;
+        const requests = rows.map((row) => ({
             ID: row.id,
             title: row.title,
             requestGroup: row.request_group,
@@ -363,6 +365,7 @@ limit, offset) => __awaiter(void 0, void 0, void 0, function* () {
             requestorName: row.requestor_name,
             emailRequestor: row.email_requestor,
         }));
+        return { totalCount, requests };
     }
     catch (err) {
         console.error('Error filtering requests:', err);

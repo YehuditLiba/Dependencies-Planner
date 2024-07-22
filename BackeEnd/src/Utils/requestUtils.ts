@@ -325,11 +325,12 @@ export const filterRequests = async (
     affectedGroupList: string | undefined, // נוסיף כאן את הפילטר החדש
     limit: number,
     offset: number
-): Promise<RequestT[]> => {
+): Promise<{ totalCount: number; requests: RequestT[] }> => {
     console.log('Filtering requests with parameters:', requestorName, requestorGroup, affectedGroupList);
 
     let sql = `
-      SELECT * FROM request
+      SELECT *, COUNT(*) OVER() AS total_count
+      FROM request
       WHERE 1 = 1
     `;
     const values: any[] = [];
@@ -362,7 +363,9 @@ export const filterRequests = async (
         const { rows } = await client.query(sql, values);
         client.release();
 
-        return rows.map((row: any) => ({
+        const totalCount = rows.length > 0 ? parseInt(rows[0].total_count, 10) : 0;
+
+        const requests = rows.map((row: any) => ({
             ID: row.id,
             title: row.title,
             requestGroup: row.request_group,
@@ -377,6 +380,8 @@ export const filterRequests = async (
             requestorName: row.requestor_name,
             emailRequestor: row.email_requestor,
         })) as RequestT[];
+
+        return { totalCount, requests };
     } catch (err) {
         console.error('Error filtering requests:', err);
         throw err;

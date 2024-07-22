@@ -213,10 +213,11 @@ const getAllFilteredRequestsWithPagination = (req, res) => __awaiter(void 0, voi
         const requestorName = req.query.requestorName;
         const requestorGroup = req.query.requestorGroup;
         const affectedGroupList = req.query.affectedGroupList;
-        const requests = yield (0, requestUtils_1.filterRequests)(requestorName, requestorGroup, affectedGroupList, limit, offset);
+        const { totalCount, requests } = yield (0, requestUtils_1.filterRequests)(requestorName, requestorGroup, affectedGroupList, limit, offset);
         res.json({
             limit,
             offset,
+            totalCount,
             requests,
         });
     }
