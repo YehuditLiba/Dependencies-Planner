@@ -20,7 +20,7 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRequestsWithPagination = exports.updatePlannedField = exports.createRequest = exports.updateFinalDecisionController = exports.updateRequestByIdController = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequestByAdmin = exports.getRequestByIdController = exports.getAllRequests = void 0;
+exports.getAllFilteredRequestsWithPagination = exports.updatePlannedField = exports.createRequest = exports.updateFinalDecisionController = exports.updateRequestByIdController = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequestByAdmin = exports.getRequestByIdController = exports.getAllRequests = void 0;
 const requestUtils_1 = require("../Utils/requestUtils");
 const getAllRequests = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -100,7 +100,6 @@ const updateRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.updateRequest = updateRequest;
-//עידכון רשימת מושפעים
 const updateAffectedGroups = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = parseInt(req.params.id);
@@ -206,19 +205,25 @@ const updatePlannedField = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.updatePlannedField = updatePlannedField;
-const getRequestsWithPagination = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getAllFilteredRequestsWithPagination = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log('Controller function called');
     const limit = parseInt(req.query.limit) || 10;
     const offset = parseInt(req.query.offset) || 0;
     try {
-        const requests = yield (0, requestUtils_1.fetchRequests)(limit, offset);
+        const requestorName = req.query.requestorName;
+        const requestorGroup = req.query.requestorGroup;
+        const affectedGroupList = req.query.affectedGroupList;
+        const { totalCount, requests } = yield (0, requestUtils_1.filterRequests)(requestorName, requestorGroup, affectedGroupList, limit, offset);
         res.json({
             limit,
             offset,
+            totalCount,
             requests,
         });
     }
-    catch (err) {
-        res.status(500).json({ error: 'Error fetching requests with limit and offset' });
+    catch (error) {
+        console.error('Error fetching filtered requests with pagination:', error);
+        res.status(500).send('Internal Server Error');
     }
 });
-exports.getRequestsWithPagination = getRequestsWithPagination;
+exports.getAllFilteredRequestsWithPagination = getAllFilteredRequestsWithPagination;

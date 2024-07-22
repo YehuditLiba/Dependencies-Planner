@@ -1,5 +1,5 @@
 // src/Utils/testDatabaseConnection.ts
-import { pool, poolG } from '../config/db';
+import { pool, poolG } from '../../config/db';
 
 const testDatabaseConnection = () => {
     // Test connection to first database

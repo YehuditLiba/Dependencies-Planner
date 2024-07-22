@@ -9,8 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRequestsByGroupId = exports.getRequestById = exports.fetchAllRequests = exports.fetchRequests = exports.updatePlanned = exports.addRequest = exports.updateFinalDecision = exports.updateRequestById = exports.getRequestByIdForUp = exports.updateAffectedGroupList = exports.updateRequestFields = exports.deleteRequestById = void 0;
+exports.getRequestsByGroupId = exports.getRequestById = exports.filterRequests = exports.updatePlanned = exports.addRequest = exports.updateFinalDecision = exports.updateRequestById = exports.getRequestByIdForUp = exports.updateAffectedGroupList = exports.updateRequestFields = exports.deleteRequestById = exports.fetchAllRequests = void 0;
 const db_1 = require("../config/db");
+//import { format } from 'date-fns';
 const fetchAllRequests = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const client = yield db_1.pool.connect();
@@ -241,6 +242,27 @@ const updateFinalDecision = (id, finalDecision) => __awaiter(void 0, void 0, voi
 });
 exports.updateFinalDecision = updateFinalDecision;
 //הוספת בקשה חדשה
+// export const addRequest = async (request: RequestT): Promise<void> => {
+//     const query = `
+//       INSERT INTO request (ID, title, request_group, description, priority, planned, comments, date_time, affected_group_list, jira_link, requestor_name,requestor_email)
+//       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+//     `;
+//     const values = [
+//         request.ID,
+//         request.title,
+//         request.requestGroup,
+//         request.description,
+//         request.priority,
+//         request.planned,
+//         request.comments,
+//         request.dateTime,
+//         request.affectedGroupList,
+//         request.jiraLink,
+//         request.requestorName,
+//         request.emailRequestor,
+//     ];
+//     await pool.query(query, values);
+// };
 const addRequest = (request) => __awaiter(void 0, void 0, void 0, function* () {
     const query = `
       INSERT INTO request ( title, request_group, description, priority, planned, comments, date_time, affected_group_list, jira_link, requestor_name,requestor_email)
@@ -248,6 +270,16 @@ const addRequest = (request) => __awaiter(void 0, void 0, void 0, function* () {
     `;
     const today = new Date();
     const formattedToday = today.toISOString();
+    console.log(request.affectedGroupList);
+    console.log(request.title);
+    console.log(request.description);
+    console.log(request.priority);
+    console.log(request.planned);
+    console.log(request.dateTime);
+    console.log(request.affectedGroupList);
+    console.log(request.jiraLink);
+    console.log(request.requestorName);
+    console.log(request.emailRequestor);
     const values = [
         request.title,
         request.requestGroup,
@@ -261,6 +293,16 @@ const addRequest = (request) => __awaiter(void 0, void 0, void 0, function* () {
         request.requestorName,
         request.emailRequestor,
     ];
+    console.log(request.affectedGroupList);
+    console.log(request.title);
+    console.log(request.description);
+    console.log(request.priority);
+    console.log(request.planned);
+    console.log(request.dateTime);
+    console.log(request.affectedGroupList);
+    console.log(request.jiraLink);
+    console.log(request.requestorName);
+    console.log(request.emailRequestor);
     yield db_1.pool.query(query, values);
 });
 exports.addRequest = addRequest;
@@ -275,18 +317,42 @@ const updatePlanned = (ID, planned) => __awaiter(void 0, void 0, void 0, functio
     yield db_1.pool.query(query, values);
 });
 exports.updatePlanned = updatePlanned;
-// Function to fetch requests with limit and offset
-const fetchRequests = (limit, offset) => __awaiter(void 0, void 0, void 0, function* () {
+// Function to filter requests with optional parameters by requestor name and/or requestor group with limit and offset
+const filterRequests = (requestorName, requestorGroup, affectedGroupList, // נוסיף כאן את הפילטר החדש
+limit, offset) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log('Filtering requests with parameters:', requestorName, requestorGroup, affectedGroupList);
+    let sql = `
+      SELECT *, COUNT(*) OVER() AS total_count
+      FROM request
+      WHERE 1 = 1
+    `;
+    const values = [];
+    if (requestorName) {
+        sql += ` AND requestor_name ILIKE $${values.length + 1}`;
+        values.push(`%${requestorName}%`);
+    }
+    if (requestorGroup) {
+        sql += ` AND request_group ILIKE $${values.length + 1}`;
+        values.push(`%${requestorGroup}%`);
+    }
+    if (affectedGroupList) {
+        sql += ` AND affected_group_list && $${values.length + 1}`; // מחפש אם יש חפיפות בין המערכים
+        values.push(`{${affectedGroupList}}`); // הפיכת המערך למבנה מתאים לשאילתה
+    }
+    sql += `
+      ORDER BY id
+      LIMIT $${values.length + 1} OFFSET $${values.length + 2};
+    `;
+    values.push(limit, offset);
+    console.log('Generated SQL:', sql, 'with values:', values);
     try {
         const client = yield db_1.pool.connect();
-        const sql = 'SELECT * FROM request ORDER BY id LIMIT $1 OFFSET $2;';
-        const { rows } = yield client.query(sql, [limit, offset]);
+        const { rows } = yield client.query(sql, values);
         client.release();
-        // Mapping rows to RequestT type
-        return rows.map((row) => ({
+        const totalCount = rows.length > 0 ? parseInt(rows[0].total_count, 10) : 0;
+        const requests = rows.map((row) => ({
             ID: row.id,
             title: row.title,
-            requestorName: row.requestor_name,
             requestGroup: row.request_group,
             description: row.description,
             priority: row.priority,
@@ -296,12 +362,14 @@ const fetchRequests = (limit, offset) => __awaiter(void 0, void 0, void 0, funct
             dateTime: row.date_time,
             affectedGroupList: row.affected_group_list,
             jiraLink: row.jira_link,
+            requestorName: row.requestor_name,
             emailRequestor: row.email_requestor,
         }));
+        return { totalCount, requests };
     }
     catch (err) {
-        console.error('Error fetching requests with limit and offset:', err);
+        console.error('Error filtering requests:', err);
         throw err;
     }
 });
-exports.fetchRequests = fetchRequests;
+exports.filterRequests = filterRequests;
