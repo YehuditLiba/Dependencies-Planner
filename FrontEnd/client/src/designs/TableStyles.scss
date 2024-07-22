@@ -1,0 +1,72 @@
+.table-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; // מרכז את התוכן במרכז
+    margin: 0 auto; // מרכז את כל הקונטיינר
+    width: 80%;
+    max-width: 1200px;
+}
+
+.table-controls {
+    display: flex; // הצגת הכפתורים בשורה אחת
+    justify-content: space-around; // שים מרווחים שווים בין הכפתורים
+    width: 100%; // התאמת הרוחב של הקונטיינר של הכפתורים
+    margin-bottom: 16px; // מרווח מתחת לכפתורים
+}
+
+.control-button {
+    background-color: #1e90ff; // צבע רקע כחול בוהק
+    color: white; // צבע טקסט לבן
+    border: none; // הסרת גבולות
+    border-radius: 4px; // עיגול הפינות
+    padding: 10px 20px; // ריווח פנימי
+    cursor: pointer; // שינוי סמן העכבר
+    font-size: 16px; // גודל טקסט
+    transition: background-color 0.3s, transform 0.3s; // אפקט מעבר צבע וגובה
+    margin: 0 8px; // מרווחים בין הכפתורים
+}
+
+.control-button:hover {
+    background-color: #00bfff; // צבע רקע כחול בהיר בעת ריחוף
+    transform: scale(1.05); // הגדלת הכפתור מעט
+}
+
+.control-button:active {
+    background-color: #4682b4; // צבע רקע כחול כהה בעת לחיצה
+}
+
+.table-paper {
+    width: 100%;
+    height: 600px; // גובה קבוע לטבלה
+    overflow-y: auto; // גלילה אנכית
+    border-radius: 8px; // עיגול הפינות
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 16px; // מרווח עליון מעל הטבלה
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between; // להניח את החיצים בצדדים
+    align-items: center;
+    padding: 0 16px;
+}
+
+.arrow-button {
+    background-color: #e0e0e0; // צבע רקע אפור בהיר
+    border: none;
+    border-radius: 50%;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 20px;
+    transition: background-color 0.3s;
+}
+
+.arrow-button:hover {
+    background-color: #b0b0b0; // צבע רקע אפור כהה בעת ריחוף
+}
+
+.request-count {
+    text-align: center;
+    font-size: 18px;
+    margin: 16px 0;
+}

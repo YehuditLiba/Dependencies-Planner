@@ -1,26 +1,29 @@
-import * as React from 'react';
+// import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
-import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
+import TablePagination from '@mui/material/TablePagination';
 import Button from '@mui/material/Button';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import Checkbox from '@mui/material/Checkbox';
 import axios from 'axios';
-import RequestForm from './RequestForm'; // נניח שהטופס נמצא באותו תיקייה
+import '../designs/TableStyles.scss'; 
+import RequestForm from './RequestForm';
 import EditableTableHeader from './EditableTableHeader';
 import EditPopup from './EditPopup';
-
-
 
 const columns = [
   { id: 'title', label: 'Title', minWidth: 100 },
   { id: 'requestorName', label: 'Requestor Name', minWidth: 100 },
-  { id: 'requestGroup', label: 'Request Group', minWidth: 100 },
+  { id: 'requestGroup', label: 'Request Group', minWidth: 100, show: true },
   { id: 'description', label: 'Description', minWidth: 150 },
   { id: 'priority', label: 'Priority', minWidth: 70 },
   { id: 'finalDecision', label: 'Final Decision', minWidth: 100 },
@@ -43,55 +46,79 @@ const modalStyle = {
 };
 
 export default function MainTable() {
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(4);
-  const [rows, setRows] = React.useState([]);
-  const [totalRows, setTotalRows] = React.useState(0);
-  const [groups, setGroups] = React.useState([]);
-  const [showGroupColumns, setShowGroupColumns] = React.useState(true);
-  const [open, setOpen] = React.useState(false);
-  const [editOpen, setEditOpen] = React.useState(false);
-  const [editValue, setEditValue] = React.useState('');
-  const [editColumn, setEditColumn] = React.useState('');
-  const [editRowId, setEditRowId] = React.useState(null);
-  const [editableColumns, setEditableColumns] = React.useState({}); // Add this line
-  const [priorities, setPriorities] = React.useState([]);
-  const [decisions, setDecisions] = React.useState([]);
-  const [statuses, setStatuses] = React.useState([]);
-  const [productManagers, setproductManagers] = React.useState([]);
-  const [planneedQueues, setPlanneedQueues] = React.useState([]);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(4);
+  const [rows, setRows] = useState([]);
+  const [totalRows, setTotalRows] = useState(0);
+  const [groups, setGroups] = useState([]);
+  const [managers, setManagers] = useState([]);
+  const [affectedGroups, setAffectedGroups] = useState([]);
+  const [showGroupColumns, setShowGroupColumns] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [anchorElGroup, setAnchorElGroup] = useState(null);
+  const [anchorElManager, setAnchorElManager] = useState(null);
+  const [anchorElAffectedGroup, setAnchorElAffectedGroup] = useState(null);
+  const [selectedGroup, setSelectedGroup] = useState('');
+  const [selectedManager, setSelectedManager] = useState('');
+  const [selectedAffectedGroups, setSelectedAffectedGroups] = useState([]);
+  const [statuses, setStatuses] = useState([]);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editValue, setEditValue] = useState('');
+  const [editColumn, setEditColumn] = useState('');
+  const [editRowId, setEditRowId] = useState(null);
+  const [editableColumns, setEditableColumns] = useState({}); // Add this line
+  const [priorities, setPriorities] = useState([]);
+  const [decisions, setDecisions] = useState([]);
+  const [productManagers, setproductManagers] = useState([]);
+  const [planneedQueues, setPlanneedQueues] = useState([]);
 
 
-  React.useEffect(() => {
-    fetchData();
+  useEffect(() => {
+ fetchData();
     fetchGroups();
     fetchPriorities();
     fetchDecisions();
     fetchStatuses();
     fetchProductManagers();
+}, [page, rowsPerPage]);
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/api/requests', {
+          params: {
+            limit: rowsPerPage === -1 ? undefined : rowsPerPage,
+            offset: rowsPerPage === -1 ? 0 : page * rowsPerPage,
+            requestorGroup: selectedGroup || undefined,
+            requestorName: selectedManager || undefined,
+            affectedGroupList: selectedAffectedGroups.length ? selectedAffectedGroups.join(',') : undefined
+          }
+        });
+        setRows(response.data.requests);
+        setTotalRows(response.data.totalCount || 0);
+      } catch (error) {
+        console.error("Failed to fetch data", error);
+      }
+    };
 
-  }, [page, rowsPerPage]);
+    const fetchGroups = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/api/groups');
+        setGroups(response.data);
+      } catch (error) {
+        console.error("Failed to fetch groups", error);
+      }
+    };
 
-  const fetchData = async () => {
-    try {
-      const response = await axios.get(`http://localhost:3001/api/requests?limit=${rowsPerPage}&offset=${page * rowsPerPage}`);
-      setRows(response.data.requests);
-      setTotalRows(response.data.totalCount || 0);
-    } catch (error) {
-      console.error("Failed to fetch data", error);
-    }
-  };
+    const fetchManagers = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/api/productManagers');
+        setManagers(response.data);
+      } catch (error) {
+        console.error("Failed to fetch product managers", error);
+      }
+    };
 
-  const fetchGroups = async () => {
-    try {
-      const response = await axios.get('http://localhost:3001/api/groups');
-      setGroups(response.data);
-    } catch (error) {
-      console.error("Failed to fetch groups", error);
-    }
-  };
-
-  const fetchPriorities = async () => {
+ const fetchPriorities = async () => {
     try {
       const response = await axios.get('http://localhost:3001/api/priority');
       setPriorities(response.data);
@@ -108,37 +135,33 @@ export default function MainTable() {
       console.error("Failed to fetch decisions", error);
     }
   };
-  const fetchStatuses = async () => {
-    try {
-      const response = await axios.get('http://localhost:3001/api/status');
-      setStatuses(response.data);
-    } catch (error) {
-      console.error("Failed to fetch statuses", error);
-    }
-  };
+    const fetchStatuses = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/api/statuses');
+        setStatuses(response.data);
+      } catch (error) {
+        console.error("Failed to fetch statuses", error);
+      }
+    };
 
-  const fetchProductManagers = async () => {
-    try {
-      const response = await axios.get('http://localhost:3001/api/productManagers');
-      setproductManagers(response.data);
-    } catch (error) {
-      console.error("Failed to fetch product managers", error);
-    }
-  };
-
-
+    fetchData();
+    fetchGroups();
+    fetchManagers();
+    fetchStatuses();
+  }, [page, rowsPerPage, selectedGroup, selectedManager, selectedAffectedGroups]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
 
   const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(+event.target.value);
+    const value = event.target.value;
+    setRowsPerPage(value === 'all' ? -1 : +value);
     setPage(0);
   };
 
   const handleToggleColumns = () => {
-    setShowGroupColumns(!showGroupColumns);
+    setShowGroupColumns(prev => !prev);
   };
 
   const handleEditClick = (columnId) => {
@@ -188,54 +211,178 @@ export default function MainTable() {
 
 
 
-  const allColumns = [...columns, ...groups.map(group => ({
-    id: `group_${group.id}`,
-    label: group.name,
-    minWidth: 100
-  }))];
+  const handleOpenMenu = (event, type) => {
+    switch (type) {
+      case 'group':
+        setAnchorElGroup(event.currentTarget);
+        break;
+      case 'manager':
+        setAnchorElManager(event.currentTarget);
+        break;
+      case 'affectedGroup':
+        setAnchorElAffectedGroup(event.currentTarget);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleCloseMenu = (type) => {
+    switch (type) {
+      case 'group':
+        setAnchorElGroup(null);
+        break;
+      case 'manager':
+        setAnchorElManager(null);
+        break;
+      case 'affectedGroup':
+        setAnchorElAffectedGroup(null);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleGroupSelect = (group) => {
+    setSelectedGroup(group.id || '');
+    handleCloseMenu('group');
+  };
+
+  const handleManagerSelect = (manager) => {
+    setSelectedManager(manager.name || '');
+    handleCloseMenu('manager');
+  };
+
+  const handleAffectedGroupSelect = (groupId) => {
+    setSelectedAffectedGroups(prev =>
+      prev.includes(groupId) ? prev.filter(id => id !== groupId) : [...prev, groupId]
+    );
+  };
+
+  const applyFilter = () => {
+    handleCloseMenu('affectedGroup');
+  };
+
+  const handleEditSave = (value) => {
+    console.log('Saving edited value:', value);
+    setEditOpen(false);
+  };
+
+  const formatDate = (value) => {
+    const date = new Date(value);
+    return date.toLocaleDateString('he-IL');
+  };
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 4 }}>
-      <Paper sx={{ width: '80%', padding: 2 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Button variant="contained" color="primary" onClick={() => setOpen(true)}>
-            הוספת בקשה
+      <Box className="header" >
+        <img src="/path/to/logo.png" alt="Logo" className="logo" />
+        <h1>Dependencies-Planner</h1>
+      </Box>
+      <Paper className="table-paper">
+        <Box className="table-controls">
+          <Button
+            className="add-request-button"
+            variant="contained"
+            onClick={() => setOpen(true)}
+          >
+            Add Request
           </Button>
-          <Button variant="contained" onClick={handleToggleColumns}>
-            {showGroupColumns ? 'צמצם עמודות' : 'הרחב עמודות'}
+          <Button
+            className="toggle-columns-button"
+            variant="contained"
+            onClick={handleToggleColumns}
+          >
+            {showGroupColumns ? 'Hide Group Columns' : 'Show Group Columns'}
           </Button>
+          <Button
+            className="filter-group-button"
+            variant="contained"
+            onClick={(event) => handleOpenMenu(event, 'group')}
+          >
+            Filter by Groups
+          </Button>
+          <Menu
+            anchorEl={anchorElGroup}
+            open={Boolean(anchorElGroup)}
+            onClose={() => handleCloseMenu('group')}
+          >
+            {groups.map(group => (
+              <MenuItem key={group.id} onClick={() => handleGroupSelect(group)}>
+                {group.name}
+              </MenuItem>
+            ))}
+          </Menu>
+          <Button
+            className="filter-manager-button"
+            variant="contained"
+            onClick={(event) => handleOpenMenu(event, 'manager')}
+          >
+            Filter by Manager
+          </Button>
+          <Menu
+            anchorEl={anchorElManager}
+            open={Boolean(anchorElManager)}
+            onClose={() => handleCloseMenu('manager')}
+          >
+            {managers.map(manager => (
+              <MenuItem key={manager.name} onClick={() => handleManagerSelect(manager)}>
+                {manager.name}
+              </MenuItem>
+            ))}
+          </Menu>
+          <Button
+            className="filter-affected-group-button"
+            variant="contained"
+            onClick={(event) => handleOpenMenu(event, 'affectedGroup')}
+          >
+            Filter by Affected Groups
+          </Button>
+          <Menu
+            anchorEl={anchorElAffectedGroup}
+            open={Boolean(anchorElAffectedGroup)}
+            onClose={() => handleCloseMenu('affectedGroup')}
+          >
+            {groups.map(group => (
+              <MenuItem key={group.id}>
+                <Checkbox
+                  checked={selectedAffectedGroups.includes(group.id)}
+                  onChange={() => handleAffectedGroupSelect(group.id)}
+                />
+                {group.name}
+              </MenuItem>
+            ))}
+            <MenuItem onClick={applyFilter}>
+              Apply Filter
+            </MenuItem>
+          </Menu>
         </Box>
-        <TableContainer sx={{ maxHeight: 440, marginTop: 2 }}>
-          <Table stickyHeader aria-label="sticky table">
+        <TableContainer>
+          <Table>
             <TableHead>
               <TableRow>
-                {columns.map((column) => (
-                  <EditableTableHeader key={column.id} column={column} onEditClick={handleEditClick} />
-                ))}
-                {showGroupColumns && groups.map(group => (
-                  <EditableTableHeader key={`group_${group.id}`} column={{ id: `group_${group.id}`, label: group.name }} onEditClick={handleEditClick} />
+                {columns.map(column => (
+                  <TableCell
+                    style={{ minWidth: column.minWidth }}
+                  )
+                  <TableCell key={`group_${group.id}`} align="left" style={{ minWidth: 100 }}>
                 ))}
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row) => (
-                <TableRow hover role="checkbox" tabIndex={-1} key={row.ID}>
-                  {columns.map((column) => {
-                    const value = row[column.id] || '';
-                    return (
+              {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (
+                <TableRow key={row.id}>
+                  {columns.map(column => (
+                    (showGroupColumns || !column.id.includes('group')) && (
                       <TableCell
                         key={column.id}
-                        align={column.align || 'left'}
+                      <TableCell key={column.id} align={column.align || 'left'}>
                         onDoubleClick={() => handleCellDoubleClick(row.ID, column.id)}
                       >
-                        {Array.isArray(value) ? value.join(', ') : value}
+                        {column.id === 'dateTime' ? formatDate(row[column.id]) : row[column.id]}
                       </TableCell>
-                    );
-                  })}
-                  {showGroupColumns && groups.map(group => (
-                    <TableCell key={`group_${group.id}`} align="left" onDoubleClick={() => handleCellDoubleClick(row.ID, `group_${group.id}`)}>
-                      {(row[`group_${group.id}`] || []).join(', ')}
-                    </TableCell>
+                    )
+                    <TableCell key={`group_${group.id}`} align="left">
                   ))}
                 </TableRow>
               ))}
@@ -243,25 +390,37 @@ export default function MainTable() {
           </Table>
         </TableContainer>
         <TablePagination
-          rowsPerPageOptions={[4, 10, 25, 100]}
+          rowsPerPageOptions={[4, 10, 25, { label: 'All', value: -1 }]}
           component="div"
           count={totalRows}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
-          labelDisplayedRows={({ from, to, count }) => `${from}-${to} מתוך ${count !== -1 ? count : `יותר מ-${to}`}`}
         />
-        <Modal
-          open={open}
-          onClose={() => setOpen(false)}
-          aria-labelledby="modal-title"
-          aria-describedby="modal-description"
-        >
-          <Box sx={modalStyle}>
-            <RequestForm onClose={() => setOpen(false)} />
-          </Box>
-        </Modal>
+      </Paper>
+
+      <Modal
+        open={open}
+        onClose={() => setOpen(false)}
+      >
+          <Box sx={{ ...modalStyle, overflow: 'auto', maxHeight: '80vh' }}>
+        <RequestForm onClose={() => setOpen(false)} />
+          
+          <Button onClick={() => setOpen(false)}>Close</Button>
+        </Box>
+      </Modal>
+
+      <Modal
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+      >
+        <Box sx={modalStyle}>
+          {/* Your Edit Request Form Here */}
+          <Button onClick={() => handleEditSave(editValue)}>Save</Button>
+          <Button onClick={() => setEditOpen(false)}>Cancel</Button>
+        </Box>
+      </Modal>
         <EditPopup
           open={editOpen}
           handleClose={() => setEditOpen(false)}
@@ -275,7 +434,6 @@ export default function MainTable() {
           productManagers={productManagers}
           planneedQueues={planneedQueues}
         />
-      </Paper>
     </Box>
 
   );

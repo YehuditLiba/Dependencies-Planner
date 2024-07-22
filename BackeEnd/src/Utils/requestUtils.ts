@@ -1,7 +1,9 @@
 import { pool } from '../config/db';
 import { RequestT } from '../types/requestTypes';
 
-const fetchAllRequests = async (): Promise<RequestT[]> => {
+//import { format } from 'date-fns';
+export const fetchAllRequests = async (): Promise<RequestT[]> => {
+
     try {
         const client = await pool.connect();
         const sql = 'SELECT * FROM request;';
@@ -185,6 +187,7 @@ export const updateAffectedGroupList = async (id: number, affectedGroupList: str
         throw err;
     }
 };
+
 export const getRequestByIdForUp = async (id: number): Promise<any> => {
     const query = 'SELECT * FROM requests WHERE id = $1';
     const { rows } = await pool.query(query, [id]);
@@ -228,30 +231,54 @@ export const updateFinalDecision = async (id: number, finalDecision: boolean): P
     }
 };
 
-//הוספת בקשה חדשה
 export const addRequest = async (request: RequestT): Promise<void> => {
     const query = `
-      INSERT INTO request (ID, title, request_group, description, priority, planned, comments, date_time, affected_group_list, jira_link, requestor_name,requestor_email)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+      INSERT INTO request ( title, request_group, description, priority, planned, comments, date_time, affected_group_list, jira_link, requestor_name,requestor_email)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11 )
     `;
+    const today = new Date();
+    const formattedToday = today.toISOString();
+
+    console.log(request.affectedGroupList);
+    console.log(request.title);
+    console.log(request.description);
+    console.log(request.priority);
+    console.log(request.planned);
+    console.log(request.dateTime);
+    console.log(request.affectedGroupList);
+    console.log(request.jiraLink);
+    console.log(request.requestorName);
+    console.log(request.emailRequestor);
+
+
 
     const values = [
-        request.ID,
         request.title,
         request.requestGroup,
         request.description,
         request.priority,
         request.planned,
         request.comments,
-        request.dateTime,
+        formattedToday,
         request.affectedGroupList,
         request.jiraLink,
         request.requestorName,
         request.emailRequestor,
     ];
+    console.log(request.affectedGroupList);
+    console.log(request.title);
+    console.log(request.description);
+    console.log(request.priority);
+    console.log(request.planned);
+    console.log(request.dateTime);
+    console.log(request.affectedGroupList);
+    console.log(request.jiraLink);
+    console.log(request.requestorName);
+    console.log(request.emailRequestor);
 
     await pool.query(query, values);
 };
+
 
 //עידכון רבעון
 export const updatePlanned = async (ID: number, planned: string): Promise<void> => {
@@ -266,19 +293,56 @@ export const updatePlanned = async (ID: number, planned: string): Promise<void> 
     await pool.query(query, values);
 };
 
-// Function to fetch requests with limit and offset
-export const fetchRequests = async (limit: number, offset: number): Promise<RequestT[]> => {
+// Function to filter requests with optional parameters by requestor name and/or requestor group with limit and offset
+export const filterRequests = async (
+    requestorName: string | undefined,
+    requestorGroup: string | undefined,
+    affectedGroupList: string | undefined, // נוסיף כאן את הפילטר החדש
+    limit: number,
+    offset: number
+): Promise<{ totalCount: number; requests: RequestT[] }> => {
+    console.log('Filtering requests with parameters:', requestorName, requestorGroup, affectedGroupList);
+
+    let sql = `
+      SELECT *, COUNT(*) OVER() AS total_count
+      FROM request
+      WHERE 1 = 1
+    `;
+    const values: any[] = [];
+
+    if (requestorName) {
+        sql += ` AND requestor_name ILIKE $${values.length + 1}`;
+        values.push(`%${requestorName}%`);
+    }
+
+    if (requestorGroup) {
+        sql += ` AND request_group ILIKE $${values.length + 1}`;
+        values.push(`%${requestorGroup}%`);
+    }
+
+    if (affectedGroupList) {
+        sql += ` AND affected_group_list && $${values.length + 1}`; // מחפש אם יש חפיפות בין המערכים
+        values.push(`{${affectedGroupList}}`); // הפיכת המערך למבנה מתאים לשאילתה
+    }
+
+    sql += `
+      ORDER BY id
+      LIMIT $${values.length + 1} OFFSET $${values.length + 2};
+    `;
+    values.push(limit, offset);
+
+    console.log('Generated SQL:', sql, 'with values:', values);
+
     try {
         const client = await pool.connect();
-        const sql = 'SELECT * FROM request ORDER BY id LIMIT $1 OFFSET $2;';
-        const { rows } = await client.query(sql, [limit, offset]);
+        const { rows } = await client.query(sql, values);
         client.release();
 
-        // Mapping rows to RequestT type
-        return rows.map((row: any) => ({
+        const totalCount = rows.length > 0 ? parseInt(rows[0].total_count, 10) : 0;
+
+        const requests = rows.map((row: any) => ({
             ID: row.id,
             title: row.title,
-            requestorName: row.requestor_name,
             requestGroup: row.request_group,
             description: row.description,
             priority: row.priority,
@@ -288,11 +352,15 @@ export const fetchRequests = async (limit: number, offset: number): Promise<Requ
             dateTime: row.date_time,
             affectedGroupList: row.affected_group_list,
             jiraLink: row.jira_link,
+            requestorName: row.requestor_name,
             emailRequestor: row.email_requestor,
         })) as RequestT[];
+
+        return { totalCount, requests };
     } catch (err) {
-        console.error('Error fetching requests with limit and offset:', err);
+        console.error('Error filtering requests:', err);
         throw err;
     }
 };
-export { fetchAllRequests, getRequestById, getRequestsByGroupId };
+
+export { getRequestById, getRequestsByGroupId };

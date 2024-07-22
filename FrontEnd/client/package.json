@@ -19,6 +19,7 @@
     "react-app-rewired": "^2.2.1",
     "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18.3.1",
+    "react-router-dom": "^6.25.1",
     "react-scripts": "5.0.1",
     "sortablejs": "^1.15.2",
     "stream-browserify": "^3.0.0",
@@ -50,5 +51,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "sass": "^1.77.8"
   }
 }
