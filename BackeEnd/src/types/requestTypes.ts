@@ -1,10 +1,11 @@
 import { AffectedGroup } from "./affectedGroupsTypes";
 import { Priority } from "./priorityTypes";
+// import { RequestorName } from "./requestorNameTypes";
 
 export interface RequestT {
 
     ID: number;
-    requestorName: string;
+    requestorName:string[]/*RequestorName */;
     title: string;
     requestGroup: string[];
     description: string;

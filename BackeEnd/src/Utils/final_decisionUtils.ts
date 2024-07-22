@@ -1,11 +1,12 @@
 import { pool } from '../config/db';
+// import { Decision } from '../types/final_decisionTypes';
 
-export const getAllDecisions = async () => {
+export const getAllDecisions = async (): Promise<string[]>  => {
     const client = await pool.connect();
     try {
         const query = `
             SELECT final_decision
-            FROM decisions;
+            FROM request;
         `;
      
         const { rows } = await client.query(query);
@@ -17,3 +18,4 @@ export const getAllDecisions = async () => {
         client.release();
     }
 };
+

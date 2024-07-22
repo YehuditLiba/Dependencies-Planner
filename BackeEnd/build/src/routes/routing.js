@@ -25,7 +25,7 @@ router.post('/requests/createRequest', requestCon_1.createRequest);
 router.put('/requests/:ID/planned', requestCon_1.updatePlannedField);
 router.get('/requests', requestCon_1.getRequestsWithPagination);
 //Requests AffectedGroups
-router.put('/requests/:id/affectedGroups', requestCon_1.updateAffectedGroups);
+router.put('/requests/:id/affectedGroups', requestCon_1.updateAffectedGroups); //===============================
 //routings ProductManager
 router.get('/productManagers', productManagerCon_1.getAllProductManagers);
 router.get('/requests/:groupId', productManagerCon_1.getAllRequestsByProductManager);
@@ -35,7 +35,9 @@ router.get('/Getstatus', StatusCon_1.getAllStatus);
 //priority routings
 router.get('/priority', PriorityCon_1.getAllPrioritiesController);
 //T_Size routings
-router.get('/GetTSize', T_SizeCon_1.getAllTSize);
+router.get('/GetTSize', T_SizeCon_1.getAllTSize); //=================================================
 //Decisions routings
 router.get('/decisions', final_decisionCon_1.getAllDecisionsController);
+//requstor names routings
+router.get('/requestor-names', requestor_nameCon_1.getAllRequestorNamesController);
 exports.default = router;

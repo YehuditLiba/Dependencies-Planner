@@ -8,7 +8,7 @@ import { getAllStatusController, getAllStatus } from '../Controllers/StatusCon';
 import { getAllPrioritiesController } from '../Controllers/PriorityCon';
 import { getAllTSize } from '../Controllers/T_SizeCon';
 import { getAllDecisionsController } from '../Controllers/final_decisionCon'
-
+import { getAllRequestorNamesController } from '../Controllers/requestor_nameCon';
 const router = express.Router();
 //groups routings
 router.get('/groups', getAllGroupsController);
@@ -26,7 +26,7 @@ router.get('/requests', getRequestsWithPagination);
 
 
 //Requests AffectedGroups
-router.put('/requests/:id/affectedGroups', updateAffectedGroups);
+router.put('/requests/:id/affectedGroups', updateAffectedGroups);//===============================
 
 //routings ProductManager
 router.get('/productManagers', getAllProductManagers);
@@ -40,9 +40,14 @@ router.get('/Getstatus', getAllStatus);
 router.get('/priority', getAllPrioritiesController);
 
 //T_Size routings
-router.get('/GetTSize', getAllTSize);
+router.get('/GetTSize', getAllTSize);//=================================================
 
 //Decisions routings
 router.get('/decisions', getAllDecisionsController);
+
+//requstor names routings
+router.get('/requestor-names', getAllRequestorNamesController);
+
+
 
 export default router;

@@ -1,5 +1,4 @@
 // productManagerCon.ts
-
 import { Request, Response } from 'express';
 import { getProductManagers, getRequestsByProductManager } from '../Utils/productUtils';
 

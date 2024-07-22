@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { fetchAllPriorities } from '../Utils/prioritUtils';
+import { fetchAllPriorities } from '../Utils/priorityUtils';
 
 export const getAllPrioritiesController = async (req: Request, res: Response): Promise<void> => {
     try {
