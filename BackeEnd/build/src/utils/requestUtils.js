@@ -241,28 +241,6 @@ const updateFinalDecision = (id, finalDecision) => __awaiter(void 0, void 0, voi
     }
 });
 exports.updateFinalDecision = updateFinalDecision;
-//הוספת בקשה חדשה
-// export const addRequest = async (request: RequestT): Promise<void> => {
-//     const query = `
-//       INSERT INTO request (ID, title, request_group, description, priority, planned, comments, date_time, affected_group_list, jira_link, requestor_name,requestor_email)
-//       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-//     `;
-//     const values = [
-//         request.ID,
-//         request.title,
-//         request.requestGroup,
-//         request.description,
-//         request.priority,
-//         request.planned,
-//         request.comments,
-//         request.dateTime,
-//         request.affectedGroupList,
-//         request.jiraLink,
-//         request.requestorName,
-//         request.emailRequestor,
-//     ];
-//     await pool.query(query, values);
-// };
 const addRequest = (request) => __awaiter(void 0, void 0, void 0, function* () {
     const query = `
       INSERT INTO request ( title, request_group, description, priority, planned, comments, date_time, affected_group_list, jira_link, requestor_name,requestor_email)
@@ -344,12 +322,13 @@ limit, offset) => __awaiter(void 0, void 0, void 0, function* () {
       LIMIT $${values.length + 1} OFFSET $${values.length + 2};
     `;
     values.push(limit, offset);
-    console.log('Generated SQL:', sql, 'with values:', values);
+    //  console.log('Generated SQL:', sql, 'with values:', values);
     try {
         const client = yield db_1.pool.connect();
         const { rows } = yield client.query(sql, values);
         client.release();
         const totalCount = rows.length > 0 ? parseInt(rows[0].total_count, 10) : 0;
+        console.log(rows);
         const requests = rows.map((row) => ({
             ID: row.id,
             title: row.title,
@@ -363,7 +342,7 @@ limit, offset) => __awaiter(void 0, void 0, void 0, function* () {
             affectedGroupList: row.affected_group_list,
             jiraLink: row.jira_link,
             requestorName: row.requestor_name,
-            emailRequestor: row.email_requestor,
+            emailRequestor: row.requestor_email,
         }));
         return { totalCount, requests };
     }

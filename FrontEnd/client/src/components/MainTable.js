@@ -27,8 +27,9 @@ const columns = [
   { id: 'priority', label: 'Priority', minWidth: 70 },
   { id: 'finalDecision', label: 'Final Decision', minWidth: 100 },
   { id: 'planned', label: 'Planned', minWidth: 100 },
-  { id: 'comments', label: 'Comments', minWidth: 100 },
-  { id: 'dateTime', label: 'DateTime', minWidth: 150 }
+  { id: 'comments', label: 'Comments', minWidth: 150 },
+  { id: 'emailRequestor', label: 'Email Requestor', minWidth: 150 },
+  { id: 'dateTime', label: 'DateTime', minWidth: 100 }
 ];
 
 const modalStyle = {
@@ -43,7 +44,7 @@ const modalStyle = {
   p: 4,
 };
 
-export default function MainTable() {
+export default function MainTable({emailRequestor}) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(4);
   const [rows, setRows] = useState([]);
@@ -281,8 +282,8 @@ export default function MainTable() {
             onClose={() => handleCloseMenu('affectedGroup')}
           >
             {groups.map(group => (
-              <MenuItem key={group.id} onClick={() => handleAffectedGroupSelect(group.id)}>
-                <Checkbox
+                    <MenuItem key={group.id} onClick={() => handleAffectedGroupSelect(group.id)}>
+               <Checkbox
                   checked={selectedAffectedGroups.includes(group.id)}
                 />
                 {group.name}
@@ -373,7 +374,7 @@ export default function MainTable() {
         onClose={() => setOpen(false)}
       >
           <Box sx={{ ...modalStyle, overflow: 'auto', maxHeight: '80vh' }}>
-        <RequestForm onClose={() => setOpen(false)} />
+        <RequestForm onClose={() => setOpen(false)} emailRequestor={emailRequestor}/>
           
           <Button onClick={() => setOpen(false)}>Close</Button>
         </Box>

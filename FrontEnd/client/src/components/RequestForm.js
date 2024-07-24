@@ -4,8 +4,7 @@ import axios from 'axios';
 import { quarters } from '../config/quarters';
 
 
-export default function RequestForm({ onClose }) {
-  const [emailRequestor, setEmailRequestor] = useState('');
+export default function RequestForm({ onClose ,emailRequestor}) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [requestorName, setRequestorName] = useState('');
@@ -17,7 +16,8 @@ export default function RequestForm({ onClose }) {
   const [planned, setPlanned] = useState('');
   const [jiraLink, setJiraLink] = useState('');
   const [pm, setPm] = useState([]);
-
+  //const [selectedQuarter, setSelectedQuarter] = useState('');
+//  const [newEmail,setNewEmail]=useState('');
   useEffect(() => {
     const fetchGroups = async () => {
       try {
@@ -43,6 +43,8 @@ export default function RequestForm({ onClose }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    console.log("Current Email:", emailRequestor); // זה יציג את הערך של newEmail בקונסול
+
     try {
       await axios.post('http://localhost:3001/api/requests/createRequest', {
         title,
@@ -59,13 +61,13 @@ export default function RequestForm({ onClose }) {
       setTitle('');
       setDescription('');
       setRequestorName('');
-      setEmailRequestor('');
       setPriority('');
       setComments('');
       setAffectedGroupList([]);
       setRequestGroup('');
       setPlanned('');
       setJiraLink('');
+     // setNewEmail('');
       alert('Request added successfully!');
       onClose();
     } catch (error) {
@@ -127,9 +129,9 @@ export default function RequestForm({ onClose }) {
         label="Email Requestor"
         fullWidth
         margin="normal"
+       // setNewEmail={email}
         value={emailRequestor}
-        onChange={(e) => setEmailRequestor(e.target.value)}
-      />
+      /> 
       <FormControl fullWidth margin="normal">
         <InputLabel id="priority-label">Priority</InputLabel>
         <Select
@@ -188,14 +190,21 @@ export default function RequestForm({ onClose }) {
           ))}
         </Select>
       </FormControl>
-      <TextField
-        id="planned"
-        label="Planned"
-        fullWidth
-        margin="normal"
-        value={planned}
-        onChange={(e) => setPlanned(e.target.value)}
-      />
+      <FormControl fullWidth margin="normal">
+      <InputLabel id="planned">planned</InputLabel>
+        <Select
+          labelId="Planned"
+          id="planned"
+          value={planned}
+          onChange={(e) => setPlanned(e.target.value)}
+        >
+          {quarters.map((quarter, index) => (
+            <MenuItem key={index} value={quarter}>
+              {quarter}
+            </MenuItem>
+          ))}
+        </Select>
+        </FormControl>
       <TextField
         id="jiraLink"
         label="JIRA Link"
