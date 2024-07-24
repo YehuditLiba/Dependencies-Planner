@@ -14,6 +14,7 @@ import Box from '@mui/material/Box';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Checkbox from '@mui/material/Checkbox';
+import Select from '@mui/material/Select';
 import axios from 'axios';
 import '../designs/TableStyles.scss'; 
 import RequestForm from './RequestForm';
@@ -191,6 +192,25 @@ export default function MainTable({emailRequestor}) {
     return date.toLocaleDateString('he-IL');
   };
 
+  const getGroupStatus = (row, groupId) => {
+    const affectedGroup = affectedGroups.find(group => group.requestId === row.id && group.groupId === groupId);
+    return affectedGroup ? affectedGroup.status : 'Not Required';
+  };
+
+  const handleStatusChange = (rowId, groupId, newStatus) => {
+    const updatedGroups = affectedGroups.map(group => 
+      group.requestId === rowId && group.groupId === groupId 
+        ? { ...group, status: newStatus } 
+        : group
+    );
+    setAffectedGroups(updatedGroups);
+    // Save the updated status to the server
+    axios.post('http://localhost:3001/api/updateStatus', {
+      requestId: rowId,
+      groupId: groupId,
+      status: newStatus
+    });
+  };
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 4 }}>
       <Box className="header" >
@@ -262,10 +282,9 @@ export default function MainTable({emailRequestor}) {
             onClose={() => handleCloseMenu('affectedGroup')}
           >
             {groups.map(group => (
-              <MenuItem key={group.id}>
+              <MenuItem key={group.id} onClick={() => handleAffectedGroupSelect(group.id)}>
                 <Checkbox
                   checked={selectedAffectedGroups.includes(group.id)}
-                  onChange={() => handleAffectedGroupSelect(group.id)}
                 />
                 {group.name}
               </MenuItem>
@@ -286,6 +305,11 @@ export default function MainTable({emailRequestor}) {
                     </TableCell>
                   )
                 ))}
+                {showGroupColumns && groups.map(group => (
+                  <TableCell key={group.id} style={{ minWidth: 150 }}>
+                    {group.name}
+                  </TableCell>
+                ))}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -297,6 +321,37 @@ export default function MainTable({emailRequestor}) {
                         {column.id === 'dateTime' ? formatDate(row[column.id]) : row[column.id]}
                       </TableCell>
                     )
+                  ))}
+                  {showGroupColumns && groups.map(group => (
+                    <TableCell key={group.id}>
+                      <Select
+                        value={getGroupStatus(row, group.id)}
+                        onChange={(e) => handleStatusChange(row.id, group.id, e.target.value)}
+                        style={{
+                          backgroundColor: (() => {
+                            const status = getGroupStatus(row, group.id);
+                            switch (status) {
+                              case 'Pending Response':
+                                return 'yellow';
+                              case 'Not Required':
+                                return 'grey';
+                              case 'In Q':
+                                return 'green';
+                              case 'Not in Q':
+                                return 'red';
+                              default:
+                                return '';
+                            }
+                          })(),
+                        }}
+                      >
+                        {statuses.map((status) => (
+                          <MenuItem key={status.value} value={status.value}>
+                            {status.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </TableCell>
                   ))}
                 </TableRow>
               ))}
@@ -338,3 +393,4 @@ export default function MainTable({emailRequestor}) {
     </Box>
   );
 }
+
