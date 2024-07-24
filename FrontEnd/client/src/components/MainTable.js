@@ -17,6 +17,7 @@ import Checkbox from '@mui/material/Checkbox';
 import Select from '@mui/material/Select';
 import axios from 'axios';
 import '../designs/TableStyles.scss'; 
+import RequestForm from './RequestForm';
 
 const columns = [
   { id: 'title', label: 'Title', minWidth: 100 },
@@ -210,8 +211,8 @@ export default function MainTable() {
     });
   };
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <Box className="header">
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 4 }}>
+      <Box className="header" >
         <img src="/path/to/logo.png" alt="Logo" className="logo" />
         <h1>Dependencies-Planner</h1>
       </Box>
@@ -371,8 +372,9 @@ export default function MainTable() {
         open={open}
         onClose={() => setOpen(false)}
       >
-        <Box sx={modalStyle}>
-          {/* Your Add Request Form Here */}
+          <Box sx={{ ...modalStyle, overflow: 'auto', maxHeight: '80vh' }}>
+        <RequestForm onClose={() => setOpen(false)} />
+          
           <Button onClick={() => setOpen(false)}>Close</Button>
         </Box>
       </Modal>
