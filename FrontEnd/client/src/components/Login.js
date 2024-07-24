@@ -4,8 +4,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const LoginPage = () => {
-  const [email, setEmail] = useState('');
+const LoginPage = ({ email, setEmail }) => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 

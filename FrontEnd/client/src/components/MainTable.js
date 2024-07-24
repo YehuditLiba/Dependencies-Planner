@@ -26,8 +26,9 @@ const columns = [
   { id: 'priority', label: 'Priority', minWidth: 70 },
   { id: 'finalDecision', label: 'Final Decision', minWidth: 100 },
   { id: 'planned', label: 'Planned', minWidth: 100 },
-  { id: 'comments', label: 'Comments', minWidth: 100 },
-  { id: 'dateTime', label: 'DateTime', minWidth: 150 }
+  { id: 'comments', label: 'Comments', minWidth: 150 },
+  { id: 'email', label: 'email', minWidth: 150 },
+  { id: 'dateTime', label: 'DateTime', minWidth: 100 }
 ];
 
 const modalStyle = {
@@ -42,14 +43,14 @@ const modalStyle = {
   p: 4,
 };
 
-export default function MainTable() {
+export default function MainTable({email}) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(4);
   const [rows, setRows] = useState([]);
   const [totalRows, setTotalRows] = useState(0);
   const [groups, setGroups] = useState([]);
   const [managers, setManagers] = useState([]);
-  const [affectedGroups, setAffectedGroups] = useState([]);
+ // const [affectedGroups, setAffectedGroups] = useState([]);
   const [showGroupColumns, setShowGroupColumns] = useState(true);
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -318,7 +319,7 @@ export default function MainTable() {
         onClose={() => setOpen(false)}
       >
           <Box sx={{ ...modalStyle, overflow: 'auto', maxHeight: '80vh' }}>
-        <RequestForm onClose={() => setOpen(false)} />
+        <RequestForm onClose={() => setOpen(false)} email={email}/>
           
           <Button onClick={() => setOpen(false)}>Close</Button>
         </Box>

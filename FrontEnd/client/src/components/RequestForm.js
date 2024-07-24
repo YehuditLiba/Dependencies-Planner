@@ -4,8 +4,7 @@ import axios from 'axios';
 import { quarters } from '../config/quarters';
 
 
-export default function RequestForm({ onClose }) {
-  const [emailRequestor, setEmailRequestor] = useState('');
+export default function RequestForm({ onClose ,email}) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [requestorName, setRequestorName] = useState('');
@@ -48,7 +47,7 @@ export default function RequestForm({ onClose }) {
         title,
         description,
         requestorName,
-        emailRequestor,
+        email ,
         priority,
         comments,
         affectedGroupList,
@@ -59,7 +58,6 @@ export default function RequestForm({ onClose }) {
       setTitle('');
       setDescription('');
       setRequestorName('');
-      setEmailRequestor('');
       setPriority('');
       setComments('');
       setAffectedGroupList([]);
@@ -127,8 +125,7 @@ export default function RequestForm({ onClose }) {
         label="Email Requestor"
         fullWidth
         margin="normal"
-        value={emailRequestor}
-        onChange={(e) => setEmailRequestor(e.target.value)}
+        value={email}
       />
       <FormControl fullWidth margin="normal">
         <InputLabel id="priority-label">Priority</InputLabel>
