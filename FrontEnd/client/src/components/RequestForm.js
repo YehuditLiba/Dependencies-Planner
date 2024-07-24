@@ -16,6 +16,7 @@ export default function RequestForm({ onClose ,emailRequestor}) {
   const [planned, setPlanned] = useState('');
   const [jiraLink, setJiraLink] = useState('');
   const [pm, setPm] = useState([]);
+  //const [selectedQuarter, setSelectedQuarter] = useState('');
 //  const [newEmail,setNewEmail]=useState('');
   useEffect(() => {
     const fetchGroups = async () => {
@@ -189,14 +190,21 @@ export default function RequestForm({ onClose ,emailRequestor}) {
           ))}
         </Select>
       </FormControl>
-      <TextField
-        id="planned"
-        label="Planned"
-        fullWidth
-        margin="normal"
-        value={planned}
-        onChange={(e) => setPlanned(e.target.value)}
-      />
+      <FormControl fullWidth margin="normal">
+      <InputLabel id="planned">planned</InputLabel>
+        <Select
+          labelId="Planned"
+          id="planned"
+          value={planned}
+          onChange={(e) => setPlanned(e.target.value)}
+        >
+          {quarters.map((quarter, index) => (
+            <MenuItem key={index} value={quarter}>
+              {quarter}
+            </MenuItem>
+          ))}
+        </Select>
+        </FormControl>
       <TextField
         id="jiraLink"
         label="JIRA Link"
