@@ -4,7 +4,7 @@ import axios from 'axios';
 import { quarters } from '../config/quarters';
 
 
-export default function RequestForm({ onClose ,email}) {
+export default function RequestForm({ onClose ,emailRequestor}) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [requestorName, setRequestorName] = useState('');
@@ -16,7 +16,7 @@ export default function RequestForm({ onClose ,email}) {
   const [planned, setPlanned] = useState('');
   const [jiraLink, setJiraLink] = useState('');
   const [pm, setPm] = useState([]);
-
+//  const [newEmail,setNewEmail]=useState('');
   useEffect(() => {
     const fetchGroups = async () => {
       try {
@@ -42,12 +42,14 @@ export default function RequestForm({ onClose ,email}) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    console.log("Current Email:", emailRequestor); // זה יציג את הערך של newEmail בקונסול
+
     try {
       await axios.post('http://localhost:3001/api/requests/createRequest', {
         title,
         description,
         requestorName,
-        email ,
+        emailRequestor,
         priority,
         comments,
         affectedGroupList,
@@ -64,6 +66,7 @@ export default function RequestForm({ onClose ,email}) {
       setRequestGroup('');
       setPlanned('');
       setJiraLink('');
+     // setNewEmail('');
       alert('Request added successfully!');
       onClose();
     } catch (error) {
@@ -125,8 +128,9 @@ export default function RequestForm({ onClose ,email}) {
         label="Email Requestor"
         fullWidth
         margin="normal"
-        value={email}
-      />
+       // setNewEmail={email}
+        value={emailRequestor}
+      /> 
       <FormControl fullWidth margin="normal">
         <InputLabel id="priority-label">Priority</InputLabel>
         <Select

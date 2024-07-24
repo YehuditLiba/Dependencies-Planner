@@ -331,7 +331,7 @@ export const filterRequests = async (
     `;
     values.push(limit, offset);
 
-    console.log('Generated SQL:', sql, 'with values:', values);
+  //  console.log('Generated SQL:', sql, 'with values:', values);
 
     try {
         const client = await pool.connect();
@@ -339,7 +339,7 @@ export const filterRequests = async (
         client.release();
 
         const totalCount = rows.length > 0 ? parseInt(rows[0].total_count, 10) : 0;
-
+        console.log(rows);
         const requests = rows.map((row: any) => ({
             ID: row.id,
             title: row.title,
@@ -353,7 +353,7 @@ export const filterRequests = async (
             affectedGroupList: row.affected_group_list,
             jiraLink: row.jira_link,
             requestorName: row.requestor_name,
-            emailRequestor: row.email_requestor,
+            emailRequestor: row.requestor_email,
         })) as RequestT[];
 
         return { totalCount, requests };

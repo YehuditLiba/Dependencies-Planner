@@ -27,7 +27,7 @@ const columns = [
   { id: 'finalDecision', label: 'Final Decision', minWidth: 100 },
   { id: 'planned', label: 'Planned', minWidth: 100 },
   { id: 'comments', label: 'Comments', minWidth: 150 },
-  { id: 'email', label: 'email', minWidth: 150 },
+  { id: 'emailRequestor', label: 'Email Requestor', minWidth: 150 },
   { id: 'dateTime', label: 'DateTime', minWidth: 100 }
 ];
 
@@ -43,7 +43,7 @@ const modalStyle = {
   p: 4,
 };
 
-export default function MainTable({email}) {
+export default function MainTable({emailRequestor}) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(4);
   const [rows, setRows] = useState([]);
@@ -319,7 +319,7 @@ export default function MainTable({email}) {
         onClose={() => setOpen(false)}
       >
           <Box sx={{ ...modalStyle, overflow: 'auto', maxHeight: '80vh' }}>
-        <RequestForm onClose={() => setOpen(false)} email={email}/>
+        <RequestForm onClose={() => setOpen(false)} emailRequestor={emailRequestor}/>
           
           <Button onClick={() => setOpen(false)}>Close</Button>
         </Box>

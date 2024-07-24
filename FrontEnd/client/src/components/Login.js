@@ -4,7 +4,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const LoginPage = ({ email, setEmail }) => {
+const LoginPage = ({ emailRequestor, setEmailRequestor }) => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -16,7 +16,7 @@ const LoginPage = ({ email, setEmail }) => {
       const response = await axios.get('http://localhost:3001/api/productManagers');
       const managers = response.data;
 
-      const managerExists = managers.some(manager => manager.email === email);
+      const managerExists = managers.some(manager => manager.email === emailRequestor);
 
       if (managerExists) {
         navigate('/MainTable');
@@ -61,8 +61,8 @@ const LoginPage = ({ email, setEmail }) => {
             autoComplete="email"
             autoFocus
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={emailRequestor}
+            onChange={(e) => setEmailRequestor(e.target.value)}
           />
           <Button
             type="submit"

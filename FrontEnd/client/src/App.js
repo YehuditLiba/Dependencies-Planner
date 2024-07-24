@@ -4,12 +4,12 @@ import LoginPage from './components/Login'; // הנתיב לקובץ LoginPage.j
 import MainTable from './components/MainTable'; // הנתיב לקובץ MainTable.jsx
 
 const App = () => {
-  const [email, setEmail] = useState('');
+  const [emailRequestor, setEmailRequestor] = useState('');
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<LoginPage email={email} setEmail={setEmail} />} />
-        <Route path="/MainTable" element={<MainTable email={email} />} />
+        <Route path="/" element={<LoginPage emailRequestor={emailRequestor} setEmailRequestor={setEmailRequestor} />} />
+        <Route path="/MainTable" element={<MainTable emailRequestor={emailRequestor} />} />
       </Routes>
     </Router>
   );
