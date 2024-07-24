@@ -51,7 +51,6 @@ export default function MainTable({emailRequestor}) {
   const [totalRows, setTotalRows] = useState(0);
   const [groups, setGroups] = useState([]);
   const [managers, setManagers] = useState([]);
-  const [affectedGroups, setAffectedGroups] = useState([]);
   const [showGroupColumns, setShowGroupColumns] = useState(true);
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -282,7 +281,6 @@ export default function MainTable({emailRequestor}) {
             onClose={() => handleCloseMenu('affectedGroup')}
           >
             {groups.map(group => (
-              <MenuItem key={group.id} onClick={() => handleAffectedGroupSelect(group.id)}>
                 <Checkbox
                   checked={selectedAffectedGroups.includes(group.id)}
                 />
