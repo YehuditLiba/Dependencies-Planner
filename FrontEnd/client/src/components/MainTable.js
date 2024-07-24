@@ -195,7 +195,42 @@ export default function MainTable() {
     const affectedGroup = affectedGroups.find(group => group.requestId === row.id && group.groupId === groupId);
     return affectedGroup ? affectedGroup.status : 'Not Required';
   };
-
+  // const handleStatusChange = async (rowId, groupId, newStatus) => {
+  //   try {
+  //     const response = await axios.post('http://localhost:3001/api/updateStatus', {
+  //       requestId: rowId,
+  //       groupId: groupId,
+  //       status: newStatus
+  //     });
+  //     if (response.status === 200) {
+  //       const updatedGroups = affectedGroups.map(group => 
+  //         group.requestId === rowId && group.groupId === groupId 
+  //           ? { ...group, status: newStatus } 
+  //           : group
+  //       );
+  //       setAffectedGroups(updatedGroups);
+  //     } else {
+  //       console.error("Failed to update status");
+  //     }
+  //   } catch (error) {
+  //     console.error("Failed to update status", error);
+  //   }
+  // };
+  const getStatusBackgroundColor = (status) => {
+    switch (status) {
+      case 'Pending Response':
+        return '#FFFF99'; // Yellow
+      case 'Not Required':
+        return '#D3D3D3'; // Grey
+      case 'In Q':
+        return '#98FB98'; // Green
+      case 'Not in Q':
+        return '#FF6961'; // Red
+      default:
+        return 'white';
+    }
+  };
+  
   const handleStatusChange = (rowId, groupId, newStatus) => {
     const updatedGroups = affectedGroups.map(group => 
       group.requestId === rowId && group.groupId === groupId 
