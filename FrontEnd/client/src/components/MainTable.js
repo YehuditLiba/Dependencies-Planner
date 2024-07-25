@@ -1,4 +1,3 @@
-// import * as React from 'react';
 import React, { useState, useEffect } from 'react';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
@@ -16,8 +15,10 @@ import MenuItem from '@mui/material/MenuItem';
 import Checkbox from '@mui/material/Checkbox';
 import Select from '@mui/material/Select';
 import axios from 'axios';
-import '../designs/TableStyles.scss'; 
+import '../designs/TableStyles.scss';
 import RequestForm from './RequestForm';
+import EditableRow from './EditableRow';
+
 
 const columns = [
   { id: 'title', label: 'Title', minWidth: 100 },
@@ -62,6 +63,8 @@ export default function MainTable() {
   const [selectedAffectedGroups, setSelectedAffectedGroups] = useState([]);
   const [statuses, setStatuses] = useState([]);
   const [editValue, setEditValue] = useState('');
+  const [isEditingRow, setIsEditingRow] = useState(null);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -197,9 +200,9 @@ export default function MainTable() {
   };
 
   const handleStatusChange = (rowId, groupId, newStatus) => {
-    const updatedGroups = affectedGroups.map(group => 
-      group.requestId === rowId && group.groupId === groupId 
-        ? { ...group, status: newStatus } 
+    const updatedGroups = affectedGroups.map(group =>
+      group.requestId === rowId && group.groupId === groupId
+        ? { ...group, status: newStatus }
         : group
     );
     setAffectedGroups(updatedGroups);
@@ -210,6 +213,17 @@ export default function MainTable() {
       status: newStatus
     });
   };
+
+  const updateRequest = async (id, updatedFields) => {
+    try {
+      const response = await axios.put(`http://localhost:3001/api/requests/${id}`, updatedFields);
+      // עדכון הסטייט בהתאם לתגובה מהשרת אם נדרש
+    } catch (error) {
+      console.error('Failed to update request', error);
+    }
+  };
+
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 4 }}>
       <Box className="header" >
@@ -293,10 +307,12 @@ export default function MainTable() {
             </MenuItem>
           </Menu>
         </Box>
+
         <TableContainer>
           <Table>
             <TableHead>
               <TableRow>
+                <TableCell></TableCell> {/* תא ריק עבור כפתור ה-Toggle */}
                 {columns.map(column => (
                   (showGroupColumns || !column.id.includes('group')) && (
                     <TableCell key={column.id} style={{ minWidth: column.minWidth }}>
@@ -311,52 +327,29 @@ export default function MainTable() {
                 ))}
               </TableRow>
             </TableHead>
+
             <TableBody>
               {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (
-                <TableRow key={row.id}>
-                  {columns.map(column => (
-                    (showGroupColumns || !column.id.includes('group')) && (
-                      <TableCell key={column.id}>
-                        {column.id === 'dateTime' ? formatDate(row[column.id]) : row[column.id]}
-                      </TableCell>
-                    )
-                  ))}
-                  {showGroupColumns && groups.map(group => (
-                    <TableCell key={group.id}>
-                      <Select
-                        value={getGroupStatus(row, group.id)}
-                        onChange={(e) => handleStatusChange(row.id, group.id, e.target.value)}
-                        style={{
-                          backgroundColor: (() => {
-                            const status = getGroupStatus(row, group.id);
-                            switch (status) {
-                              case 'Pending Response':
-                                return 'yellow';
-                              case 'Not Required':
-                                return 'grey';
-                              case 'In Q':
-                                return 'green';
-                              case 'Not in Q':
-                                return 'red';
-                              default:
-                                return '';
-                            }
-                          })(),
-                        }}
-                      >
-                        {statuses.map((status) => (
-                          <MenuItem key={status.value} value={status.value}>
-                            {status.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </TableCell>
-                  ))}
-                </TableRow>
+                <EditableRow
+                  key={row.ID}
+                  row={row}
+                  columns={columns}
+                  groups={groups}
+                  statuses={statuses}
+                  onUpdate={updatedRow => {
+                    console.log('Updated Row from Backend:', updatedRow); // Debugging Line
+                    const newRows = rows.map(r => r.ID === updatedRow.ID ? updatedRow : r);
+                    setRows(newRows);
+                  }}
+                />
               ))}
             </TableBody>
+
+
+
           </Table>
         </TableContainer>
+
         <TablePagination
           rowsPerPageOptions={[4, 10, 25, { label: 'All', value: -1 }]}
           component="div"
@@ -372,9 +365,9 @@ export default function MainTable() {
         open={open}
         onClose={() => setOpen(false)}
       >
-          <Box sx={{ ...modalStyle, overflow: 'auto', maxHeight: '80vh' }}>
-        <RequestForm onClose={() => setOpen(false)} />
-          
+        <Box sx={{ ...modalStyle, overflow: 'auto', maxHeight: '80vh' }}>
+          <RequestForm onClose={() => setOpen(false)} />
+
           <Button onClick={() => setOpen(false)}>Close</Button>
         </Box>
       </Modal>
