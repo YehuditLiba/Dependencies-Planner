@@ -264,7 +264,7 @@ export const addRequest = async (request: RequestT): Promise<void> => {
 
         // Insert each affected group with status 1
         for (const groupId of request.affectedGroupList) {
-            await createAffectedGroupInDB(requestId, groupId, 1);
+            await createAffectedGroupInDB(requestId, groupId, 2);
         }
 
         // Commit the transaction
