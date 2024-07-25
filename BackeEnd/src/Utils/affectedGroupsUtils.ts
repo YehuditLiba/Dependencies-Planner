@@ -12,7 +12,7 @@ export const getAllAffectedGroups = async (): Promise<AffectedGroup[]> => {
         return rows.map((row: any) => ({
             requestId: row.request_id,
             groupId: row.group_id,
-            status: row.status,
+            statusId: row.status,
             id: row.id,
         })) as AffectedGroup[];
     } catch (err) {
@@ -21,24 +21,38 @@ export const getAllAffectedGroups = async (): Promise<AffectedGroup[]> => {
     }
 };
 
-export const updateAffectedGroupStatus = async (id: number, status: string): Promise<AffectedGroup | null> => {
-    try {
-        const client = await pool.connect();
-        const sql = 'UPDATE affected_group SET status = $1 WHERE id = $2 RETURNING *;';
-        const { rows } = await client.query(sql, [status, id]);
-        client.release();
-        if (rows.length === 0) {
-            return null;
-        }
-        const row = rows[0];
-        return {
-            requestId: row.request_id,
-            groupId: row.group_id,
-            status: row.status,
-            id: row.id,
-        } as AffectedGroup;
-    } catch (err) {
-        console.error('Error updating affected group status:', err);
-        throw err;
+export const updateAffectedGroupStatusInDB = async (affectedGroupId: number, statusId: number) => {
+    // בדיקה אם הסטטוס קיים
+    const statusResult = await pool.query('SELECT * FROM status WHERE id = $1', [statusId]);
+    if (statusResult.rowCount === 0) {
+        throw new Error('Status not found');
     }
+
+    // עדכון הסטטוס של ה-AffectedGroup
+    const updatedAffectedGroup = await pool.query(
+        'UPDATE affected_group SET status = $1 WHERE id = $2 RETURNING *',
+        [statusId, affectedGroupId]
+    );
+
+    if (updatedAffectedGroup.rowCount === 0) {
+        throw new Error('AffectedGroup not found');
+    }
+
+    return updatedAffectedGroup.rows[0];
+};
+
+
+//create new
+export const createAffectedGroupInDB = async (requestId: number, groupId: number, statusId: number) => {
+    const statusResult = await pool.query('SELECT * FROM status WHERE id = $1', [statusId]);
+    if (statusResult.rowCount === 0) {
+        throw new Error('Status not found');
+    }
+
+    const newAffectedGroup = await pool.query(
+        'INSERT INTO affected_group (request_id, group_id, status) VALUES ($1, $2, $3) RETURNING *',
+        [requestId, groupId, statusId]
+    );
+
+    return newAffectedGroup.rows[0];
 };
