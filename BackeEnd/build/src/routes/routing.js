@@ -11,8 +11,7 @@ const StatusCon_1 = require("../Controllers/StatusCon");
 const PriorityCon_1 = require("../Controllers/PriorityCon");
 // import { getAllTSize } from '../Controllers/T_SizeCon';
 // import { getAllDecisionsController } from '../Controllers/final_decisionCon';
-const affectedGroupCon_1 = require("../Controllers/affectedGroupCon");
-const affectedGroupCon_2 = require("../Controllers/affectedGroupCon");
+const affectedGroupCon_1 = require("../Controllers/affectedGroupCon"); //,editStatusAffectedGroupController ,updateAffectedGroupStatusController,
 const router = express_1.default.Router();
 //groups routings
 router.get('/groups', GroupCon_1.getAllGroupsController);
@@ -28,10 +27,12 @@ router.put('/requests/:ID/planned', requestCon_1.updatePlannedField);
 //router.get('/requestsA', getRequestsWithPagination);
 //filter:
 router.get('/requests', requestCon_1.getAllFilteredRequestsWithPagination);
-// // Affected_Groups:
+// Affected_Groups:
 router.get('/affectedGroups', affectedGroupCon_1.getAllAffectedGroupsController);
-router.put('/affectedGroups/:id', affectedGroupCon_2.updateAffectedGroupStatusController);
-router.put('/affected-groups/:id/status', affectedGroupCon_1.editStatusAffectedGroupController);
+// router.put('/affectedGroups/:id', updateAffectedGroupStatusController);
+// router.put('/affected-groups/:id/status', editStatusAffectedGroupController);
+router.put('/updateAffectedGroups/status', affectedGroupCon_1.updateAffectedGroupStatus);
+router.post('/createAffectedGroup', affectedGroupCon_1.createAffectedGroup);
 //routings ProductManager
 router.get('/productManagers', productManagerCon_1.getAllProductManagers);
 router.get('/requests/:groupId', productManagerCon_1.getAllRequestsByProductManager);
