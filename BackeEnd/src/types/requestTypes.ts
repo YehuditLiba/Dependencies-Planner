@@ -12,7 +12,7 @@ export interface RequestT {
     planned: string; // שקול לשנות את הסוג ל-Date אם מדובר בתאריך
     comments: string;
     dateTime: Date;
-    affectedGroupList: AffectedGroup[] | number[]; // אם יש צורך בשני סוגים שונים
+    affectedGroupList: number[]; // אם יש צורך בשני סוגים שונים
     jiraLink: string;
     emailRequestor: string;
 }

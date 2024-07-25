@@ -28,8 +28,9 @@ const columns = [
   { id: 'priority', label: 'Priority', minWidth: 70 },
   { id: 'finalDecision', label: 'Final Decision', minWidth: 100 },
   { id: 'planned', label: 'Planned', minWidth: 100 },
-  { id: 'comments', label: 'Comments', minWidth: 100 },
-  { id: 'dateTime', label: 'DateTime', minWidth: 150 }
+  { id: 'comments', label: 'Comments', minWidth: 150 },
+  { id: 'emailRequestor', label: 'Email Requestor', minWidth: 150 },
+  { id: 'dateTime', label: 'DateTime', minWidth: 100 }
 ];
 
 const modalStyle = {
@@ -44,7 +45,7 @@ const modalStyle = {
   p: 4,
 };
 
-export default function MainTable() {
+export default function MainTable({emailRequestor}) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(4);
   const [rows, setRows] = useState([]);
@@ -199,6 +200,21 @@ export default function MainTable() {
     return affectedGroup ? affectedGroup.status : 'Not Required';
   };
 
+  const getStatusBackgroundColor = (status) => {
+    switch (status) {
+      case 'Pending Response':
+        return '#FFFF99'; // Yellow
+      case 'Not Required':
+        return '#D3D3D3'; // Grey
+      case 'In Q':
+        return '#98FB98'; // Green
+      case 'Not in Q':
+        return '#FF6961'; // Red
+      default:
+        return 'white';
+    }
+  };
+  
   const handleStatusChange = (rowId, groupId, newStatus) => {
     const updatedGroups = affectedGroups.map(group =>
       group.requestId === rowId && group.groupId === groupId
@@ -295,8 +311,8 @@ export default function MainTable() {
             onClose={() => handleCloseMenu('affectedGroup')}
           >
             {groups.map(group => (
-              <MenuItem key={group.id} onClick={() => handleAffectedGroupSelect(group.id)}>
-                <Checkbox
+                    <MenuItem key={group.id} onClick={() => handleAffectedGroupSelect(group.id)}>
+               <Checkbox
                   checked={selectedAffectedGroups.includes(group.id)}
                 />
                 {group.name}
@@ -365,9 +381,9 @@ export default function MainTable() {
         open={open}
         onClose={() => setOpen(false)}
       >
-        <Box sx={{ ...modalStyle, overflow: 'auto', maxHeight: '80vh' }}>
-          <RequestForm onClose={() => setOpen(false)} />
-
+          <Box sx={{ ...modalStyle, overflow: 'auto', maxHeight: '80vh' }}>
+        <RequestForm onClose={() => setOpen(false)} emailRequestor={emailRequestor}/>
+          
           <Button onClick={() => setOpen(false)}>Close</Button>
         </Box>
       </Modal>

@@ -4,6 +4,7 @@
   "main": "build/app.js",
   "scripts": {
     "start": "tsc && nodemon build/app.js",
+    "watch": "nodemon app.ts",
     "test": "jest"
   },
   "keywords": [],
