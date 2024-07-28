@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getRequestsByGroupId = exports.getRequestById = exports.filterRequests = exports.updatePlanned = exports.addRequest = exports.updateFinalDecision = exports.updateRequestById = exports.getRequestByIdForUp = exports.updateAffectedGroupList = exports.updateRequestFields = exports.deleteRequestById = exports.fetchAllRequests = void 0;
 const db_1 = require("../config/db");
+const affectedGroupsUtils_1 = require("./affectedGroupsUtils");
 //import { format } from 'date-fns';
 const fetchAllRequests = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -243,21 +244,11 @@ const updateFinalDecision = (id, finalDecision) => __awaiter(void 0, void 0, voi
 exports.updateFinalDecision = updateFinalDecision;
 const addRequest = (request) => __awaiter(void 0, void 0, void 0, function* () {
     const query = `
-      INSERT INTO request ( title, request_group, description, priority, planned, comments, date_time, affected_group_list, jira_link, requestor_name,requestor_email)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11 )
+      INSERT INTO request (title, request_group, description, priority, planned, comments, date_time, affected_group_list, jira_link, requestor_name, requestor_email)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id
     `;
     const today = new Date();
     const formattedToday = today.toISOString();
-    console.log(request.affectedGroupList);
-    console.log(request.title);
-    console.log(request.description);
-    console.log(request.priority);
-    console.log(request.planned);
-    console.log(request.dateTime);
-    console.log(request.affectedGroupList);
-    console.log(request.jiraLink);
-    console.log(request.requestorName);
-    console.log(request.emailRequestor);
     const values = [
         request.title,
         request.requestGroup,
@@ -271,17 +262,24 @@ const addRequest = (request) => __awaiter(void 0, void 0, void 0, function* () {
         request.requestorName,
         request.emailRequestor,
     ];
-    console.log(request.affectedGroupList);
-    console.log(request.title);
-    console.log(request.description);
-    console.log(request.priority);
-    console.log(request.planned);
-    console.log(request.dateTime);
-    console.log(request.affectedGroupList);
-    console.log(request.jiraLink);
-    console.log(request.requestorName);
-    console.log(request.emailRequestor);
-    yield db_1.pool.query(query, values);
+    // Start a transaction
+    yield db_1.pool.query('BEGIN');
+    try {
+        // Insert the request and get the inserted request's ID
+        const result = yield db_1.pool.query(query, values);
+        const requestId = result.rows[0].id;
+        // Insert each affected group with status 1
+        for (const groupId of request.affectedGroupList) {
+            yield (0, affectedGroupsUtils_1.createAffectedGroupInDB)(requestId, groupId, 2);
+        }
+        // Commit the transaction
+        yield db_1.pool.query('COMMIT');
+    }
+    catch (error) {
+        // Rollback the transaction in case of an error
+        yield db_1.pool.query('ROLLBACK');
+        throw error;
+    }
 });
 exports.addRequest = addRequest;
 //עידכון רבעון
@@ -322,12 +320,13 @@ limit, offset) => __awaiter(void 0, void 0, void 0, function* () {
       LIMIT $${values.length + 1} OFFSET $${values.length + 2};
     `;
     values.push(limit, offset);
-    console.log('Generated SQL:', sql, 'with values:', values);
+    //  console.log('Generated SQL:', sql, 'with values:', values);
     try {
         const client = yield db_1.pool.connect();
         const { rows } = yield client.query(sql, values);
         client.release();
         const totalCount = rows.length > 0 ? parseInt(rows[0].total_count, 10) : 0;
+        console.log(rows);
         const requests = rows.map((row) => ({
             ID: row.id,
             title: row.title,
@@ -341,7 +340,7 @@ limit, offset) => __awaiter(void 0, void 0, void 0, function* () {
             affectedGroupList: row.affected_group_list,
             jiraLink: row.jira_link,
             requestorName: row.requestor_name,
-            emailRequestor: row.email_requestor,
+            emailRequestor: row.requestor_email,
         }));
         return { totalCount, requests };
     }

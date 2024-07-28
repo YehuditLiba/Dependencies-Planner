@@ -7,9 +7,8 @@ import { getAllProductManagers, getAllRequestsByProductManager } from '../Contro
 import { getAllStatusController, getAllStatus } from '../Controllers/StatusCon';
 import { getAllPrioritiesController } from '../Controllers/PriorityCon';
 // import { getAllTSize } from '../Controllers/T_SizeCon';
-import { getAllDecisionsController } from '../Controllers/final_decisionCon';
-import { getAllAffectedGroupsController } from '../Controllers/affectedGroupCon';
-import { updateAffectedGroupStatusController } from '../Controllers/affectedGroupCon';
+// import { getAllDecisionsController } from '../Controllers/final_decisionCon';
+import { getAllAffectedGroupsController,createAffectedGroup,updateAffectedGroupStatus} from '../Controllers/affectedGroupCon';
 
 const router = express.Router();
 //groups routings
@@ -28,11 +27,10 @@ router.put('/requests/:ID/planned', updatePlannedField);
 //filter:
 router.get('/requests', getAllFilteredRequestsWithPagination);
 
-// // Affected_Groups:
-// router.get('/affectedGroups',getAllAffectedGroupsController);
-// router.put('/affectedGroups/:id', updateAffectedGroups);
+// Affected_Groups:
 router.get('/affectedGroups', getAllAffectedGroupsController);
-router.put('/affectedGroups/:id', updateAffectedGroupStatusController);
+router.put('/updateAffectedGroups/status', updateAffectedGroupStatus);
+router.post('/createAffectedGroup', createAffectedGroup);
 
 //routings ProductManager
 router.get('/productManagers', getAllProductManagers);
