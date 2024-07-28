@@ -231,6 +231,7 @@ export default function MainTable({ emailRequestor }) {
   };
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
   const getGroupStatus = (row, groupId) => {
     const status = row.statuses.find(s => s.groupId === groupId);
@@ -241,6 +242,11 @@ export default function MainTable({ emailRequestor }) {
   const formatDate = (value) => {
     const date = new Date(value);
     return date.toLocaleDateString('he-IL');
+=======
+  const getGroupStatus = (row, groupId) => {
+    const status = row.statuses.find(s => s.groupId === groupId);
+    return status ? status.status : 'Not Required';
+>>>>>>> 75ae64bf44dd0cf40e94960b6ddfc7d29269b49c
 =======
   const handleStatusChange = (rowId, groupId, newStatus) => {
     const updatedGroups = affectedGroups.map(group =>
@@ -258,6 +264,14 @@ export default function MainTable({ emailRequestor }) {
 >>>>>>> master
   };
 
+<<<<<<< HEAD
+=======
+  const formatDate = (value) => {
+    const date = new Date(value);
+    return date.toLocaleDateString('he-IL');
+  };
+
+>>>>>>> 75ae64bf44dd0cf40e94960b6ddfc7d29269b49c
 
   // const handleStatusChange = (rowId, groupId, newStatus) => {
   //   const updatedGroups = affectedGroups.map(group =>
@@ -436,6 +450,29 @@ export default function MainTable({ emailRequestor }) {
 
 
             <TableBody>
+              {rows.map((row, rowIndex) => (
+                <EditableRow
+                  key={row.ID}
+                  row={row}
+                  index={rowIndex}
+                  columns={columns}
+                  isEditingRow={isEditingRow}
+                  setIsEditingRow={setIsEditingRow}
+                  editValue={editValue}
+                  setEditValue={setEditValue}
+                  handleEditSave={handleEditSave}
+                  handleStatusChange={handleStatusChange}
+                  groups={groups}
+                  statuses={statuses}
+                  getStatusBackgroundColor={getStatusBackgroundColor}
+                  getGroupStatus={getGroupStatus}
+                  formatDate={formatDate}
+                />
+              ))}
+            </TableBody> 
+
+
+            {/* <TableBody>
               {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (
                 <EditableRow
                   key={row.ID}
@@ -451,8 +488,15 @@ export default function MainTable({ emailRequestor }) {
                   formatDateTime={formatDateTime} // העברת הפונקציה לקומפוננטת ה-EditableRow
                 />
               ))}
+<<<<<<< HEAD
 
+=======
+<<<<<<< HEAD
+            </TableBody> */}
+=======
+>>>>>>> 75ae64bf44dd0cf40e94960b6ddfc7d29269b49c
             </TableBody>
+>>>>>>> master
           </Table>
         </TableContainer>
 
@@ -470,6 +514,7 @@ export default function MainTable({ emailRequestor }) {
       <Modal
         open={open}
 <<<<<<< HEAD
+<<<<<<< HEAD
 
         onClose={() => setOpen(false)}>
           <Box sx={{ ...modalStyle, overflow: 'auto', maxHeight: '80vh' }}>
@@ -481,6 +526,11 @@ export default function MainTable({ emailRequestor }) {
           <RequestForm onClose={() => setOpen(false)} emailRequestor={emailRequestor} />
 
 
+=======
+        onClose={() => setOpen(false)}>
+          <Box sx={{ ...modalStyle, overflow: 'auto', maxHeight: '80vh' }}>
+        <RequestForm onClose={() => setOpen(false)} emailRequestor={emailRequestor}/>
+>>>>>>> 75ae64bf44dd0cf40e94960b6ddfc7d29269b49c
 =======
         onClose={() => setOpen(false)}
       >
@@ -515,7 +565,14 @@ export default function MainTable({ emailRequestor }) {
         ))}
         <MenuItem onClick={applyFilter}>Apply</MenuItem>
       </Menu>
+<<<<<<< HEAD
       
+=======
+      {/* <Box sx={modalStyle}>
+          <Button onClick={() => handleEditSave(editValue)}>Save</Button>
+          <Button onClick={() => setEditOpen(false)}>Cancel</Button>
+        </Box> */}
+>>>>>>> 75ae64bf44dd0cf40e94960b6ddfc7d29269b49c
     </Box>
   );
 }
