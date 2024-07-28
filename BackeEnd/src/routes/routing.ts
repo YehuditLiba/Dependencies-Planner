@@ -1,7 +1,7 @@
 import express from 'express';
 import { getAllGroupsController } from '../Controllers/GroupCon.';
 import { getAllRequests, getRequestByIdController, updateRequest, 
-    deleteRequestByAdmin, updateRequestByIdController,updateFinalDecisionController ,
+    deleteRequest, updateRequestByIdController,updateFinalDecisionController ,
     createRequest, updatePlannedField, getAllFilteredRequestsWithPagination} from '../Controllers/requestCon';
 import { getAllProductManagers, getAllRequestsByProductManager } from '../Controllers/productManagerCon';
 import { getAllStatusController, getAllStatus } from '../Controllers/StatusCon';
@@ -17,7 +17,7 @@ router.get('/groups', getAllGroupsController);
 //Requests routings
 router.get('/Allrequests', getAllRequests);
 router.get('/requests/:id', getRequestByIdController);
-router.delete('/deleteRequests/:id', deleteRequestByAdmin);
+router.delete('/deleteRequests/:id', deleteRequest);
 router.put('/requests/:id', updateRequest);
 router.put('/requests/:id', updateRequestByIdController);
 router.put('/requests/updateFinalDecision/:id', updateFinalDecisionController);

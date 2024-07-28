@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getRequestsByGroupId = exports.getRequestById = exports.filterRequests = exports.updatePlanned = exports.addRequest = exports.updateFinalDecision = exports.updateRequestById = exports.getRequestByIdForUp = exports.updateAffectedGroupList = exports.updateRequestFields = exports.deleteRequestById = exports.fetchAllRequests = void 0;
 const db_1 = require("../config/db");
 const affectedGroupsUtils_1 = require("./affectedGroupsUtils");
+const affectedGroupsUtils_2 = require("./affectedGroupsUtils");
 //import { format } from 'date-fns';
 const fetchAllRequests = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -108,19 +109,22 @@ const getRequestsByGroupId = (groupId) => __awaiter(void 0, void 0, void 0, func
 exports.getRequestsByGroupId = getRequestsByGroupId;
 const deleteRequestById = (requestId, requestorEmail) => __awaiter(void 0, void 0, void 0, function* () {
     const client = yield db_1.pool.connect();
+    console.log(requestorEmail + "id" + requestId);
     try {
         yield client.query('BEGIN');
-        // Check if the requestor exists and matches the provided email
+        // Check if the request exists and the requestor matches the provided email
         const checkRequestorQuery = `
-            SELECT COUNT(*) FROM product_manager
-            WHERE email = $1;
+            SELECT COUNT(*) FROM request
+            WHERE id = $1 AND requestor_email = $2;
         `;
-        const { rows } = yield client.query(checkRequestorQuery, [requestorEmail]);
+        const { rows } = yield client.query(checkRequestorQuery, [requestId, requestorEmail]);
         const requestorExists = parseInt(rows[0].count, 10) > 0;
         if (!requestorExists) {
             throw new Error('Unauthorized: Only the requestor can delete this request');
         }
-        // Delete request by ID
+        // Delete affected groups first
+        yield (0, affectedGroupsUtils_2.deleteAffectedGroupsByRequestId)(requestId);
+        // Delete the request
         const deleteRequestQuery = `
             DELETE FROM request
             WHERE id = $1;
