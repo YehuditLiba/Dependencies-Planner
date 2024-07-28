@@ -56,3 +56,12 @@ export const createAffectedGroupInDB = async (requestId: number, groupId: number
 
     return newAffectedGroup.rows[0];
 };
+//delete
+export const deleteAffectedGroupsByRequestId = async (requestId: number): Promise<void> => {
+    const query = `
+        DELETE FROM affected_group
+        WHERE request_id = $1
+    `;
+
+    await pool.query(query, [requestId]);
+};

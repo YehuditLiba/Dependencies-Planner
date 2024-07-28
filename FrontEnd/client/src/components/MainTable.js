@@ -18,6 +18,9 @@ import axios from 'axios';
 import '../designs/TableStyles.scss';
 import RequestForm from './RequestForm';
 import EditableRow from './EditableRow';
+import { formatDateTime } from '../utils/utils'; // נייבא את הפונקציה החדשה
+
+
 
 
 const columns = [
@@ -45,7 +48,7 @@ const modalStyle = {
   p: 4,
 };
 
-export default function MainTable({emailRequestor}) {
+export default function MainTable({ emailRequestor }) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(4);
   const [rows, setRows] = useState([]);
@@ -184,22 +187,34 @@ export default function MainTable({emailRequestor}) {
   const applyFilter = () => {
     handleCloseMenu('affectedGroup');
   };
+  const handleStatusChange = async (rowId, groupId, newStatus) => {
+    try {
+      await axios.post('http://localhost:3001/api/updateStatus', {
+        requestId: rowId,
+        groupId: groupId,
+        status: newStatus
+      });
 
+      const updatedRows = rows.map(row => {
+        if (row.ID === rowId) {
+          return {
+            ...row,
+            statuses: row.statuses.map(s => 
+              s.groupId === groupId ? { ...s, status: newStatus } : s
+            )
+          };
+        }
+        return row;
+      });
+      setRows(updatedRows);
+    } catch (error) {
+      console.error('Failed to update status', error);
+    }
+  };
   const handleEditSave = (value) => {
     console.log('Saving edited value:', value);
     setEditOpen(false);
   };
-
-  const formatDate = (value) => {
-    const date = new Date(value);
-    return date.toLocaleDateString('he-IL');
-  };
-
-  const getGroupStatus = (row, groupId) => {
-    const affectedGroup = affectedGroups.find(group => group.requestId === row.id && group.groupId === groupId);
-    return affectedGroup ? affectedGroup.status : 'Not Required';
-  };
-
   const getStatusBackgroundColor = (status) => {
     switch (status) {
       case 'Pending Response':
@@ -214,21 +229,35 @@ export default function MainTable({emailRequestor}) {
         return 'white';
     }
   };
+
+
+  const getGroupStatus = (row, groupId) => {
+    const status = row.statuses.find(s => s.groupId === groupId);
+    return status ? status.status : 'Not Required';
   
-  const handleStatusChange = (rowId, groupId, newStatus) => {
-    const updatedGroups = affectedGroups.map(group =>
-      group.requestId === rowId && group.groupId === groupId
-        ? { ...group, status: newStatus }
-        : group
-    );
-    setAffectedGroups(updatedGroups);
-    // Save the updated status to the server
-    axios.post('http://localhost:3001/api/updateStatus', {
-      requestId: rowId,
-      groupId: groupId,
-      status: newStatus
-    });
+  }
+  
+  const formatDate = (value) => {
+    const date = new Date(value);
+    return date.toLocaleDateString('he-IL');
   };
+
+
+  // const handleStatusChange = (rowId, groupId, newStatus) => {
+  //   const updatedGroups = affectedGroups.map(group =>
+  //     group.requestId === rowId && group.groupId === groupId
+  //       ? { ...group, status: newStatus }
+  //       : group
+  //   );
+
+  //   setAffectedGroups(updatedGroups);
+  //   // Save the updated status to the server
+  //   axios.post('http://localhost:3001/api/updateStatus', {
+  //     requestId: rowId,
+  //     groupId: groupId,
+  //     status: newStatus
+  //   });
+  // };
 
   const updateRequest = async (id, updatedFields) => {
     try {
@@ -311,8 +340,8 @@ export default function MainTable({emailRequestor}) {
             onClose={() => handleCloseMenu('affectedGroup')}
           >
             {groups.map(group => (
-                    <MenuItem key={group.id} onClick={() => handleAffectedGroupSelect(group.id)}>
-               <Checkbox
+              <MenuItem key={group.id} onClick={() => handleAffectedGroupSelect(group.id)}>
+                <Checkbox
                   checked={selectedAffectedGroups.includes(group.id)}
                 />
                 {group.name}
@@ -323,12 +352,35 @@ export default function MainTable({emailRequestor}) {
             </MenuItem>
           </Menu>
         </Box>
-
         <TableContainer>
           <Table>
             <TableHead>
-              <TableRow>
-                <TableCell></TableCell> {/* תא ריק עבור כפתור ה-Toggle */}
+
+            <TableRow>
+                {columns.map(column => (
+                  column.show !== false && (
+                    <TableCell
+                      key={column.id}
+                      align={column.align}
+                      style={{ minWidth: column.minWidth }}
+                    >
+                      {column.label}
+                    </TableCell>
+                  )
+                ))}
+                {showGroupColumns && groups.map(group => (
+                  <TableCell
+                    key={group.id}
+                    align="center"
+                    style={{ minWidth: 100 }}
+                  >
+                    {group.name}
+                  </TableCell>
+                ))}
+              </TableRow>
+
+              {/* <TableRow>
+                <TableCell></TableCell>
                 {columns.map(column => (
                   (showGroupColumns || !column.id.includes('group')) && (
                     <TableCell key={column.id} style={{ minWidth: column.minWidth }}>
@@ -341,8 +393,31 @@ export default function MainTable({emailRequestor}) {
                     {group.name}
                   </TableCell>
                 ))}
-              </TableRow>
+              </TableRow> */}
             </TableHead>
+
+            {/* <TableBody>
+              {rows.map((row, rowIndex) => (
+                <EditableRow
+                  key={row.ID}
+                  row={row}
+                  index={rowIndex}
+                  columns={columns}
+                  isEditingRow={isEditingRow}
+                  setIsEditingRow={setIsEditingRow}
+                  editValue={editValue}
+                  setEditValue={setEditValue}
+                  handleEditSave={handleEditSave}
+                  handleStatusChange={handleStatusChange}
+                  groups={groups}
+                  statuses={statuses}
+                  getStatusBackgroundColor={getStatusBackgroundColor}
+                  getGroupStatus={getGroupStatus}
+                  formatDate={formatDate}
+                />
+              ))}
+            </TableBody>  */}
+
 
             <TableBody>
               {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (
@@ -357,8 +432,10 @@ export default function MainTable({emailRequestor}) {
                     const newRows = rows.map(r => r.ID === updatedRow.ID ? updatedRow : r);
                     setRows(newRows);
                   }}
+                  formatDateTime={formatDateTime} // העברת הפונקציה לקומפוננטת ה-EditableRow
                 />
               ))}
+
             </TableBody>
 
 
@@ -379,25 +456,45 @@ export default function MainTable({emailRequestor}) {
 
       <Modal
         open={open}
-        onClose={() => setOpen(false)}
-      >
+
+        onClose={() => setOpen(false)}>
           <Box sx={{ ...modalStyle, overflow: 'auto', maxHeight: '80vh' }}>
         <RequestForm onClose={() => setOpen(false)} emailRequestor={emailRequestor}/>
-          
+
+        onClose={() => setOpen(false)}
+      </Box>
+        <Box sx={{ ...modalStyle, overflow: 'auto', maxHeight: '80vh' }}>
+          <RequestForm onClose={() => setOpen(false)} emailRequestor={emailRequestor} />
+
+
           <Button onClick={() => setOpen(false)}>Close</Button>
         </Box>
       </Modal>
-
-      <Modal
-        open={editOpen}
-        onClose={() => setEditOpen(false)}
+      <Menu
+        anchorEl={anchorElManager}
+        open={Boolean(anchorElManager)}
+        onClose={() => handleCloseMenu('manager')}
       >
-        <Box sx={modalStyle}>
-          {/* Your Edit Request Form Here */}
-          <Button onClick={() => handleEditSave(editValue)}>Save</Button>
-          <Button onClick={() => setEditOpen(false)}>Cancel</Button>
-        </Box>
-      </Modal>
+        {groups.map(group => (
+          <MenuItem key={group.name} onClick={() => handleManagerSelect(group)}>
+            {group.name}
+          </MenuItem>
+        ))}
+      </Menu>
+      <Menu
+        anchorEl={anchorElAffectedGroup}
+        open={Boolean(anchorElAffectedGroup)}
+        onClose={() => handleCloseMenu('affectedGroup')}
+      >
+        {affectedGroups.map(group => (
+          <MenuItem key={group.id} onClick={() => handleAffectedGroupSelect(group.id)}>
+            <Checkbox checked={selectedAffectedGroups.includes(group.id)} />
+            {group.name}
+          </MenuItem>
+        ))}
+        <MenuItem onClick={applyFilter}>Apply</MenuItem>
+      </Menu>
+      
     </Box>
   );
 }
