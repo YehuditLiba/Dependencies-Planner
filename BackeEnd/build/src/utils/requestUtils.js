@@ -141,9 +141,9 @@ exports.deleteRequestById = deleteRequestById;
 const updateRequestFields = (id, updatedFields) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const client = yield db_1.pool.connect();
-        const { title, description } = updatedFields;
-        const sql = 'UPDATE request SET title = $1, description = $2 WHERE id = $3 RETURNING *;';
-        const { rows } = yield client.query(sql, [title, description, id]);
+        const { title, description, comments } = updatedFields;
+        const sql = 'UPDATE request SET title = $1, description = $2, comments = $3 WHERE id = $4 RETURNING *;';
+        const { rows } = yield client.query(sql, [title, description, comments, id]);
         client.release();
         if (rows.length === 0) {
             return null;

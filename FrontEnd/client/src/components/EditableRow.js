@@ -91,7 +91,7 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
         >
 
 
-          {isEditing && (column.id === 'title' || column.id === 'description') && editCell === column.id ? (
+          {isEditing && (column.id === 'title' || column.id === 'description' || column.id === 'comments') && editCell === column.id ? (
             <TextField
               value={rowData[column.id]}
               onChange={(e) => handleChange(e, column.id)}
