@@ -18,6 +18,9 @@ import axios from 'axios';
 import '../designs/TableStyles.scss';
 import RequestForm from './RequestForm';
 import EditableRow from './EditableRow';
+import { formatDateTime } from '../utils/utils'; // נייבא את הפונקציה החדשה
+
+
 
 
 const columns = [
@@ -45,7 +48,7 @@ const modalStyle = {
   p: 4,
 };
 
-export default function MainTable({emailRequestor}) {
+export default function MainTable({ emailRequestor }) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(4);
   const [rows, setRows] = useState([]);
@@ -227,9 +230,25 @@ export default function MainTable({emailRequestor}) {
     }
   };
 
+<<<<<<< HEAD
   const getGroupStatus = (row, groupId) => {
     const status = row.statuses.find(s => s.groupId === groupId);
     return status ? status.status : 'Not Required';
+=======
+  const handleStatusChange = (rowId, groupId, newStatus) => {
+    const updatedGroups = affectedGroups.map(group =>
+      group.requestId === rowId && group.groupId === groupId
+        ? { ...group, status: newStatus }
+        : group
+    );
+    setAffectedGroups(updatedGroups);
+    // Save the updated status to the server
+    axios.post('http://localhost:3001/api/updateStatus', {
+      requestId: rowId,
+      groupId: groupId,
+      status: newStatus
+    });
+>>>>>>> master
   };
 
   const formatDate = (value) => {
@@ -335,8 +354,8 @@ export default function MainTable({emailRequestor}) {
             onClose={() => handleCloseMenu('affectedGroup')}
           >
             {groups.map(group => (
-                    <MenuItem key={group.id} onClick={() => handleAffectedGroupSelect(group.id)}>
-               <Checkbox
+              <MenuItem key={group.id} onClick={() => handleAffectedGroupSelect(group.id)}>
+                <Checkbox
                   checked={selectedAffectedGroups.includes(group.id)}
                 />
                 {group.name}
@@ -427,9 +446,14 @@ export default function MainTable({emailRequestor}) {
                     const newRows = rows.map(r => r.ID === updatedRow.ID ? updatedRow : r);
                     setRows(newRows);
                   }}
+                  formatDateTime={formatDateTime} // העברת הפונקציה לקומפוננטת ה-EditableRow
                 />
               ))}
+<<<<<<< HEAD
             </TableBody> */}
+=======
+            </TableBody>
+>>>>>>> master
           </Table>
         </TableContainer>
 
@@ -446,9 +470,17 @@ export default function MainTable({emailRequestor}) {
 
       <Modal
         open={open}
+<<<<<<< HEAD
         onClose={() => setOpen(false)}>
           <Box sx={{ ...modalStyle, overflow: 'auto', maxHeight: '80vh' }}>
         <RequestForm onClose={() => setOpen(false)} emailRequestor={emailRequestor}/>
+=======
+        onClose={() => setOpen(false)}
+      >
+        <Box sx={{ ...modalStyle, overflow: 'auto', maxHeight: '80vh' }}>
+          <RequestForm onClose={() => setOpen(false)} emailRequestor={emailRequestor} />
+
+>>>>>>> master
           <Button onClick={() => setOpen(false)}>Close</Button>
         </Box>
       </Modal>
