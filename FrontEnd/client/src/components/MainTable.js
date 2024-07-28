@@ -230,6 +230,7 @@ export default function MainTable({ emailRequestor }) {
     }
   };
 
+<<<<<<< HEAD
 
   const getGroupStatus = (row, groupId) => {
     const status = row.statuses.find(s => s.groupId === groupId);
@@ -240,6 +241,21 @@ export default function MainTable({ emailRequestor }) {
   const formatDate = (value) => {
     const date = new Date(value);
     return date.toLocaleDateString('he-IL');
+=======
+  const handleStatusChange = (rowId, groupId, newStatus) => {
+    const updatedGroups = affectedGroups.map(group =>
+      group.requestId === rowId && group.groupId === groupId
+        ? { ...group, status: newStatus }
+        : group
+    );
+    setAffectedGroups(updatedGroups);
+    // Save the updated status to the server
+    axios.post('http://localhost:3001/api/updateStatus', {
+      requestId: rowId,
+      groupId: groupId,
+      status: newStatus
+    });
+>>>>>>> master
   };
 
 
@@ -437,9 +453,6 @@ export default function MainTable({ emailRequestor }) {
               ))}
 
             </TableBody>
-
-
-
           </Table>
         </TableContainer>
 
@@ -456,6 +469,7 @@ export default function MainTable({ emailRequestor }) {
 
       <Modal
         open={open}
+<<<<<<< HEAD
 
         onClose={() => setOpen(false)}>
           <Box sx={{ ...modalStyle, overflow: 'auto', maxHeight: '80vh' }}>
@@ -467,6 +481,13 @@ export default function MainTable({ emailRequestor }) {
           <RequestForm onClose={() => setOpen(false)} emailRequestor={emailRequestor} />
 
 
+=======
+        onClose={() => setOpen(false)}
+      >
+        <Box sx={{ ...modalStyle, overflow: 'auto', maxHeight: '80vh' }}>
+          <RequestForm onClose={() => setOpen(false)} emailRequestor={emailRequestor} />
+
+>>>>>>> master
           <Button onClick={() => setOpen(false)}>Close</Button>
         </Box>
       </Modal>
