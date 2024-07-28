@@ -9,6 +9,8 @@ import TextField from '@mui/material/TextField';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import axios from 'axios';
+import { formatDateTime } from '../utils/utils'; // נייבא את הפונקציה החדשה
+
 
 
 const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
@@ -88,34 +90,8 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
           onDoubleClick={() => handleDoubleClick(column.id)}
         >
 
-          {/* {editCell === column.id ? (
-            <TextField
-              value={rowData[column.id]}
-              onChange={(e) => handleChange(e, column.id)}
-              onBlur={handleBlur}
-              autoFocus
-            />
-          ) : (
-            rowData[column.id]
-          )}
-        </TableCell>
-      ))}
-      {groups.map(group => (
-        <TableCell key={group.id}>
-          {isEditing ? (
-            <Select
-              value={rowData[group.id] || ''}
-              onChange={(e) => handleChange(e, group.id)}
-            >
-              {statuses.map(status => (
-                <MenuItem key={status} value={status}>
-                  {status}
-                </MenuItem>
-              ))}
-            </Select>
-          ) : (
-            rowData[group.id] || 'Not Required' */}
-            {isEditing && (column.id === 'title' || column.id === 'description') && editCell === column.id ? (
+
+          {isEditing && (column.id === 'title' || column.id === 'description') && editCell === column.id ? (
             <TextField
               value={rowData[column.id]}
               onChange={(e) => handleChange(e, column.id)}
@@ -135,6 +111,9 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
                 </MenuItem>
               ))}
             </Select>
+          ) : column.id === 'dateTime' ? (
+            formatDateTime(rowData[column.id])
+
           ) : isEditing && column.id === 'requestGroup' ? (
             <Select
               value={rowData[column.id] || ''}

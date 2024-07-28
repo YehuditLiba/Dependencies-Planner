@@ -18,6 +18,8 @@ import axios from 'axios';
 import '../designs/TableStyles.scss';
 import RequestForm from './RequestForm';
 import EditableRow from './EditableRow';
+import { formatDateTime } from '../utils/utils'; // נייבא את הפונקציה החדשה
+
 
 
 const columns = [
@@ -45,7 +47,7 @@ const modalStyle = {
   p: 4,
 };
 
-export default function MainTable({emailRequestor}) {
+export default function MainTable({ emailRequestor }) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(4);
   const [rows, setRows] = useState([]);
@@ -214,7 +216,7 @@ export default function MainTable({emailRequestor}) {
         return 'white';
     }
   };
-  
+
   const handleStatusChange = (rowId, groupId, newStatus) => {
     const updatedGroups = affectedGroups.map(group =>
       group.requestId === rowId && group.groupId === groupId
@@ -311,8 +313,8 @@ export default function MainTable({emailRequestor}) {
             onClose={() => handleCloseMenu('affectedGroup')}
           >
             {groups.map(group => (
-                    <MenuItem key={group.id} onClick={() => handleAffectedGroupSelect(group.id)}>
-               <Checkbox
+              <MenuItem key={group.id} onClick={() => handleAffectedGroupSelect(group.id)}>
+                <Checkbox
                   checked={selectedAffectedGroups.includes(group.id)}
                 />
                 {group.name}
@@ -357,6 +359,7 @@ export default function MainTable({emailRequestor}) {
                     const newRows = rows.map(r => r.ID === updatedRow.ID ? updatedRow : r);
                     setRows(newRows);
                   }}
+                  formatDateTime={formatDateTime} // העברת הפונקציה לקומפוננטת ה-EditableRow
                 />
               ))}
             </TableBody>
@@ -381,9 +384,9 @@ export default function MainTable({emailRequestor}) {
         open={open}
         onClose={() => setOpen(false)}
       >
-          <Box sx={{ ...modalStyle, overflow: 'auto', maxHeight: '80vh' }}>
-        <RequestForm onClose={() => setOpen(false)} emailRequestor={emailRequestor}/>
-          
+        <Box sx={{ ...modalStyle, overflow: 'auto', maxHeight: '80vh' }}>
+          <RequestForm onClose={() => setOpen(false)} emailRequestor={emailRequestor} />
+
           <Button onClick={() => setOpen(false)}>Close</Button>
         </Box>
       </Modal>
