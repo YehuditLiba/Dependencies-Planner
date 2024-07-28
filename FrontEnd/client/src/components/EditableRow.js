@@ -13,7 +13,7 @@ import { formatDateTime } from '../utils/formatDateUtil'; // נייבא את ה�
 
 
 
-const EditableRow = ({ row, columns, groups, statuses, onUpdate/*, updateRequest */ }) => {
+const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [rowData, setRowData] = useState(row);
   const [editCell, setEditCell] = useState(null);
@@ -144,7 +144,7 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate/*, updateRequest
               ))}
             </Select>
           ) : (
-            rowData[group.id] || 'Not Required'
+            rowData[group.id] || 'Not Required' 
           )}
         </TableCell>
       ))}
