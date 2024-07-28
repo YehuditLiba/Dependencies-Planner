@@ -18,6 +18,8 @@ import axios from 'axios';
 import '../designs/TableStyles.scss';
 import RequestForm from './RequestForm';
 import EditableRow from './EditableRow';
+import { formatDateTime } from '../utils/utils'; // נייבא את הפונקציה החדשה
+
 
 
 
@@ -358,6 +360,7 @@ export default function MainTable({ emailRequestor }) {
                     const newRows = rows.map(r => r.ID === updatedRow.ID ? updatedRow : r);
                     setRows(newRows);
                   }}
+                  formatDateTime={formatDateTime} // העברת הפונקציה לקומפוננטת ה-EditableRow
                 />
               ))}
             </TableBody>

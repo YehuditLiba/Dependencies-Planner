@@ -89,7 +89,8 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
           key={column.id}
           onDoubleClick={() => handleDoubleClick(column.id)}
         >
-          {/* {editCell === column.id ? ( */}
+
+
           {isEditing && (column.id === 'title' || column.id === 'description') && editCell === column.id ? (
             <TextField
               value={rowData[column.id]}
@@ -110,6 +111,9 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
                 </MenuItem>
               ))}
             </Select>
+          ) : column.id === 'dateTime' ? (
+            formatDateTime(rowData[column.id])
+
           ) : isEditing && column.id === 'requestGroup' ? (
             <Select
               value={rowData[column.id] || ''}
