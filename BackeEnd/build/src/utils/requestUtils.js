@@ -270,7 +270,7 @@ const addRequest = (request) => __awaiter(void 0, void 0, void 0, function* () {
         const requestId = result.rows[0].id;
         // Insert each affected group with status 1
         for (const groupId of request.affectedGroupList) {
-            yield (0, affectedGroupsUtils_1.createAffectedGroupInDB)(requestId, groupId, 2);
+            yield (0, affectedGroupsUtils_1.createAffectedGroupInDB)(requestId, groupId, 1);
         }
         // Commit the transaction
         yield db_1.pool.query('COMMIT');
