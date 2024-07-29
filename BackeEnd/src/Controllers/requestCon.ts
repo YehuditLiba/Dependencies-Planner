@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 
 import {
-  updateRequestFields, fetchAllRequests ,getRequestById, getRequestByIdForUp, 
+  updateRequestFields ,getRequestById, getRequestByIdForUp, 
 updateAffectedGroupList, deleteRequestById, updateRequestById,updateFinalDecision,
   addRequest, updatePlanned, filterRequests
 } from '../Utils/requestUtils';
@@ -10,15 +10,7 @@ updateAffectedGroupList, deleteRequestById, updateRequestById,updateFinalDecisio
 import { RequestT } from '../types/requestTypes';
 
 
-export const getAllRequests = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const requests = await fetchAllRequests();
-    res.json(requests);
-  } catch (err) {
-    console.error('Error in getAllRequests:', err);
-    res.status(500).json({ error: 'Failed to fetch requests' });
-  }
-};
+
 
 
 export const getRequestByIdController = async (req: Request, res: Response): Promise<void> => {
@@ -208,7 +200,7 @@ export const updatePlannedField = async (req: CustomRequest<UpdatePlannedBody>, 
 export const getAllFilteredRequestsWithPagination = async (req: Request, res: Response): Promise<void> => {
   console.log('Controller function called');
 
-  const limit = parseInt(req.query.limit as string) || 10;
+  const limit = parseInt(req.query.limit as string) || 0;
   const offset = parseInt(req.query.offset as string) || 0;
 
   try {
