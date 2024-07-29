@@ -20,19 +20,8 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllFilteredRequestsWithPagination = exports.updatePlannedField = exports.createRequest = exports.updateFinalDecisionController = exports.updateRequestByIdController = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequest = exports.getRequestByIdController = exports.getAllRequests = void 0;
+exports.getAllFilteredRequestsWithPagination = exports.updatePlannedField = exports.createRequest = exports.updateFinalDecisionController = exports.updateRequestByIdController = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequest = exports.getRequestByIdController = void 0;
 const requestUtils_1 = require("../Utils/requestUtils");
-const getAllRequests = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const requests = yield (0, requestUtils_1.fetchAllRequests)();
-        res.json(requests);
-    }
-    catch (err) {
-        console.error('Error in getAllRequests:', err);
-        res.status(500).json({ error: 'Failed to fetch requests' });
-    }
-});
-exports.getAllRequests = getAllRequests;
 const getRequestByIdController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = parseInt(req.params.id, 10);
     if (isNaN(id)) {
@@ -201,7 +190,7 @@ const updatePlannedField = (req, res) => __awaiter(void 0, void 0, void 0, funct
 exports.updatePlannedField = updatePlannedField;
 const getAllFilteredRequestsWithPagination = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log('Controller function called');
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 0;
     const offset = parseInt(req.query.offset) || 0;
     try {
         const requestorName = req.query.requestorName;

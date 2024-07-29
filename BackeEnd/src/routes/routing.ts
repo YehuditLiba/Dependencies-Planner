@@ -1,6 +1,7 @@
 import express from 'express';
 import { getAllGroupsController } from '../Controllers/GroupCon.';
-import { getAllRequests, getRequestByIdController, updateRequest, 
+import {  getRequestByIdController, updateRequest, 
+
     deleteRequest, updateRequestByIdController,updateFinalDecisionController ,
     createRequest, updatePlannedField, getAllFilteredRequestsWithPagination} from '../Controllers/requestCon';
 import { getAllProductManagers, getAllRequestsByProductManager } from '../Controllers/productManagerCon';
@@ -15,7 +16,7 @@ const router = express.Router();
 router.get('/groups', getAllGroupsController);
 
 //Requests routings
-router.get('/Allrequests', getAllRequests);
+// router.get('/Allrequests', getAllRequests);
 router.get('/requests/:id', getRequestByIdController);
 router.delete('/deleteRequests/:id', deleteRequest);
 router.put('/requests/:id', updateRequest);
