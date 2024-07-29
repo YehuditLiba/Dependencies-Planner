@@ -16,3 +16,20 @@ export const fetchAllPriorities = async (): Promise<Priority[]> => {
         throw err;
     }
 };
+
+export const updatePriority = async (ID: number, priority: string): Promise<void> => {
+    const query = `
+      UPDATE request
+      SET priority = $1
+      WHERE id = $2
+    `;
+
+    const values = [priority, ID];
+
+    try {
+        await pool.query(query, values);
+    } catch (err) {
+        console.error('Error updating priority:', err);
+        throw err;
+    }
+};
