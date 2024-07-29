@@ -16,7 +16,7 @@ const router = express_1.default.Router();
 //groups routings
 router.get('/groups', GroupCon_1.getAllGroupsController);
 //Requests routings
-router.get('/Allrequests', requestCon_1.getAllRequests);
+// router.get('/Allrequests', getAllRequests);
 router.get('/requests/:id', requestCon_1.getRequestByIdController);
 router.delete('/deleteRequests/:id', requestCon_1.deleteRequest);
 router.put('/requests/:id', requestCon_1.updateRequest);
