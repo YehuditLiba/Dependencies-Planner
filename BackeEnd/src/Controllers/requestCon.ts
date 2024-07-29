@@ -33,33 +33,26 @@ export const getRequestByIdController = async (req: Request, res: Response): Pro
   }
 };
 
-export const deleteRequestByAdmin = async (req: Request, res: Response): Promise<void> => {
-  const requestId = parseInt(req.params.id, 10);
-  const requestorEmail = req.body.requestorEmail; // שימוש בכתובת הדוא"ל שנשלחת מהלקוח
+export const deleteRequest = async (req: Request, res: Response) => {
+  const { id } = req.params; // לקיחת requestId מה-URL
+  const { requestorEmail } = req.body; // לקיחת requestorEmail מה-גוף הבקשה
+  console.log('REQUEST ID:', id); // לוג לבדיקת requestId
+  console.log('REQUESTOR EMAIL:', requestorEmail); // לוג לבדיקת requestorEmail
 
-  console.log("Request ID:", requestId);
-  console.log("Requestor Email:", requestorEmail);
-
-  if (isNaN(requestId)) {
-    res.status(400).json({ error: 'Invalid request ID' });
-    return;
-  }
-
-  if (!requestorEmail) {
-    res.status(400).json({ error: 'Requestor email is required' });
-    return;
+  if (!id || !requestorEmail) {
+      return res.status(400).json({ message: 'Missing requestId or requestorEmail' });
   }
 
   try {
-    await deleteRequestById(requestId, requestorEmail);
-    res.json({ message: 'Request deleted successfully' });
-  } catch (error: any) {
-    if (error.message === 'Unauthorized: Only the requestor can delete this request') {
-      res.status(403).json({ error: 'Unauthorized' });
-    } else {
-      console.error('Error in deleteRequestByAdmin:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
+      await deleteRequestById(Number(id), requestorEmail);
+      res.status(200).json({ message: `Request with ID ${id} and its affected groups deleted successfully` });
+  } catch (error: unknown) {
+      let errorMessage = 'Unknown error';
+      if (error instanceof Error) {
+          errorMessage = error.message;
+      }
+      console.error('Error deleting request:', errorMessage);
+      res.status(500).json({ message: errorMessage });
   }
 };
 //עדכון שדות בקשה

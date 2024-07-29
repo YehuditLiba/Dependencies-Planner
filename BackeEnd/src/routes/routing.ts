@@ -1,14 +1,15 @@
 import express from 'express';
 import { getAllGroupsController } from '../Controllers/GroupCon.';
+
 import {  getRequestByIdController, updateRequest, 
-    deleteRequestByAdmin, updateRequestByIdController,updateFinalDecisionController ,
+    deleteRequest, updateRequestByIdController,updateFinalDecisionController ,
     createRequest, updatePlannedField, getAllFilteredRequestsWithPagination} from '../Controllers/requestCon';
 import { getAllProductManagers, getAllRequestsByProductManager } from '../Controllers/productManagerCon';
 import { getAllStatusController, getAllStatus } from '../Controllers/StatusCon';
 import { getAllPrioritiesController } from '../Controllers/PriorityCon';
 // import { getAllTSize } from '../Controllers/T_SizeCon';
 // import { getAllDecisionsController } from '../Controllers/final_decisionCon';
-import { getAllAffectedGroupsController,createAffectedGroup,updateAffectedGroupStatus} from '../Controllers/affectedGroupCon';
+import { getAllAffectedGroupsController,createAffectedGroup,updateAffectedGroupStatus,deleteAffectedGroups } from '../Controllers/affectedGroupCon';
 
 const router = express.Router();
 //groups routings
@@ -17,7 +18,7 @@ router.get('/groups', getAllGroupsController);
 //Requests routings
 // router.get('/Allrequests', getAllRequests);
 router.get('/requests/:id', getRequestByIdController);
-router.delete('/requests/:id', deleteRequestByAdmin);
+router.delete('/deleteRequests/:id', deleteRequest);
 router.put('/requests/:id', updateRequest);
 router.put('/requests/:id', updateRequestByIdController);
 router.put('/requests/updateFinalDecision/:id', updateFinalDecisionController);
@@ -31,6 +32,7 @@ router.get('/requests', getAllFilteredRequestsWithPagination);
 router.get('/affectedGroups', getAllAffectedGroupsController);
 router.put('/updateAffectedGroups/status', updateAffectedGroupStatus);
 router.post('/createAffectedGroup', createAffectedGroup);
+router.delete('/affectedGroups/:requestId', deleteAffectedGroups);
 
 //routings ProductManager
 router.get('/productManagers', getAllProductManagers);

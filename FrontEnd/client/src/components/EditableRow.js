@@ -9,16 +9,44 @@ import TextField from '@mui/material/TextField';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import axios from 'axios';
+import { formatDateTime } from '../utils/formatDateUtil'; // נייבא את הפונקציה החדשה
 
 
-const EditableRow = ({ row, columns, groups, statuses, onUpdate/*, updateRequest */ }) => {
+
+const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [rowData, setRowData] = useState(row);
   const [editCell, setEditCell] = useState(null);
+  const [productManagers, setProductManagers] = useState([]);
+  const [allGroups, setAllGroups] = useState([]);
+
 
   useEffect(() => {
     setRowData(row);
   }, [row]);
+
+  useEffect(() => {
+    const fetchProductManagers = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/api/productManagers');
+        setProductManagers(response.data);
+      } catch (err) {
+        console.error('Error fetching product managers:', err);
+      }
+    };
+
+    const fetchAllGroups = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/api/groups');
+        setAllGroups(response.data);
+      } catch (err) {
+        console.error('Error fetching groups:', err);
+      }
+    };
+
+    fetchProductManagers();
+    fetchAllGroups();
+  }, []);
 
 
   const handleToggleEdit = async () => {
@@ -61,13 +89,46 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate/*, updateRequest
           key={column.id}
           onDoubleClick={() => handleDoubleClick(column.id)}
         >
-          {editCell === column.id ? (
+
+
+          {isEditing && (column.id === 'title' || column.id === 'description') && editCell === column.id ? (
             <TextField
               value={rowData[column.id]}
               onChange={(e) => handleChange(e, column.id)}
               onBlur={handleBlur}
               autoFocus
             />
+          ) : isEditing && column.id === 'requestorName' ? (
+            <Select
+              value={rowData[column.id] || ''}
+              onChange={(e) => handleChange(e, column.id)}
+              onBlur={handleBlur}
+              autoFocus
+            >
+              {productManagers.map(manager => (
+                <MenuItem key={manager.id} value={manager.name}>
+                  {manager.name}
+                </MenuItem>
+              ))}
+            </Select>
+          ) : column.id === 'dateTime' ? (
+            formatDateTime(rowData[column.id])
+
+          ) : isEditing && column.id === 'requestGroup' ? (
+            <Select
+              value={rowData[column.id] || ''}
+              onChange={(e) => handleChange(e, column.id)}
+              onBlur={handleBlur}
+              autoFocus
+            >
+              {allGroups.map(group => (
+                <MenuItem key={group.id} value={group.name}>
+                  {group.name}
+                </MenuItem>
+              ))}
+            </Select>
+          ) : column.id === 'dateTime' ? (
+            formatDateTime(rowData[column.id])
           ) : (
             rowData[column.id]
           )}
@@ -87,7 +148,7 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate/*, updateRequest
               ))}
             </Select>
           ) : (
-            rowData[group.id] || 'Not Required'
+            rowData[group.id] || 'Not Required' 
           )}
         </TableCell>
       ))}

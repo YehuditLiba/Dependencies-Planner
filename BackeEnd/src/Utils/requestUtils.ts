@@ -1,6 +1,7 @@
 import { pool } from '../config/db';
 import { RequestT } from '../types/requestTypes';
 import { createAffectedGroupInDB } from './affectedGroupsUtils';
+import { deleteAffectedGroupsByRequestId } from './affectedGroupsUtils';
 
 
 const getRequestById = async (id: number): Promise<RequestT | null> => {
@@ -69,22 +70,26 @@ const getRequestsByGroupId = async (groupId: number): Promise<RequestT[]> => {
 
 export const deleteRequestById = async (requestId: number, requestorEmail: string): Promise<void> => {
     const client = await pool.connect();
+    console.log(requestorEmail+"id"+requestId)
     try {
         await client.query('BEGIN');
 
-        // Check if the requestor exists and matches the provided email
+        // Check if the request exists and the requestor matches the provided email
         const checkRequestorQuery = `
-            SELECT COUNT(*) FROM product_manager
-            WHERE email = $1;
+            SELECT COUNT(*) FROM request
+            WHERE id = $1 AND requestor_email = $2;
         `;
-        const { rows } = await client.query(checkRequestorQuery, [requestorEmail]);
+        const { rows } = await client.query(checkRequestorQuery, [requestId, requestorEmail]);
         const requestorExists = parseInt(rows[0].count, 10) > 0;
 
         if (!requestorExists) {
             throw new Error('Unauthorized: Only the requestor can delete this request');
         }
 
-        // Delete request by ID
+        // Delete affected groups first
+        await deleteAffectedGroupsByRequestId(requestId);
+
+        // Delete the request
         const deleteRequestQuery = `
             DELETE FROM request
             WHERE id = $1;
@@ -99,7 +104,6 @@ export const deleteRequestById = async (requestId: number, requestorEmail: strin
         client.release();
     }
 };
-
 //עריכת כותרת ותיאור
 export const updateRequestFields = async (id: number, updatedFields: Partial<Pick<RequestT, 'title' | 'description'>>): Promise<RequestT | null> => {
     try {
@@ -234,7 +238,7 @@ export const addRequest = async (request: RequestT): Promise<void> => {
 
         // Insert each affected group with status 1
         for (const groupId of request.affectedGroupList) {
-            await createAffectedGroupInDB(requestId, groupId, 2);
+            await createAffectedGroupInDB(requestId, groupId, 1);
         }
 
         // Commit the transaction

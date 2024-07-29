@@ -190,8 +190,10 @@ export default function RequestForm({ onClose }) {
           onChange={(e) => setRequestGroup(e.target.value)}
           className="request-group-select" // Class name for styling
         >
-          {quarters.map(q => (
-            <MenuItem key={q.id} value={q.name}>{q.name}</MenuItem>
+          {groups.map(group => (
+            <MenuItem key={group.id} value={group.name}>
+            {group.name}
+          </MenuItem>
           ))}
         </Select>
       </FormControl>

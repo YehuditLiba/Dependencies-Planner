@@ -20,7 +20,7 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllFilteredRequestsWithPagination = exports.updatePlannedField = exports.createRequest = exports.updateFinalDecisionController = exports.updateRequestByIdController = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequestByAdmin = exports.getRequestByIdController = void 0;
+exports.getAllFilteredRequestsWithPagination = exports.updatePlannedField = exports.createRequest = exports.updateFinalDecisionController = exports.updateRequestByIdController = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequest = exports.getRequestByIdController = void 0;
 const requestUtils_1 = require("../Utils/requestUtils");
 const getRequestByIdController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = parseInt(req.params.id, 10);
@@ -42,34 +42,28 @@ const getRequestByIdController = (req, res) => __awaiter(void 0, void 0, void 0,
     }
 });
 exports.getRequestByIdController = getRequestByIdController;
-const deleteRequestByAdmin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const requestId = parseInt(req.params.id, 10);
-    const requestorEmail = req.body.requestorEmail; // שימוש בכתובת הדוא"ל שנשלחת מהלקוח
-    console.log("Request ID:", requestId);
-    console.log("Requestor Email:", requestorEmail);
-    if (isNaN(requestId)) {
-        res.status(400).json({ error: 'Invalid request ID' });
-        return;
-    }
-    if (!requestorEmail) {
-        res.status(400).json({ error: 'Requestor email is required' });
-        return;
+const deleteRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params; // לקיחת requestId מה-URL
+    const { requestorEmail } = req.body; // לקיחת requestorEmail מה-גוף הבקשה
+    console.log('REQUEST ID:', id); // לוג לבדיקת requestId
+    console.log('REQUESTOR EMAIL:', requestorEmail); // לוג לבדיקת requestorEmail
+    if (!id || !requestorEmail) {
+        return res.status(400).json({ message: 'Missing requestId or requestorEmail' });
     }
     try {
-        yield (0, requestUtils_1.deleteRequestById)(requestId, requestorEmail);
-        res.json({ message: 'Request deleted successfully' });
+        yield (0, requestUtils_1.deleteRequestById)(Number(id), requestorEmail);
+        res.status(200).json({ message: `Request with ID ${id} and its affected groups deleted successfully` });
     }
     catch (error) {
-        if (error.message === 'Unauthorized: Only the requestor can delete this request') {
-            res.status(403).json({ error: 'Unauthorized' });
+        let errorMessage = 'Unknown error';
+        if (error instanceof Error) {
+            errorMessage = error.message;
         }
-        else {
-            console.error('Error in deleteRequestByAdmin:', error);
-            res.status(500).json({ error: 'Internal server error' });
-        }
+        console.error('Error deleting request:', errorMessage);
+        res.status(500).json({ message: errorMessage });
     }
 });
-exports.deleteRequestByAdmin = deleteRequestByAdmin;
+exports.deleteRequest = deleteRequest;
 //עדכון שדות בקשה
 const updateRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {

@@ -18,7 +18,7 @@ router.get('/groups', GroupCon_1.getAllGroupsController);
 //Requests routings
 // router.get('/Allrequests', getAllRequests);
 router.get('/requests/:id', requestCon_1.getRequestByIdController);
-router.delete('/requests/:id', requestCon_1.deleteRequestByAdmin);
+router.delete('/deleteRequests/:id', requestCon_1.deleteRequest);
 router.put('/requests/:id', requestCon_1.updateRequest);
 router.put('/requests/:id', requestCon_1.updateRequestByIdController);
 router.put('/requests/updateFinalDecision/:id', requestCon_1.updateFinalDecisionController);
@@ -31,6 +31,7 @@ router.get('/requests', requestCon_1.getAllFilteredRequestsWithPagination);
 router.get('/affectedGroups', affectedGroupCon_1.getAllAffectedGroupsController);
 router.put('/updateAffectedGroups/status', affectedGroupCon_1.updateAffectedGroupStatus);
 router.post('/createAffectedGroup', affectedGroupCon_1.createAffectedGroup);
+router.delete('/affectedGroups/:requestId', affectedGroupCon_1.deleteAffectedGroups);
 //routings ProductManager
 router.get('/productManagers', productManagerCon_1.getAllProductManagers);
 router.get('/requests/:groupId', productManagerCon_1.getAllRequestsByProductManager);
