@@ -108,11 +108,7 @@ import MenuItem from '@mui/material/MenuItem';
 import axios from 'axios';
 import { formatDateTime } from '../utils/formatDateUtil'; // נייבא את הפונקציה החדשה
 
-<<<<<<< HEAD
-=======
 
-
->>>>>>> master
 const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [rowData, setRowData] = useState(row);
@@ -125,8 +121,7 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
     setRowData(row);
   }, [row]);
 
-<<<<<<< HEAD
-=======
+
   useEffect(() => {
     const fetchProductManagers = async () => {
       try {
@@ -151,7 +146,6 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
   }, []);
 
 
->>>>>>> master
   const handleToggleEdit = async () => {
     setIsEditing(!isEditing);
     if (isEditing) {
