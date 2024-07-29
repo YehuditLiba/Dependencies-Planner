@@ -19,6 +19,9 @@ import axios from 'axios';
 import '../designs/TableStyles.scss';
 import RequestForm from './RequestForm';
 import EditableRow from './EditableRow';
+import { formatDateTime } from '../utils/utils'; // נייבא את הפונקציה החדשה
+
+
 
 const columns = [
   { id: 'title', label: 'Title', minWidth: 100 },
@@ -314,12 +317,14 @@ export default function MainTable({ emailRequestor }) {
             open={Boolean(anchorElAffectedGroup)}
             onClose={() => handleCloseMenu('affectedGroup')}
           >
+
             {groups.map((group) => (
               <MenuItem
                 key={group.id}
                 onClick={() => handleAffectedGroupSelect(group.id)}
               >
                 <Checkbox checked={selectedAffectedGroups.includes(group.id)} />
+
                 {group.name}
               </MenuItem>
             ))}
@@ -353,6 +358,7 @@ export default function MainTable({ emailRequestor }) {
               </TableRow>
             </TableHead>
             <TableBody>
+
               {rows.map((row, rowIndex) => (
                 <React.Fragment key={row.id}>
                   <TableRow hover role="checkbox" tabIndex={-1}>
@@ -389,6 +395,7 @@ export default function MainTable({ emailRequestor }) {
                     />
                   )}
                 </React.Fragment>
+
               ))}
             </TableBody>
           </Table>
@@ -409,8 +416,10 @@ export default function MainTable({ emailRequestor }) {
         aria-labelledby="modal-title"
         aria-describedby="modal-description"
       >
+
         <Box sx={modalStyle}>
           <RequestForm onClose={() => setOpen(false)} />
+
         </Box>
       </Modal>
       <Modal
