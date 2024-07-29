@@ -19,6 +19,7 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
   const [editCell, setEditCell] = useState(null);
   const [productManagers, setProductManagers] = useState([]);
   const [allGroups, setAllGroups] = useState([]);
+  const [priorities, setPriorities] = useState([]);
 
 
   useEffect(() => {
@@ -44,8 +45,18 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
       }
     };
 
+    const fetchPriorities = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/api/priority');
+        setPriorities(response.data);
+      } catch (err) {
+        console.error('Error fetching priorities:', err);
+      }
+    };
+
     fetchProductManagers();
     fetchAllGroups();
+    fetchPriorities();
   }, []);
 
 
@@ -89,8 +100,6 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
           key={column.id}
           onDoubleClick={() => handleDoubleClick(column.id)}
         >
-
-
           {isEditing && (column.id === 'title' || column.id === 'description' || column.id === 'comments') && editCell === column.id ? (
             <TextField
               value={rowData[column.id]}
@@ -98,6 +107,19 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
               onBlur={handleBlur}
               autoFocus
             />
+          ) : isEditing && column.id === 'priority' ? (
+            <Select
+              value={rowData[column.id] || ''}
+              onChange={(e) => handleChange(e, column.id)}
+              onBlur={handleBlur}
+              autoFocus
+            >
+              {priorities.map(priority => (
+                <MenuItem key={priority.id} value={priority.value}>
+                  {priority.value}
+                </MenuItem>
+              ))}
+            </Select>
           ) : isEditing && column.id === 'requestorName' ? (
             <Select
               value={rowData[column.id] || ''}
