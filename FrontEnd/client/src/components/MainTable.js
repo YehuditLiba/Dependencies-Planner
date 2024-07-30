@@ -20,6 +20,8 @@ import '../designs/TableStyles.scss';
 import RequestForm from './RequestForm';
 import EditableRow from './EditableRow';
 import { formatDateTime } from '../utils/utils'; // נייבא את הפונקציה החדשה
+import DeleteRequest from './DeleteRequest'; // Add this line
+
 
 
 
@@ -81,6 +83,7 @@ export default function MainTable({ emailRequestor }) {
             affectedGroupList: selectedAffectedGroups.length ? selectedAffectedGroups.join(',') : undefined
           }
         });
+        console.log('Fetched rows:', response.data.requests);
         setRows(response.data.requests);
         setTotalRows(response.data.totalCount || response.data.requests.length);
       } catch (error) {
@@ -180,6 +183,11 @@ export default function MainTable({ emailRequestor }) {
     setSelectedAffectedGroups(prev =>
       prev.includes(groupId) ? prev.filter(id => id !== groupId) : [...prev, groupId]
     );
+  };
+
+  const handleDeleteRequest = (ID) => {
+    console.log(`Removing row with ID: ${ID} from the table`);
+    setRows(prevRows => prevRows.filter(row => row.ID !== ID));
   };
 
   const applyFilter = () => {
@@ -335,6 +343,9 @@ export default function MainTable({ emailRequestor }) {
           <Table stickyHeader>
             <TableHead>
               <TableRow>
+              <TableCell style={{ minWidth: 50, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}>
+                Actions
+              </TableCell>
                 {columns.map((column) => (
                   column.id === 'requestGroup' && !showGroupColumns ? null : (
                     <TableCell
@@ -362,6 +373,9 @@ export default function MainTable({ emailRequestor }) {
               {rows.map((row, rowIndex) => (
                 <React.Fragment key={row.id}>
                   <TableRow hover role="checkbox" tabIndex={-1}>
+                    <TableCell>
+                      <DeleteRequest id={row.ID} email={emailRequestor} onDelete={handleDeleteRequest} />
+                    </TableCell>
                     {columns.map((column) => {
                       const value = row[column.id];
                       return (
