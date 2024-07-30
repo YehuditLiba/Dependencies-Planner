@@ -284,7 +284,7 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
               ))}
             </Select>
           ) : (
-            rowData[group.id] || 'Not Required' 
+            rowData[group.id]
           )}
         </TableCell>
       ))}

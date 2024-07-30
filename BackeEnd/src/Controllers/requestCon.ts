@@ -12,7 +12,6 @@ import { RequestT } from '../types/requestTypes';
 
 
 
-
 export const getRequestByIdController = async (req: Request, res: Response): Promise<void> => {
   const id = parseInt(req.params.id, 10);
   if (isNaN(id)) {

@@ -40,4 +40,5 @@ const getProductManagers = async (): Promise<ProductManager[]> => {
     }
 };
 
+
 export { getProductManagers, getRequestsByProductManager };

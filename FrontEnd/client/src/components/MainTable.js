@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 import React, { useState, useEffect } from 'react';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
@@ -21,6 +19,7 @@ import axios from 'axios';
 import '../designs/TableStyles.scss';
 import RequestForm from './RequestForm';
 import EditableRow from './EditableRow';
+import AdminSettings from './AdminSettings';
 import { formatDateTime } from '../utils/utils'; // נייבא את הפונקציה החדשה
 
 
@@ -70,7 +69,8 @@ export default function MainTable({ emailRequestor }) {
   const [statuses, setStatuses] = useState([]);
   const [editValue, setEditValue] = useState('');
   const [isEditingRow, setIsEditingRow] = useState(null);
-
+  const [adminSettingsOpen, setAdminSettingsOpen] = useState(false);
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -260,6 +260,7 @@ export default function MainTable({ emailRequestor }) {
           {showGroupColumns ? 'Hide Group Columns' : 'Show Group Columns'}
         </Button>
         <Button variant="contained" onClick={clearFilters}>Clear Filters</Button>
+        <Button variant="contained" onClick={() => setAdminSettingsOpen(true)}>Admin Settings</Button>
       </Box>
       <Paper sx={{ width: '80%', overflow: 'hidden', marginTop: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, padding: 2 }}>
@@ -441,7 +442,16 @@ export default function MainTable({ emailRequestor }) {
           <Button onClick={() => handleEditSave(editValue)}>Save</Button>
         </Box>
       </Modal>
+      <Modal
+        open={adminSettingsOpen}
+        onClose={() => setAdminSettingsOpen(false)}
+        aria-labelledby="admin-settings-modal-title"
+        aria-describedby="admin-settings-modal-description"
+      >
+        <Box sx={modalStyle}>
+          <AdminSettings /> {/* הצגת הקומפוננטה AdminSettings */}
+        </Box>
+      </Modal>
     </Box>
   );
 }
->>>>>>> master
