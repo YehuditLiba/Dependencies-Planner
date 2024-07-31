@@ -4,36 +4,6 @@ import { RequestT } from '../types/requestTypes';
 // import { deleteAffectedGroupsByRequestId } from './affectedGroupsUtils';
 import { createAffectedGroupInDB, deleteAffectedGroupsByRequestId } from './affectedGroupsUtils';
 
-//import { format } from 'date-fns';
-export const fetchAllRequests = async (): Promise<RequestT[]> => {
-
-    try {
-        const client = await pool.connect();
-        const sql = 'SELECT * FROM request;';
-        const { rows } = await client.query(sql);
-        client.release();
-
-        // Mapping rows to RequestT type
-        return rows.map((row: any) => ({
-            ID: row.id,
-            title: row.title,
-            requestorName: row.requestorName,
-            requestGroup: row.request_group,
-            description: row.description,
-            priority: row.priority,
-            finalDecision: row.final_decision,
-            planned: row.planned,
-            comments: row.comments,
-            dateTime: row.date_time,
-            affectedGroupList: row.affected_group_list,
-            jiraLink: row.jira_link,
-            emailRequestor: row.emailRequestor,
-        })) as RequestT[];
-    } catch (err) {
-        console.error('Error fetching requests:', err);
-        throw err;
-    }
-};
 
 const getRequestById = async (id: number): Promise<RequestT | null> => {
     console.log({ id });
@@ -101,21 +71,20 @@ const getRequestsByGroupId = async (groupId: number): Promise<RequestT[]> => {
 
 export const deleteRequestById = async (requestId: number, requestorEmail: string): Promise<void> => {
     const client = await pool.connect();
-    console.log(requestorEmail+"id"+requestId)
     try {
-        await client.query('BEGIN');
-
-        // Check if the request exists and the requestor matches the provided email
-        const checkRequestorQuery = `
-            SELECT COUNT(*) FROM request
-            WHERE id = $1 AND requestor_email = $2;
-        `;
-        const { rows } = await client.query(checkRequestorQuery, [requestId, requestorEmail]);
-        const requestorExists = parseInt(rows[0].count, 10) > 0;
-
-        if (!requestorExists) {
-            throw new Error('Unauthorized: Only the requestor can delete this request');
-        }
+      await client.query('BEGIN');
+  
+      // בדיקת הרשאה
+      const checkRequestorQuery = `
+        SELECT COUNT(*) FROM request
+        WHERE id = $1 AND requestor_email = $2;
+      `;
+      const { rows } = await client.query(checkRequestorQuery, [requestId, requestorEmail]);
+      const requestorExists = parseInt(rows[0].count, 10) > 0;
+  
+      if (!requestorExists) {
+        throw new Error('Unauthorized: Only the requestor can delete this request');
+      }
 
         // Delete affected groups first
         await deleteAffectedGroupsByRequestId(requestId);
@@ -129,12 +98,12 @@ export const deleteRequestById = async (requestId: number, requestorEmail: strin
 
         await client.query('COMMIT');
     } catch (error) {
-        await client.query('ROLLBACK');
-        throw error;
+      await client.query('ROLLBACK');
+      throw error;
     } finally {
-        client.release();
+      client.release();
     }
-};
+  };
 //עריכת כותרת ותיאור
 export const updateRequestFields = async (id: number, updatedFields: Partial<Pick<RequestT, 'title' | 'description' | 'comments'>>): Promise<RequestT | null> => {
     try {
@@ -296,45 +265,52 @@ export const updatePlanned = async (ID: number, planned: string): Promise<void> 
     await pool.query(query, values);
 };
 
-// Function to filter requests with optional parameters by requestor name and/or requestor group with limit and offset
+
 export const filterRequests = async (
     requestorName: string | undefined,
     requestorGroup: string | undefined,
-    affectedGroupList: string | undefined, // נוסיף כאן את הפילטר החדש
+    affectedGroupList: string | undefined,
     limit: number,
     offset: number
 ): Promise<{ totalCount: number; requests: RequestT[] }> => {
     console.log('Filtering requests with parameters:', requestorName, requestorGroup, affectedGroupList);
 
     let sql = `
-      SELECT *, COUNT(*) OVER() AS total_count
-      FROM request
+      SELECT 
+        r.*, 
+        COUNT(*) OVER() AS total_count,
+        ag.group_id AS group_id,
+        ag.status AS status_id,
+        COALESCE(s.id, 0) AS status_id,
+        COALESCE(s.status, 'Not Required') AS status_description
+      FROM request r
+      LEFT JOIN affected_group ag ON r.id = ag.request_id
+      LEFT JOIN status s ON ag.status = s.id
       WHERE 1 = 1
     `;
     const values: any[] = [];
 
     if (requestorName) {
-        sql += ` AND requestor_name ILIKE $${values.length + 1}`;
+        sql += ` AND r.requestor_name ILIKE $${values.length + 1}`;
         values.push(`%${requestorName}%`);
     }
 
     if (requestorGroup) {
-        sql += ` AND request_group ILIKE $${values.length + 1}`;
+        sql += ` AND r.request_group ILIKE $${values.length + 1}`;
         values.push(`%${requestorGroup}%`);
     }
 
     if (affectedGroupList) {
-        sql += ` AND affected_group_list && $${values.length + 1}`; // מחפש אם יש חפיפות בין המערכים
-        values.push(`{${affectedGroupList}}`); // הפיכת המערך למבנה מתאים לשאילתה
+        sql += ` AND r.affected_group_list && $${values.length + 1}`;
+        values.push(`{${affectedGroupList}}`);
     }
 
-    sql += `
-      ORDER BY id
-      LIMIT $${values.length + 1} OFFSET $${values.length + 2};
-    `;
-    values.push(limit, offset);
-
-  //  console.log('Generated SQL:', sql, 'with values:', values);
+    if (limit > 0) {
+        sql += ` ORDER BY r.id LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
+        values.push(limit, offset);
+    } else {
+        sql += ` ORDER BY r.id`;
+    }
 
     try {
         const client = await pool.connect();
@@ -343,21 +319,38 @@ export const filterRequests = async (
 
         const totalCount = rows.length > 0 ? parseInt(rows[0].total_count, 10) : 0;
         console.log(rows);
-        const requests = rows.map((row: any) => ({
-            ID: row.id,
-            title: row.title,
-            requestGroup: row.request_group,
-            description: row.description,
-            priority: row.priority,
-            finalDecision: row.final_decision,
-            planned: row.planned,
-            comments: row.comments,
-            dateTime: row.date_time,
-            affectedGroupList: row.affected_group_list,
-            jiraLink: row.jira_link,
-            requestorName: row.requestor_name,
-            emailRequestor: row.requestor_email,
-        })) as RequestT[];
+
+        // Group statuses by request ID
+        const requestMap: { [key: number]: RequestT } = {};
+        rows.forEach((row: any) => {
+            if (!requestMap[row.id]) {
+                requestMap[row.id] = {
+                    ID: row.id,
+                    title: row.title,
+                    requestGroup: row.request_group,
+                    description: row.description,
+                    priority: row.priority,
+                    finalDecision: row.final_decision,
+                    planned: row.planned,
+                    comments: row.comments,
+                    dateTime: row.date_time,
+                    affectedGroupList: row.affected_group_list,
+                    jiraLink: row.jira_link,
+                    requestorName: row.requestor_name,
+                    emailRequestor: row.requestor_email,
+                    statuses: [] // Initialize the statuses array
+                };
+            }
+            requestMap[row.id].statuses.push({
+                groupId: row.group_id,
+                status: {
+                    id: row.status_id,
+                    status: row.status_description
+                }
+            });
+        });
+
+        const requests = Object.values(requestMap);
 
         return { totalCount, requests };
     } catch (err) {
@@ -365,5 +358,7 @@ export const filterRequests = async (
         throw err;
     }
 };
+
+
 
 export { getRequestById, getRequestsByGroupId };

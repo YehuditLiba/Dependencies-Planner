@@ -1,4 +1,4 @@
-
+// export default EditableRow;
 import React, { useState, useEffect } from 'react';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
@@ -10,7 +10,6 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import axios from 'axios';
 import { formatDateTime, priorityMap } from '../utils/utils'; // נייבא את הפונקציה החדשה
-
 
 
 const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
@@ -25,6 +24,8 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
   useEffect(() => {
     setRowData(row);
   }, [row]);
+
+
 
   useEffect(() => {
     const fetchProductManagers = async () => {
@@ -63,7 +64,8 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
   const handleToggleEdit = async () => {
     setIsEditing(!isEditing);
     if (isEditing) {
-      console.log('Updated Row Data:', rowData); // Debugging Line
+      console.log('Updated Row Data:', rowData);
+      console.log('Updated Row Data:', rowData);
       try {
         // אם העדכון הוא עבור priority
         if (rowData.priority !== row.priority) {
@@ -91,6 +93,21 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
 
   const handleBlur = () => {
     setEditCell(null);
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Pending Response':
+        return 'yellow';
+      case 'Not Required':
+        return 'gray';
+      case 'In Q':
+        return 'green';
+      case 'Not in Q':
+        return 'red';
+      default:
+        return 'transparent';
+    }
   };
 
   return (
@@ -161,7 +178,14 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
         </TableCell>
       ))}
       {groups.map(group => (
-        <TableCell key={group.id}>
+        <TableCell
+          key={group.id}
+          style={{ backgroundColor: getStatusColor(rowData[group.id]) }}
+        >
+        <TableCell
+          key={group.id}
+          style={{ backgroundColor: getStatusColor(rowData[group.id]) }}
+        >
           {isEditing ? (
             <Select
               value={rowData[group.id] || ''}
@@ -177,114 +201,10 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
             rowData[group.id] || 'Not Required'
           )}
         </TableCell>
+        </TableCell>
       ))}
     </TableRow>
   );
 };
 
 export default EditableRow;
-
-
-//   return (
-//     <TableRow hover role="checkbox" tabIndex={-1}>
-//       <TableCell>
-//         <IconButton onClick={handleToggleEdit} color={isEditing ? "primary" : "default"}>
-//           {isEditing ? <SaveIcon /> : <EditIcon />}
-//         </IconButton>
-//       </TableCell>
-//       {columns.map(column => (
-//         <TableCell
-//           key={column.id}
-//           onDoubleClick={() => handleDoubleClick(column.id)}
-//         >
-//           {isEditing && (column.id === 'title' || column.id === 'description' || column.id === 'comments') && editCell === column.id ? (
-//             <TextField
-//               value={rowData[column.id]}
-//               onChange={(e) => handleChange(e, column.id)}
-//               onBlur={handleBlur}
-//               autoFocus
-//             />
-// // priorityMap[rowData[column.id]] || rowData[column.id]
-//           ) : isEditing && column.id === 'priority' ? (
-//             <Select
-//               value={rowData[column.id] || ''}
-//               onChange={(e) => handleChange(e, column.id)}
-//               onBlur={handleBlur}
-//               autoFocus
-//             >
-//               {priorities.map(priority => (
-//                 <MenuItem key={priority.id} value={priority.value}>
-//                   {/* {priority.value} */}
-//                   {priorityMap[priority.id]}
-//                 </MenuItem>
-//               ))}
-//             </Select>
-//           ) : isEditing && column.id === 'requestorName' ? (
-//             <Select
-//               value={rowData[column.id] || ''}
-//               onChange={(e) => handleChange(e, column.id)}
-//               onBlur={handleBlur}
-//               autoFocus
-//             >
-//               {productManagers.map(manager => (
-//                 <MenuItem key={manager.id} value={manager.name}>
-//                   {manager.name}
-//                 </MenuItem>
-//               ))}
-//             </Select>
-//           ) : column.id === 'dateTime' ? (
-//             formatDateTime(rowData[column.id])
-
-//           ) : isEditing && column.id === 'requestGroup' ? (
-//             <Select
-//               value={rowData[column.id] || ''}
-//               onChange={(e) => handleChange(e, column.id)}
-//               onBlur={handleBlur}
-//               autoFocus
-//             >
-//               {allGroups.map(group => (
-//                 <MenuItem key={group.id} value={group.name}>
-//                   {group.name}
-//                 </MenuItem>
-//               ))}
-//             </Select>
-//           ) : column.id === 'dateTime' ? (
-//             formatDateTime(rowData[column.id])
-//           ) : (
-//             rowData[column.id]
-//           )}
-//         </TableCell>
-//       ))}
-//       {groups.map(group => (
-//         <TableCell key={group.id}>
-//           {isEditing ? (
-//             <Select
-//               value={rowData[group.id] || ''}
-//               onChange={(e) => handleChange(e, group.id)}
-//             >
-//               {statuses.map(status => (
-//                 <MenuItem key={status} value={status}>
-//                   {status}
-//                 </MenuItem>
-//               ))}
-//             </Select>
-//           ) : (
-//             rowData[group.id] || 'Not Required'
-//           )}
-//         </TableCell>
-//       ))}
-//     </TableRow>
-//   );
-// };
-
-// export default EditableRow;
-
-// )}
-// </TableCell>
-// ))}
-// </TableRow>
-// );
-// };
-
-// export default EditableRow;
-
