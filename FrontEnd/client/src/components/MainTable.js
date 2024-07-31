@@ -19,8 +19,12 @@ import axios from 'axios';
 import '../designs/TableStyles.scss';
 import RequestForm from './RequestForm';
 import EditableRow from './EditableRow';
+import AdminSettings from './AdminSettings';
 import { formatDateTime } from '../utils/utils'; // נייבא את הפונקציה החדשה
 import StatusCell from './StatusCell';
+ // או הנתיב הנכון לקובץ שבו הפונקציה מוגדרת
+import DeleteRequest from './DeleteRequest'; // Add this line
+
 
 
 
@@ -74,6 +78,8 @@ export default function MainTable({ emailRequestor }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredRows, setFilteredRows] = useState([]);
 
+  const [adminSettingsOpen, setAdminSettingsOpen] = useState(false);
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -87,6 +93,7 @@ export default function MainTable({ emailRequestor }) {
           }
         });
         console.log('Fetched data:', response.data); // הדפס את הנתונים המלאים מהשרת
+        console.log('Fetched rows:', response.data.requests);
         setRows(response.data.requests);
         setTotalRows(response.data.totalCount || response.data.requests.length);
       } catch (error) {
@@ -193,6 +200,11 @@ export default function MainTable({ emailRequestor }) {
     );
   };
 
+  const handleDeleteRequest = (ID) => {
+    console.log(`Removing row with ID: ${ID} from the table`);
+    setRows(prevRows => prevRows.filter(row => row.ID !== ID));
+  };
+
   const applyFilter = () => {
     handleCloseMenu('affectedGroup');
   };
@@ -213,10 +225,15 @@ export default function MainTable({ emailRequestor }) {
     return date.toLocaleDateString('he-IL');
   };
 
-  const getStatusForGroup = (requestId, groupId) => {
-    return statuses.find(status => status.request_id === requestId && status.group_id === groupId)?.status_description || 'No Status';
-  };
+  // const getStatusForGroup = (requestId, groupId) => {
+  //   return statuses.find(status => status.request_id === requestId && status.group_id === groupId)?.status_description || 'No Status';
+  // };
 
+  const getGroupStatus = (row, groupId) => {
+    // נניח שיש לך מבנה של סטטוסים ב- row, תוודא שהנתיב נכון לסטטוס של הקבוצה
+    const status = row.statuses.find(status => status.groupId === groupId);
+    return status ? status.status_description : 'No Status';
+  };
 
   const handleStatusChange = async (rowId, groupId) => {
     const newStatus = prompt("Enter new status:");
@@ -289,6 +306,7 @@ export default function MainTable({ emailRequestor }) {
           {showGroupColumns ? 'Hide Group Columns' : 'Show Group Columns'}
         </Button>
         <Button variant="contained" onClick={clearFilters}>Clear Filters</Button>
+        <Button variant="contained" onClick={() => setAdminSettingsOpen(true)}>Admin Settings</Button>
       </Box>
       <Paper sx={{ width: '80%', overflow: 'hidden', marginTop: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, padding: 2 }}>
@@ -366,6 +384,9 @@ export default function MainTable({ emailRequestor }) {
           <Table stickyHeader>
             <TableHead>
               <TableRow>
+              <TableCell style={{ minWidth: 50, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}>
+                Actions
+              </TableCell>
                 {columns.map((column) => (
                   column.id === 'requestGroup' && !showGroupColumns ? null : (
                     <TableCell
@@ -389,35 +410,54 @@ export default function MainTable({ emailRequestor }) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row) => (
-                <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
-                  {columns.map((column) => (
-                    <TableCell key={column.id}>
-                      {row[column.id]}
+              {rows.map((row, rowIndex) => (
+                <React.Fragment key={row.id}>
+                  <TableRow hover role="checkbox" tabIndex={-1}>
+                    <TableCell>
+                      <DeleteRequest id={row.ID} email={emailRequestor} onDelete={handleDeleteRequest} />
                     </TableCell>
-                  ))}
-                  {showGroupColumns && groups.map((group) => {
-                    const status = row.statuses.find(status => status.groupId === group.id);
-                    const statusDescription = status ? status.status.status : 'Not Required';
+                    {columns.map((column) => {
+                      const value = row[column.id];
+                      return (
+                        column.id === 'requestGroup' && !showGroupColumns ? null : (
+                          <TableCell key={column.id} style={{ minWidth: column.minWidth }}>
+                            {column.id === 'dateTime' ? formatDate(value) : value}
+                          </TableCell>
+                        )
+                      );
+                    })}
+                    {groups.map((group) => {
+                      const status = row.statuses.find(status => status.groupId === group.id);
+                      const statusDescription = status ? status.status.status : 'Not Required';
 
-                    // הגדרת סגנון התא
-                    let cellStyle = {};
-                    if (statusDescription === 'Not Required') {
-                      cellStyle = { color: 'gray' }; // צבע אפור ל-'Not Required'
-                    }
+                      // הגדרת סגנון התא
+                      let cellStyle = {};
+                      if (statusDescription === 'Not Required') {
+                        cellStyle = { color: 'gray' }; // צבע אפור ל-'Not Required'
+                      }
 
-                    const backgroundColor = getStatusBackgroundColor(statusDescription);
-
-                    return (
-                      <TableCell
-                        key={group.id}
-                        style={{ backgroundColor: backgroundColor, ...cellStyle }}
-                      >
-                        {statusDescription}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
+                      return showGroupColumns ? (
+                        <TableCell
+                          key={group.id}
+                          style={{ backgroundColor: getStatusBackgroundColor(getGroupStatus(row, group.id)), ...cellStyle }}
+                          onClick={() => handleStatusChange(row.id, group.id, 'newStatus')}
+                        >
+                          {statusDescription}
+                        </TableCell>
+                      ) : null;
+                    })}
+                  </TableRow>
+                  {isEditingRow === rowIndex && (
+                    <EditableRow
+                      row={row}
+                      onSave={(updatedRow) => {
+                        updateRequest(row.id, updatedRow);
+                        setIsEditingRow(null);
+                      }}
+                      onCancel={() => setIsEditingRow(null)}
+                    />
+                  )}
+                </React.Fragment>
               ))}
             </TableBody>
 
@@ -461,6 +501,16 @@ export default function MainTable({ emailRequestor }) {
             cols={50}
           />
           <Button onClick={() => handleEditSave(editValue)}>Save</Button>
+        </Box>
+      </Modal>
+      <Modal
+        open={adminSettingsOpen}
+        onClose={() => setAdminSettingsOpen(false)}
+        aria-labelledby="admin-settings-modal-title"
+        aria-describedby="admin-settings-modal-description"
+      >
+        <Box sx={modalStyle}>
+          <AdminSettings /> {/* הצגת הקומפוננטה AdminSettings */}
         </Box>
       </Modal>
     </Box>

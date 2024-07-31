@@ -79,14 +79,13 @@ const getRequestsByGroupId = (groupId) => __awaiter(void 0, void 0, void 0, func
 exports.getRequestsByGroupId = getRequestsByGroupId;
 const deleteRequestById = (requestId, requestorEmail) => __awaiter(void 0, void 0, void 0, function* () {
     const client = yield db_1.pool.connect();
-    console.log(requestorEmail + "id" + requestId);
     try {
         yield client.query('BEGIN');
-        // Check if the request exists and the requestor matches the provided email
+        // בדיקת הרשאה
         const checkRequestorQuery = `
-            SELECT COUNT(*) FROM request
-            WHERE id = $1 AND requestor_email = $2;
-        `;
+        SELECT COUNT(*) FROM request
+        WHERE id = $1 AND requestor_email = $2;
+      `;
         const { rows } = yield client.query(checkRequestorQuery, [requestId, requestorEmail]);
         const requestorExists = parseInt(rows[0].count, 10) > 0;
         if (!requestorExists) {
@@ -115,9 +114,9 @@ exports.deleteRequestById = deleteRequestById;
 const updateRequestFields = (id, updatedFields) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const client = yield db_1.pool.connect();
-        const { title, description } = updatedFields;
-        const sql = 'UPDATE request SET title = $1, description = $2 WHERE id = $3 RETURNING *;';
-        const { rows } = yield client.query(sql, [title, description, id]);
+        const { title, description, comments } = updatedFields;
+        const sql = 'UPDATE request SET title = $1, description = $2, comments = $3 WHERE id = $4 RETURNING *;';
+        const { rows } = yield client.query(sql, [title, description, comments, id]);
         client.release();
         if (rows.length === 0) {
             return null;
