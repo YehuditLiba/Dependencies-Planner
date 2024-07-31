@@ -13,14 +13,15 @@ import Box from '@mui/material/Box';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Checkbox from '@mui/material/Checkbox';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormGroup from '@mui/material/FormGroup';
+// import FormControlLabel from '@mui/material/FormControlLabel';
+// import FormGroup from '@mui/material/FormGroup';
 import axios from 'axios';
 import '../designs/TableStyles.scss';
 import RequestForm from './RequestForm';
 import EditableRow from './EditableRow';
-import AdminSettings from './AdminSettings';
-import { formatDateTime } from '../utils/utils'; // נייבא את הפונקציה החדשה
+// import AdminSettings from './AdminSettings';
+// import { formatDateTime } from '../utils/utils'; // נייבא את הפונקציה החדשה
+import { Navigate } from 'react-router-dom';
 
 
 
@@ -69,7 +70,9 @@ export default function MainTable({ emailRequestor }) {
   const [statuses, setStatuses] = useState([]);
   const [editValue, setEditValue] = useState('');
   const [isEditingRow, setIsEditingRow] = useState(null);
-  const [adminSettingsOpen, setAdminSettingsOpen] = useState(false);
+  const [redirectToAdminSettings, setRedirectToAdminSettings] = useState(false);
+
+  
   
   useEffect(() => {
     const fetchData = async () => {
@@ -248,6 +251,11 @@ export default function MainTable({ emailRequestor }) {
     }
   };
 
+  if (redirectToAdminSettings) {
+    return <Navigate to="/admin-settings" />;
+  }
+  
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 4 }}>
       <Box className="header">
@@ -260,7 +268,16 @@ export default function MainTable({ emailRequestor }) {
           {showGroupColumns ? 'Hide Group Columns' : 'Show Group Columns'}
         </Button>
         <Button variant="contained" onClick={clearFilters}>Clear Filters</Button>
-        <Button variant="contained" onClick={() => setAdminSettingsOpen(true)}>Admin Settings</Button>
+        {/* <Button variant="contained" onClick={() => setAdminSettingsOpen(true)}>Admin Settings</Button> */}
+
+            <Button
+          variant="contained"
+          color="primary"
+          onClick={() => setRedirectToAdminSettings(true)}
+        >
+          Admin Settings
+        </Button>
+
       </Box>
       <Paper sx={{ width: '80%', overflow: 'hidden', marginTop: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, padding: 2 }}>
@@ -419,7 +436,6 @@ export default function MainTable({ emailRequestor }) {
         aria-labelledby="modal-title"
         aria-describedby="modal-description"
       >
-
         <Box sx={modalStyle}>
           <RequestForm onClose={() => setOpen(false)} />
 
@@ -440,16 +456,6 @@ export default function MainTable({ emailRequestor }) {
             cols={50}
           />
           <Button onClick={() => handleEditSave(editValue)}>Save</Button>
-        </Box>
-      </Modal>
-      <Modal
-        open={adminSettingsOpen}
-        onClose={() => setAdminSettingsOpen(false)}
-        aria-labelledby="admin-settings-modal-title"
-        aria-describedby="admin-settings-modal-description"
-      >
-        <Box sx={modalStyle}>
-          <AdminSettings /> {/* הצגת הקומפוננטה AdminSettings */}
         </Box>
       </Modal>
     </Box>

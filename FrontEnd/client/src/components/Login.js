@@ -3,27 +3,21 @@ import { TextField, Button, Container, Typography, Box, Avatar, Alert } from '@m
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-
 const LoginPage = ({ emailRequestor, setEmailRequestor }) => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
-
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError('');
-
     try {
       // קבלת רשימת מנהלי המוצר מהשרת
       const response = await axios.get('http://localhost:3001/api/productManagers');
       const managers = response.data;
-
       // בדיקה אם המייל קיים ברשימה
       const managerExists = managers.some(manager => manager.email === emailRequestor);
-
       if (managerExists) {
         // שמירת המייל בקונסטנטה או בהגדרה גלובלית אחרת לפי הצורך
         localStorage.setItem('userEmail', emailRequestor);
-
         // ניווט לדף הבקשות
         navigate('/MainTable');
       } else {
@@ -34,7 +28,6 @@ const LoginPage = ({ emailRequestor, setEmailRequestor }) => {
       setError('Server error. Please try again later.');
     }
   };
-
   return (
     <Container component="main" maxWidth="xs">
       <Box
@@ -84,5 +77,4 @@ const LoginPage = ({ emailRequestor, setEmailRequestor }) => {
     </Container>
   );
 };
-
 export default LoginPage;

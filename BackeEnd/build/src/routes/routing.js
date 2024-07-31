@@ -15,6 +15,7 @@ const affectedGroupCon_1 = require("../Controllers/affectedGroupCon");
 const router = express_1.default.Router();
 //groups routings
 router.get('/groups', GroupCon_1.getAllGroupsController);
+router.put('/groups/:groupId', GroupCon_1.editGroupByAdmin);
 //Requests routings
 // router.get('/Allrequests', getAllRequests);
 router.get('/requests/:id', requestCon_1.getRequestByIdController);
@@ -35,7 +36,7 @@ router.delete('/affectedGroups/:requestId', affectedGroupCon_1.deleteAffectedGro
 //routings ProductManager
 router.get('/productManagers', productManagerCon_1.getAllProductManagers);
 router.get('/requests/:groupId', productManagerCon_1.getAllRequestsByProductManager);
-router.get('/admin-settings', productManagerCon_1.getAllGroupsWithProductManagers);
+router.put('/productManagers/:email', productManagerCon_1.editProductManagerByAdmin);
 //status routings
 router.get('/status', StatusCon_1.getAllStatusController);
 router.get('/Getstatus', StatusCon_1.getAllStatus);

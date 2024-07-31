@@ -1,10 +1,9 @@
 import express from 'express';
-import { getAllGroupsController } from '../Controllers/GroupCon.';
+import { getAllGroupsController, editGroupByAdmin } from '../Controllers/GroupCon.';
 import {  getRequestByIdController, updateRequest, 
-
     deleteRequest, updateRequestByIdController,updateFinalDecisionController ,
     createRequest, updatePlannedField, getAllFilteredRequestsWithPagination} from '../Controllers/requestCon';
-import { getAllProductManagers, getAllRequestsByProductManager } from '../Controllers/productManagerCon';
+import { getAllProductManagers, getAllRequestsByProductManager, editProductManagerByAdmin } from '../Controllers/productManagerCon';
 import { getAllStatusController, getAllStatus } from '../Controllers/StatusCon';
 import { getAllPrioritiesController, updatePriorityController } from '../Controllers/PriorityCon';
 // import { getAllTSize } from '../Controllers/T_SizeCon';
@@ -14,6 +13,8 @@ import { getAllAffectedGroupsController,createAffectedGroup,updateAffectedGroupS
 const router = express.Router();
 //groups routings
 router.get('/groups', getAllGroupsController);
+router.put('/groups/:groupId', editGroupByAdmin);
+
 
 //Requests routings
 // router.get('/Allrequests', getAllRequests);
@@ -37,10 +38,11 @@ router.delete('/affectedGroups/:requestId', deleteAffectedGroups);
 //routings ProductManager
 router.get('/productManagers', getAllProductManagers);
 router.get('/requests/:groupId', getAllRequestsByProductManager);
-
+router.put('/productManagers/:email', editProductManagerByAdmin);
 //status routings
 router.get('/status', getAllStatusController);
 router.get('/Getstatus', getAllStatus);
+
 
 //priority routings
 router.get('/priority', getAllPrioritiesController);
