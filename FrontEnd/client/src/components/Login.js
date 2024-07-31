@@ -13,12 +13,18 @@ const LoginPage = ({ emailRequestor, setEmailRequestor }) => {
     setError('');
 
     try {
+      // קבלת רשימת מנהלי המוצר מהשרת
       const response = await axios.get('http://localhost:3001/api/productManagers');
       const managers = response.data;
 
+      // בדיקה אם המייל קיים ברשימה
       const managerExists = managers.some(manager => manager.email === emailRequestor);
 
       if (managerExists) {
+        // שמירת המייל בקונסטנטה או בהגדרה גלובלית אחרת לפי הצורך
+        localStorage.setItem('userEmail', emailRequestor);
+
+        // ניווט לדף הבקשות
         navigate('/MainTable');
       } else {
         setError('Email not found');
@@ -73,9 +79,6 @@ const LoginPage = ({ emailRequestor, setEmailRequestor }) => {
           >
             Check Email
           </Button>
-          <div>
-
-          </div>
         </Box>
       </Box>
     </Container>

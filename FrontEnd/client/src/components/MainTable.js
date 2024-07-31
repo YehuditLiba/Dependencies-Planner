@@ -13,11 +13,13 @@ import Box from '@mui/material/Box';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Checkbox from '@mui/material/Checkbox';
-import Select from '@mui/material/Select';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormGroup from '@mui/material/FormGroup';
 import axios from 'axios';
 import '../designs/TableStyles.scss';
 import RequestForm from './RequestForm';
 import EditableRow from './EditableRow';
+import AdminSettings from './AdminSettings';
 import { formatDateTime } from '../utils/utils'; // נייבא את הפונקציה החדשה
 
 
@@ -67,8 +69,8 @@ export default function MainTable({ emailRequestor }) {
   const [statuses, setStatuses] = useState([]);
   const [editValue, setEditValue] = useState('');
   const [isEditingRow, setIsEditingRow] = useState(null);
-
-
+  const [adminSettingsOpen, setAdminSettingsOpen] = useState(false);
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -82,12 +84,11 @@ export default function MainTable({ emailRequestor }) {
           }
         });
         setRows(response.data.requests);
-        setTotalRows(response.data.totalCount || 0);
+        setTotalRows(response.data.totalCount || response.data.requests.length);
       } catch (error) {
         console.error("Failed to fetch data", error);
       }
     };
-
     const fetchGroups = async () => {
       try {
         const response = await axios.get('http://localhost:3001/api/groups');
@@ -187,6 +188,12 @@ export default function MainTable({ emailRequestor }) {
     handleCloseMenu('affectedGroup');
   };
 
+  const clearFilters = () => {
+    setSelectedGroup('');
+    setSelectedManager('');
+    setSelectedAffectedGroups([]);
+  };
+
   const handleEditSave = (value) => {
     console.log('Saving edited value:', value);
     setEditOpen(false);
@@ -241,49 +248,46 @@ export default function MainTable({ emailRequestor }) {
     }
   };
 
-
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 4 }}>
-      <Box className="header" >
+      <Box className="header">
         <img src="/path/to/logo.png" alt="Logo" className="logo" />
         <h1>Dependencies-Planner</h1>
       </Box>
-      <Paper className="table-paper">
-        <Box className="table-controls">
+      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
+        <Button variant="contained" onClick={() => setOpen(true)}>Add Request</Button>
+        <Button variant="contained" onClick={handleToggleColumns}>
+          {showGroupColumns ? 'Hide Group Columns' : 'Show Group Columns'}
+        </Button>
+        <Button variant="contained" onClick={clearFilters}>Clear Filters</Button>
+        <Button variant="contained" onClick={() => setAdminSettingsOpen(true)}>Admin Settings</Button>
+      </Box>
+      <Paper sx={{ width: '80%', overflow: 'hidden', marginTop: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, padding: 2 }}>
           <Button
-            className="add-request-button"
-            variant="contained"
-            onClick={() => setOpen(true)}
-          >
-            Add Request
-          </Button>
-          <Button
-            className="toggle-columns-button"
-            variant="contained"
-            onClick={handleToggleColumns}
-          >
-            {showGroupColumns ? 'Hide Group Columns' : 'Show Group Columns'}
-          </Button>
-          <Button
-            className="filter-group-button"
+            className="filter-button"
             variant="contained"
             onClick={(event) => handleOpenMenu(event, 'group')}
           >
-            Filter by Groups
+            Filter by Group
           </Button>
           <Menu
             anchorEl={anchorElGroup}
             open={Boolean(anchorElGroup)}
             onClose={() => handleCloseMenu('group')}
           >
-            {groups.map(group => (
-              <MenuItem key={group.id} onClick={() => handleGroupSelect(group)}>
+            {groups.map((group) => (
+              <MenuItem
+                key={group.id}
+                selected={group.id === selectedGroup}
+                onClick={() => handleGroupSelect(group)}
+              >
                 {group.name}
               </MenuItem>
             ))}
           </Menu>
           <Button
-            className="filter-manager-button"
+            className="filter-button"
             variant="contained"
             onClick={(event) => handleOpenMenu(event, 'manager')}
           >
@@ -294,14 +298,18 @@ export default function MainTable({ emailRequestor }) {
             open={Boolean(anchorElManager)}
             onClose={() => handleCloseMenu('manager')}
           >
-            {managers.map(manager => (
-              <MenuItem key={manager.name} onClick={() => handleManagerSelect(manager)}>
+            {managers.map((manager) => (
+              <MenuItem
+                key={manager.id}
+                selected={manager.name === selectedManager}
+                onClick={() => handleManagerSelect(manager)}
+              >
                 {manager.name}
               </MenuItem>
             ))}
           </Menu>
           <Button
-            className="filter-affected-group-button"
+            className="filter-button"
             variant="contained"
             onClick={(event) => handleOpenMenu(event, 'affectedGroup')}
           >
@@ -312,65 +320,91 @@ export default function MainTable({ emailRequestor }) {
             open={Boolean(anchorElAffectedGroup)}
             onClose={() => handleCloseMenu('affectedGroup')}
           >
-            {groups.map(group => (
-              <MenuItem key={group.id} onClick={() => handleAffectedGroupSelect(group.id)}>
-                <Checkbox
-                  checked={selectedAffectedGroups.includes(group.id)}
-                />
+
+            {groups.map((group) => (
+              <MenuItem
+                key={group.id}
+                onClick={() => handleAffectedGroupSelect(group.id)}
+              >
+                <Checkbox checked={selectedAffectedGroups.includes(group.id)} />
+
                 {group.name}
               </MenuItem>
             ))}
-            <MenuItem onClick={applyFilter}>
-              Apply Filter
-            </MenuItem>
+            <MenuItem onClick={applyFilter}>Apply</MenuItem>
           </Menu>
         </Box>
-
-        <TableContainer>
-          <Table>
+        <TableContainer sx={{ maxHeight: 440 }}>
+          <Table stickyHeader>
             <TableHead>
               <TableRow>
-                <TableCell></TableCell> {/* תא ריק עבור כפתור ה-Toggle */}
-                {columns.map(column => (
-                  (showGroupColumns || !column.id.includes('group')) && (
-                    <TableCell key={column.id} style={{ minWidth: column.minWidth }}>
+                {columns.map((column) => (
+                  column.id === 'requestGroup' && !showGroupColumns ? null : (
+                    <TableCell
+                      key={column.id}
+                      style={{ minWidth: column.minWidth, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}
+                    >
                       {column.label}
                     </TableCell>
                   )
                 ))}
-                {showGroupColumns && groups.map(group => (
-                  <TableCell key={group.id} style={{ minWidth: 150 }}>
-                    {group.name}
-                  </TableCell>
-                ))}
+                {groups.map((group) =>
+                  showGroupColumns ? (
+                    <TableCell
+                      key={group.id}
+                      style={{ minWidth: 100, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}
+                    >
+                      {group.name}
+                    </TableCell>
+                  ) : null
+                )}
               </TableRow>
             </TableHead>
-
             <TableBody>
-              {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (
-                <EditableRow
-                  key={row.ID}
-                  row={row}
-                  columns={columns}
-                  groups={groups}
-                  statuses={statuses}
-                  onUpdate={updatedRow => {
-                    console.log('Updated Row from Backend:', updatedRow); // Debugging Line
-                    const newRows = rows.map(r => r.ID === updatedRow.ID ? updatedRow : r);
-                    setRows(newRows);
-                  }}
-                  formatDateTime={formatDateTime} // העברת הפונקציה לקומפוננטת ה-EditableRow
-                />
+
+              {rows.map((row, rowIndex) => (
+                <React.Fragment key={row.id}>
+                  <TableRow hover role="checkbox" tabIndex={-1}>
+                    {columns.map((column) => {
+                      const value = row[column.id];
+                      return (
+                        column.id === 'requestGroup' && !showGroupColumns ? null : (
+                          <TableCell key={column.id} style={{ minWidth: column.minWidth }}>
+                            {column.id === 'dateTime' ? formatDate(value) : value}
+                          </TableCell>
+                        )
+                      );
+                    })}
+                    {groups.map((group) =>
+                      showGroupColumns ? (
+                        <TableCell
+                          key={group.id}
+                          style={{ backgroundColor: getStatusBackgroundColor(getGroupStatus(row, group.id)) }}
+                          onClick={() => handleStatusChange(row.id, group.id, 'newStatus')}
+                        >
+                          {getGroupStatus(row, group.id)}
+                        </TableCell>
+                      ) : null
+                    )}
+                  </TableRow>
+                  {isEditingRow === rowIndex && (
+                    <EditableRow
+                      row={row}
+                      onSave={(updatedRow) => {
+                        updateRequest(row.id, updatedRow);
+                        setIsEditingRow(null);
+                      }}
+                      onCancel={() => setIsEditingRow(null)}
+                    />
+                  )}
+                </React.Fragment>
+
               ))}
             </TableBody>
-
-
-
           </Table>
         </TableContainer>
-
         <TablePagination
-          rowsPerPageOptions={[4, 10, 25, { label: 'All', value: -1 }]}
+          rowsPerPageOptions={[4, 8, 12, { label: 'All', value: -1 }]}
           component="div"
           count={totalRows}
           rowsPerPage={rowsPerPage}
@@ -379,29 +413,45 @@ export default function MainTable({ emailRequestor }) {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
-
       <Modal
         open={open}
         onClose={() => setOpen(false)}
+        aria-labelledby="modal-title"
+        aria-describedby="modal-description"
       >
-        <Box sx={{ ...modalStyle, overflow: 'auto', maxHeight: '80vh' }}>
-          <RequestForm onClose={() => setOpen(false)} emailRequestor={emailRequestor} />
 
-          <Button onClick={() => setOpen(false)}>Close</Button>
+        <Box sx={modalStyle}>
+          <RequestForm onClose={() => setOpen(false)} />
+
         </Box>
       </Modal>
-
       <Modal
         open={editOpen}
         onClose={() => setEditOpen(false)}
+        aria-labelledby="edit-modal-title"
+        aria-describedby="edit-modal-description"
       >
         <Box sx={modalStyle}>
-          {/* Your Edit Request Form Here */}
+          <h2 id="edit-modal-title">Edit Value</h2>
+          <textarea
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            rows={10}
+            cols={50}
+          />
           <Button onClick={() => handleEditSave(editValue)}>Save</Button>
-          <Button onClick={() => setEditOpen(false)}>Cancel</Button>
+        </Box>
+      </Modal>
+      <Modal
+        open={adminSettingsOpen}
+        onClose={() => setAdminSettingsOpen(false)}
+        aria-labelledby="admin-settings-modal-title"
+        aria-describedby="admin-settings-modal-description"
+      >
+        <Box sx={modalStyle}>
+          <AdminSettings /> {/* הצגת הקומפוננטה AdminSettings */}
         </Box>
       </Modal>
     </Box>
   );
 }
-

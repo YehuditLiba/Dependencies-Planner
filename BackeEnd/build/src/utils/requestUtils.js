@@ -9,39 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRequestsByGroupId = exports.getRequestById = exports.filterRequests = exports.updatePlanned = exports.addRequest = exports.updateFinalDecision = exports.updateRequestById = exports.getRequestByIdForUp = exports.updateAffectedGroupList = exports.updateRequestFields = exports.deleteRequestById = exports.fetchAllRequests = void 0;
+exports.getRequestsByGroupId = exports.getRequestById = exports.filterRequests = exports.updatePlanned = exports.addRequest = exports.updateFinalDecision = exports.updateRequestById = exports.getRequestByIdForUp = exports.updateAffectedGroupList = exports.updateRequestFields = exports.deleteRequestById = void 0;
 const db_1 = require("../config/db");
 const affectedGroupsUtils_1 = require("./affectedGroupsUtils");
-//import { format } from 'date-fns';
-const fetchAllRequests = () => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const client = yield db_1.pool.connect();
-        const sql = 'SELECT * FROM request;';
-        const { rows } = yield client.query(sql);
-        client.release();
-        // Mapping rows to RequestT type
-        return rows.map((row) => ({
-            ID: row.id,
-            title: row.title,
-            requestorName: row.requestorName,
-            requestGroup: row.request_group,
-            description: row.description,
-            priority: row.priority,
-            finalDecision: row.final_decision,
-            planned: row.planned,
-            comments: row.comments,
-            dateTime: row.date_time,
-            affectedGroupList: row.affected_group_list,
-            jiraLink: row.jira_link,
-            emailRequestor: row.emailRequestor,
-        }));
-    }
-    catch (err) {
-        console.error('Error fetching requests:', err);
-        throw err;
-    }
-});
-exports.fetchAllRequests = fetchAllRequests;
+const affectedGroupsUtils_2 = require("./affectedGroupsUtils");
 const getRequestById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     console.log({ id });
     try {
@@ -108,19 +79,22 @@ const getRequestsByGroupId = (groupId) => __awaiter(void 0, void 0, void 0, func
 exports.getRequestsByGroupId = getRequestsByGroupId;
 const deleteRequestById = (requestId, requestorEmail) => __awaiter(void 0, void 0, void 0, function* () {
     const client = yield db_1.pool.connect();
+    console.log(requestorEmail + "id" + requestId);
     try {
         yield client.query('BEGIN');
-        // Check if the requestor exists and matches the provided email
+        // Check if the request exists and the requestor matches the provided email
         const checkRequestorQuery = `
-            SELECT COUNT(*) FROM product_manager
-            WHERE email = $1;
+            SELECT COUNT(*) FROM request
+            WHERE id = $1 AND requestor_email = $2;
         `;
-        const { rows } = yield client.query(checkRequestorQuery, [requestorEmail]);
+        const { rows } = yield client.query(checkRequestorQuery, [requestId, requestorEmail]);
         const requestorExists = parseInt(rows[0].count, 10) > 0;
         if (!requestorExists) {
             throw new Error('Unauthorized: Only the requestor can delete this request');
         }
-        // Delete request by ID
+        // Delete affected groups first
+        yield (0, affectedGroupsUtils_2.deleteAffectedGroupsByRequestId)(requestId);
+        // Delete the request
         const deleteRequestQuery = `
             DELETE FROM request
             WHERE id = $1;
@@ -315,16 +289,27 @@ limit, offset) => __awaiter(void 0, void 0, void 0, function* () {
         sql += ` AND affected_group_list && $${values.length + 1}`; // מחפש אם יש חפיפות בין המערכים
         values.push(`{${affectedGroupList}}`); // הפיכת המערך למבנה מתאים לשאילתה
     }
-    sql += `
-      ORDER BY id
-      LIMIT $${values.length + 1} OFFSET $${values.length + 2};
-    `;
-    values.push(limit, offset);
-    //  console.log('Generated SQL:', sql, 'with values:', values);
+    if (limit > 0) {
+        sql += ` ORDER BY id LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
+        values.push(limit, offset);
+    }
+    else {
+        sql += ` ORDER BY id`;
+    }
     try {
         const client = yield db_1.pool.connect();
         const { rows } = yield client.query(sql, values);
         client.release();
+        //     sql += `
+        //       ORDER BY id
+        //       LIMIT $${values.length + 1} OFFSET $${values.length + 2};
+        //     `;
+        //     values.push(limit, offset);
+        //   //  console.log('Generated SQL:', sql, 'with values:', values);
+        //     try {
+        //         const client = await pool.connect();
+        //         const { rows } = await client.query(sql, values);
+        //         client.release();
         const totalCount = rows.length > 0 ? parseInt(rows[0].total_count, 10) : 0;
         console.log(rows);
         const requests = rows.map((row) => ({
