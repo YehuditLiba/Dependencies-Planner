@@ -14,6 +14,7 @@ const db_1 = require("../config/db");
 // import { createAffectedGroupInDB } from './affectedGroupsUtils';
 // import { deleteAffectedGroupsByRequestId } from './affectedGroupsUtils';
 const affectedGroupsUtils_1 = require("./affectedGroupsUtils");
+const affectedGroupsUtils_2 = require("./affectedGroupsUtils");
 const getRequestById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     console.log({ id });
     try {
