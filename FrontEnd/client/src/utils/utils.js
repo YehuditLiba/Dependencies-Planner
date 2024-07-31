@@ -13,3 +13,10 @@ export const formatDateTime = (value) => {
     return date.toLocaleString('he-IL', options);
   };
   
+  export const priorityMap = {
+    1: 'Critical',
+    2: 'High',
+    3: 'Medium',
+    4: 'Low'
+  };
+  
