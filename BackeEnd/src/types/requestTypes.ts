@@ -1,5 +1,6 @@
 import { AffectedGroup } from "./affectedGroupsTypes";
 import { Priority } from "./priorityTypes";
+import { Status } from "../types/StatusTypes"; // נניח שהטייפ הזה מוגדר בקובץ אחר בשם statusTypes.ts
 
 export interface RequestT {
     ID: number;
@@ -15,4 +16,5 @@ export interface RequestT {
     affectedGroupList: number[]; // אם יש צורך בשני סוגים שונים
     jiraLink: string;
     emailRequestor: string;
+    statuses: { groupId: number; status: Status }[];
 }

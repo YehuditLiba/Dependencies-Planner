@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
-import { getAllAffectedGroups, createAffectedGroupInDB ,updateAffectedGroupStatusInDB,deleteAffectedGroupsByRequestId} from '../Utils/affectedGroupsUtils';
+import { getAllAffectedGroups, createAffectedGroupInDB, updateAffectedGroupStatusInDB, 
+deleteAffectedGroupsByRequestId, getAllRequestsWithStatusesFromDB } from '../Utils/affectedGroupsUtils';
 import { getAllStatuses } from '../Utils/StatusUtils';
 // updateAffectedGroupStatus,
 export const getAllAffectedGroupsController = async (req: Request, res: Response): Promise<void> => {
@@ -60,5 +61,14 @@ console.log(requestId);
         }
         console.error('Error deleting affected groups:', errorMessage);
         res.status(500).json({ message: errorMessage });
+    }
+};
+export const getAllRequestsWithStatusesController = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const requestsWithStatuses = await getAllRequestsWithStatusesFromDB();
+        res.json(requestsWithStatuses);
+    } catch (err) {
+        console.error('Error in getAllRequestsWithStatusesController:', err);
+        res.status(500).json({ error: 'Failed to fetch requests with statuses' });
     }
 };

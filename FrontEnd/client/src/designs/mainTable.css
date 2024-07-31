@@ -1,34 +1,58 @@
-/* mainTable.css */
+/* YourTableStyles.css */
 
+/* עיצוב כללי של הטבלה */
+.MuiTable-root {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+/* עיצוב לשורות עם רקע לפי סטטוס */
 .inQ {
-  background-color: #5fff3c; /* ירוק בהיר כהה יותר */
+  background-color: transparent;
+  /* רקע שקוף לשורה */
 }
 
 .notInQ {
-  background-color: #ff4c4c; /* אדום בהיר כהה יותר */
+  background-color: transparent;
+  /* רקע שקוף לשורה */
 }
 
-.inQ:hover {
-  background-color: #baffa7; /* צבע כהה יותר בעת העמידה על שורה ירוקה */
+/* עיצוב רקע לאותיות בלב */
+.inQ .MuiTableCell-root::before {
+  content: 'In Queue';
+  color: white;
+  background-color: red;
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 
-.notInQ:hover {
-  background-color: #f1aab2; /* צבע כהה יותר בעת העמידה על שורה אדומה */
+.notInQ .MuiTableCell-root::before {
+  content: 'Not In Queue';
+  color: white;
+  background-color: green;
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 
-.table-row:hover {
-  background-color: #f5f5f5; /* הדגשת שורה בעת העמידה עליה */
+/* עיצוב כללי של תאי הטבלה */
+.MuiTableCell-root {
+  position: relative;
 }
 
-.drag-handle {
-  cursor: move;
-  padding: 0 16px;
+/* הצג רקע עבור תיאור הטקסט */
+.MuiTableCell-root::before {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  display: block;
+  padding: 2px 6px;
 }
-
-.StyledTableRow:hover {
-  background-color: #f5f5f5;
+.MuiTableCell-root::before {
+  content: '';
+  display: none;
 }
-
-.DragHandle {
-  cursor: move;
+.MuiTableCell-root {
+  border: 1px solid #ddd;
 }

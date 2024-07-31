@@ -22,6 +22,12 @@ import EditableRow from './EditableRow';
 // import AdminSettings from './AdminSettings';
 // import { formatDateTime } from '../utils/utils'; // נייבא את הפונקציה החדשה
 import { Navigate } from 'react-router-dom';
+import AdminSettings from './AdminSettings';
+import { formatDateTime } from '../utils/utils'; // נייבא את הפונקציה החדשה
+import StatusCell from './StatusCell';
+ // או הנתיב הנכון לקובץ שבו הפונקציה מוגדרת
+import DeleteRequest from './DeleteRequest'; // Add this line
+
 
 
 
@@ -71,8 +77,12 @@ export default function MainTable({ emailRequestor }) {
   const [editValue, setEditValue] = useState('');
   const [isEditingRow, setIsEditingRow] = useState(null);
   const [redirectToAdminSettings, setRedirectToAdminSettings] = useState(false);
+  const [requestId, setRequestId] = useState(null);
+  const [groupId, setGroupId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredRows, setFilteredRows] = useState([]);
 
-  
+  const [adminSettingsOpen, setAdminSettingsOpen] = useState(false);
   
   useEffect(() => {
     const fetchData = async () => {
@@ -86,12 +96,15 @@ export default function MainTable({ emailRequestor }) {
             affectedGroupList: selectedAffectedGroups.length ? selectedAffectedGroups.join(',') : undefined
           }
         });
+        console.log('Fetched data:', response.data); // הדפס את הנתונים המלאים מהשרת
+        console.log('Fetched rows:', response.data.requests);
         setRows(response.data.requests);
         setTotalRows(response.data.totalCount || response.data.requests.length);
       } catch (error) {
         console.error("Failed to fetch data", error);
       }
     };
+
     const fetchGroups = async () => {
       try {
         const response = await axios.get('http://localhost:3001/api/groups');
@@ -110,21 +123,25 @@ export default function MainTable({ emailRequestor }) {
       }
     };
 
+
     const fetchStatuses = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/api/statuses');
+        const response = await axios.get('http://localhost:3001/api/status');
+        console.log('Statuses fetched from server:', response.data);
         setStatuses(response.data);
       } catch (error) {
-        console.error("Failed to fetch statuses", error);
+        console.error('Failed to fetch statuses', error);
       }
     };
+
+
+
 
     fetchData();
     fetchGroups();
     fetchManagers();
     fetchStatuses();
   }, [page, rowsPerPage, selectedGroup, selectedManager, selectedAffectedGroups]);
-
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -187,6 +204,11 @@ export default function MainTable({ emailRequestor }) {
     );
   };
 
+  const handleDeleteRequest = (ID) => {
+    console.log(`Removing row with ID: ${ID} from the table`);
+    setRows(prevRows => prevRows.filter(row => row.ID !== ID));
+  };
+
   const applyFilter = () => {
     handleCloseMenu('affectedGroup');
   };
@@ -207,40 +229,64 @@ export default function MainTable({ emailRequestor }) {
     return date.toLocaleDateString('he-IL');
   };
 
+  // const getStatusForGroup = (requestId, groupId) => {
+  //   return statuses.find(status => status.request_id === requestId && status.group_id === groupId)?.status_description || 'No Status';
+  // };
+
   const getGroupStatus = (row, groupId) => {
-    const affectedGroup = affectedGroups.find(group => group.requestId === row.id && group.groupId === groupId);
-    return affectedGroup ? affectedGroup.status : 'Not Required';
+    // נניח שיש לך מבנה של סטטוסים ב- row, תוודא שהנתיב נכון לסטטוס של הקבוצה
+    const status = row.statuses.find(status => status.groupId === groupId);
+    return status ? status.status_description : 'No Status';
   };
+
+  const handleStatusChange = async (rowId, groupId) => {
+    const newStatus = prompt("Enter new status:");
+    if (newStatus) {
+      try {
+        const response = await axios.post('http://localhost:3001/api/updateStatus', {
+          requestId: rowId,
+          groupId: groupId,
+          status: newStatus
+        });
+        // עדכון סטטוסים מקומי אם נדרש
+        setStatuses(prevStatuses => prevStatuses.map(status =>
+          status.request_id === rowId && status.group_id === groupId
+            ? { ...status, status_description: newStatus }
+            : status
+        ));
+      } catch (error) {
+        console.error("Failed to update status", error);
+      }
+    }
+  };
+
+
+
+
+
+  // // דוגמה לשימוש בפונקציה
+  // const exampleUsage = () => {
+  //   const exampleRequestId = 112; // שים לב לנתון שהתקבל מה-API
+  //   const exampleGroupId = 4; // שים לב לנתון שהתקבל מה-API
+  //   console.log('Status:', getStatusForGroup(exampleRequestId, exampleGroupId));
+  // };
+
+
 
   const getStatusBackgroundColor = (status) => {
     switch (status) {
+      case 'Completed':
+        return 'lightgreen';
       case 'Pending Response':
-        return '#FFFF99'; // Yellow
+        return 'lightyellow';
       case 'Not Required':
-        return '#D3D3D3'; // Grey
-      case 'In Q':
-        return '#98FB98'; // Green
-      case 'Not in Q':
-        return '#FF6961'; // Red
+        return 'lightgray';
       default:
         return 'white';
     }
   };
 
-  const handleStatusChange = (rowId, groupId, newStatus) => {
-    const updatedGroups = affectedGroups.map(group =>
-      group.requestId === rowId && group.groupId === groupId
-        ? { ...group, status: newStatus }
-        : group
-    );
-    setAffectedGroups(updatedGroups);
-    // Save the updated status to the server
-    axios.post('http://localhost:3001/api/updateStatus', {
-      requestId: rowId,
-      groupId: groupId,
-      status: newStatus
-    });
-  };
+
 
   const updateRequest = async (id, updatedFields) => {
     try {
@@ -257,6 +303,7 @@ export default function MainTable({ emailRequestor }) {
   
 
   return (
+
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 4 }}>
       <Box className="header">
         <img src="/path/to/logo.png" alt="Logo" className="logo" />
@@ -281,6 +328,7 @@ export default function MainTable({ emailRequestor }) {
       </Box>
       <Paper sx={{ width: '80%', overflow: 'hidden', marginTop: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, padding: 2 }}>
+
           <Button
             className="filter-button"
             variant="contained"
@@ -307,8 +355,7 @@ export default function MainTable({ emailRequestor }) {
             className="filter-button"
             variant="contained"
             onClick={(event) => handleOpenMenu(event, 'manager')}
-          >
-            Filter by Manager
+          > Filter by Manager
           </Button>
           <Menu
             anchorEl={anchorElManager}
@@ -321,6 +368,7 @@ export default function MainTable({ emailRequestor }) {
                 selected={manager.name === selectedManager}
                 onClick={() => handleManagerSelect(manager)}
               >
+                <Checkbox checked={manager.name === selectedManager} />
                 {manager.name}
               </MenuItem>
             ))}
@@ -328,7 +376,7 @@ export default function MainTable({ emailRequestor }) {
           <Button
             className="filter-button"
             variant="contained"
-            onClick={(event) => handleOpenMenu(event, 'affectedGroup')}
+            onClick={(event) => handleOpenMenu(event, 'manager')}
           >
             Filter by Affected Groups
           </Button>
@@ -344,7 +392,6 @@ export default function MainTable({ emailRequestor }) {
                 onClick={() => handleAffectedGroupSelect(group.id)}
               >
                 <Checkbox checked={selectedAffectedGroups.includes(group.id)} />
-
                 {group.name}
               </MenuItem>
             ))}
@@ -355,6 +402,9 @@ export default function MainTable({ emailRequestor }) {
           <Table stickyHeader>
             <TableHead>
               <TableRow>
+              <TableCell style={{ minWidth: 50, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}>
+                Actions
+              </TableCell>
                 {columns.map((column) => (
                   column.id === 'requestGroup' && !showGroupColumns ? null : (
                     <TableCell
@@ -378,10 +428,12 @@ export default function MainTable({ emailRequestor }) {
               </TableRow>
             </TableHead>
             <TableBody>
-
               {rows.map((row, rowIndex) => (
                 <React.Fragment key={row.id}>
                   <TableRow hover role="checkbox" tabIndex={-1}>
+                    <TableCell>
+                      <DeleteRequest id={row.ID} email={emailRequestor} onDelete={handleDeleteRequest} />
+                    </TableCell>
                     {columns.map((column) => {
                       const value = row[column.id];
                       return (
@@ -392,17 +444,26 @@ export default function MainTable({ emailRequestor }) {
                         )
                       );
                     })}
-                    {groups.map((group) =>
-                      showGroupColumns ? (
+                    {groups.map((group) => {
+                      const status = row.statuses.find(status => status.groupId === group.id);
+                      const statusDescription = status ? status.status.status : 'Not Required';
+
+                      // הגדרת סגנון התא
+                      let cellStyle = {};
+                      if (statusDescription === 'Not Required') {
+                        cellStyle = { color: 'gray' }; // צבע אפור ל-'Not Required'
+                      }
+
+                      return showGroupColumns ? (
                         <TableCell
                           key={group.id}
-                          style={{ backgroundColor: getStatusBackgroundColor(getGroupStatus(row, group.id)) }}
+                          style={{ backgroundColor: getStatusBackgroundColor(getGroupStatus(row, group.id)), ...cellStyle }}
                           onClick={() => handleStatusChange(row.id, group.id, 'newStatus')}
                         >
-                          {getGroupStatus(row, group.id)}
+                          {statusDescription}
                         </TableCell>
-                      ) : null
-                    )}
+                      ) : null;
+                    })}
                   </TableRow>
                   {isEditingRow === rowIndex && (
                     <EditableRow
@@ -415,9 +476,10 @@ export default function MainTable({ emailRequestor }) {
                     />
                   )}
                 </React.Fragment>
-
               ))}
             </TableBody>
+
+
           </Table>
         </TableContainer>
         <TablePagination
@@ -460,4 +522,5 @@ export default function MainTable({ emailRequestor }) {
       </Modal>
     </Box>
   );
+
 }
