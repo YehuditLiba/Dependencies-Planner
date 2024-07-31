@@ -70,21 +70,20 @@ const getRequestsByGroupId = async (groupId: number): Promise<RequestT[]> => {
 
 export const deleteRequestById = async (requestId: number, requestorEmail: string): Promise<void> => {
     const client = await pool.connect();
-    console.log(requestorEmail+"id"+requestId)
     try {
-        await client.query('BEGIN');
-
-        // Check if the request exists and the requestor matches the provided email
-        const checkRequestorQuery = `
-            SELECT COUNT(*) FROM request
-            WHERE id = $1 AND requestor_email = $2;
-        `;
-        const { rows } = await client.query(checkRequestorQuery, [requestId, requestorEmail]);
-        const requestorExists = parseInt(rows[0].count, 10) > 0;
-
-        if (!requestorExists) {
-            throw new Error('Unauthorized: Only the requestor can delete this request');
-        }
+      await client.query('BEGIN');
+  
+      // בדיקת הרשאה
+      const checkRequestorQuery = `
+        SELECT COUNT(*) FROM request
+        WHERE id = $1 AND requestor_email = $2;
+      `;
+      const { rows } = await client.query(checkRequestorQuery, [requestId, requestorEmail]);
+      const requestorExists = parseInt(rows[0].count, 10) > 0;
+  
+      if (!requestorExists) {
+        throw new Error('Unauthorized: Only the requestor can delete this request');
+      }
 
         // Delete affected groups first
         await deleteAffectedGroupsByRequestId(requestId);
@@ -98,12 +97,12 @@ export const deleteRequestById = async (requestId: number, requestorEmail: strin
 
         await client.query('COMMIT');
     } catch (error) {
-        await client.query('ROLLBACK');
-        throw error;
+      await client.query('ROLLBACK');
+      throw error;
     } finally {
-        client.release();
+      client.release();
     }
-};
+  };
 //עריכת כותרת ותיאור
 export const updateRequestFields = async (id: number, updatedFields: Partial<Pick<RequestT, 'title' | 'description'>>): Promise<RequestT | null> => {
     try {

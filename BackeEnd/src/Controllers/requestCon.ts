@@ -34,25 +34,26 @@ export const getRequestByIdController = async (req: Request, res: Response): Pro
 };
 
 export const deleteRequest = async (req: Request, res: Response) => {
-  const { id } = req.params; // לקיחת requestId מה-URL
-  const { requestorEmail } = req.body; // לקיחת requestorEmail מה-גוף הבקשה
-  console.log('REQUEST ID:', id); // לוג לבדיקת requestId
-  console.log('REQUESTOR EMAIL:', requestorEmail); // לוג לבדיקת requestorEmail
+  const { id } = req.params;
+  const { requestorEmail } = req.body;
 
   if (!id || !requestorEmail) {
-      return res.status(400).json({ message: 'Missing requestId or requestorEmail' });
+    return res.status(400).json({ message: 'Missing requestId or requestorEmail' });
   }
 
   try {
-      await deleteRequestById(Number(id), requestorEmail);
-      res.status(200).json({ message: `Request with ID ${id} and its affected groups deleted successfully` });
+    await deleteRequestById(Number(id), requestorEmail);
+    res.status(200).json({ message: `Request with ID ${id} and its affected groups deleted successfully` });
   } catch (error: unknown) {
-      let errorMessage = 'Unknown error';
-      if (error instanceof Error) {
-          errorMessage = error.message;
-      }
-      console.error('Error deleting request:', errorMessage);
-      res.status(500).json({ message: errorMessage });
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+      return res.status(403).json({ message: error.message });
+    }
+    let errorMessage = 'Unknown error';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    console.error('Error deleting request:', errorMessage);
+    res.status(500).json({ message: errorMessage });
   }
 };
 //עדכון שדות בקשה
