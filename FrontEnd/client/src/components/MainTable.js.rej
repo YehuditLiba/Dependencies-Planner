@@ -1,9 +1,0 @@
-diff a/FrontEnd/client/src/components/MainTable.js b/FrontEnd/client/src/components/MainTable.js	(rejected hunks)
-@@ -51,6 +51,7 @@
-   const [totalRows, setTotalRows] = useState(0);
-   const [groups, setGroups] = useState([]);
-   const [managers, setManagers] = useState([]);
-+  const [affectedGroups, setAffectedGroups] = useState([]);
-   const [showGroupColumns, setShowGroupColumns] = useState(true);
-   const [open, setOpen] = useState(false);
-   const [editOpen, setEditOpen] = useState(false);

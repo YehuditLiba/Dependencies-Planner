@@ -47,6 +47,7 @@ const deleteRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     const { requestorEmail } = req.body; // לקיחת requestorEmail מה-גוף הבקשה
     console.log('REQUEST ID:', id); // לוג לבדיקת requestId
     console.log('REQUESTOR EMAIL:', requestorEmail); // לוג לבדיקת requestorEmail
+    console.log('FULL REQUEST BODY:', req.body); // הוספת לוג נוסף לבדיקה
     if (!id || !requestorEmail) {
         return res.status(400).json({ message: 'Missing requestId or requestorEmail' });
     }
