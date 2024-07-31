@@ -164,9 +164,10 @@ const createRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             dateTime: new Date(req.body.dateTime),
             affectedGroupList: req.body.affectedGroupList,
             jiraLink: req.body.jiraLink,
-            emailRequestor: req.body.emailRequestor
+            emailRequestor: req.body.emailRequestor,
+            statuses: req.body.statuses // כולל את הסטטוסים
         };
-        yield (0, requestUtils_1.addRequest)(request);
+        yield (0, requestUtils_1.addRequest)(request); // להוסיף את הבקשה
         res.status(201).json({ message: 'Request added successfully' });
     }
     catch (error) {

@@ -264,78 +264,92 @@ export const updatePlanned = async (ID: number, planned: string): Promise<void> 
     await pool.query(query, values);
 };
 
-// Function to filter requests with optional parameters by requestor name and/or requestor group with limit and offset
+
 export const filterRequests = async (
     requestorName: string | undefined,
     requestorGroup: string | undefined,
-    affectedGroupList: string | undefined, // נוסיף כאן את הפילטר החדש
+    affectedGroupList: string | undefined,
     limit: number,
     offset: number
 ): Promise<{ totalCount: number; requests: RequestT[] }> => {
     console.log('Filtering requests with parameters:', requestorName, requestorGroup, affectedGroupList);
 
     let sql = `
-      SELECT *, COUNT(*) OVER() AS total_count
-      FROM request
+      SELECT 
+        r.*, 
+        COUNT(*) OVER() AS total_count,
+        ag.group_id AS group_id,
+        ag.status AS status_id,
+        COALESCE(s.id, 0) AS status_id,
+        COALESCE(s.status, 'Not Required') AS status_description
+      FROM request r
+      LEFT JOIN affected_group ag ON r.id = ag.request_id
+      LEFT JOIN status s ON ag.status = s.id
       WHERE 1 = 1
     `;
     const values: any[] = [];
 
     if (requestorName) {
-        sql += ` AND requestor_name ILIKE $${values.length + 1}`;
+        sql += ` AND r.requestor_name ILIKE $${values.length + 1}`;
         values.push(`%${requestorName}%`);
     }
 
     if (requestorGroup) {
-        sql += ` AND request_group ILIKE $${values.length + 1}`;
+        sql += ` AND r.request_group ILIKE $${values.length + 1}`;
         values.push(`%${requestorGroup}%`);
     }
 
     if (affectedGroupList) {
-        sql += ` AND affected_group_list && $${values.length + 1}`; // מחפש אם יש חפיפות בין המערכים
-        values.push(`{${affectedGroupList}}`); // הפיכת המערך למבנה מתאים לשאילתה
+        sql += ` AND r.affected_group_list && $${values.length + 1}`;
+        values.push(`{${affectedGroupList}}`);
     }
+
     if (limit > 0) {
-        sql += ` ORDER BY id LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
+        sql += ` ORDER BY r.id LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
         values.push(limit, offset);
     } else {
-        sql += ` ORDER BY id`;
+        sql += ` ORDER BY r.id`;
     }
 
     try {
         const client = await pool.connect();
         const { rows } = await client.query(sql, values);
         client.release();
-//     sql += `
-//       ORDER BY id
-//       LIMIT $${values.length + 1} OFFSET $${values.length + 2};
-//     `;
-//     values.push(limit, offset);
-
-//   //  console.log('Generated SQL:', sql, 'with values:', values);
-
-//     try {
-//         const client = await pool.connect();
-//         const { rows } = await client.query(sql, values);
-//         client.release();
 
         const totalCount = rows.length > 0 ? parseInt(rows[0].total_count, 10) : 0;
         console.log(rows);
-        const requests = rows.map((row: any) => ({
-            ID: row.id,
-            title: row.title,
-            requestGroup: row.request_group,
-            description: row.description,
-            priority: row.priority,
-            finalDecision: row.final_decision,
-            planned: row.planned,
-            comments: row.comments,
-            dateTime: row.date_time,
-            affectedGroupList: row.affected_group_list,
-            jiraLink: row.jira_link,
-            requestorName: row.requestor_name,
-            emailRequestor: row.requestor_email,
-        })) as RequestT[];
+
+        // Group statuses by request ID
+        const requestMap: { [key: number]: RequestT } = {};
+        rows.forEach((row: any) => {
+            if (!requestMap[row.id]) {
+                requestMap[row.id] = {
+                    ID: row.id,
+                    title: row.title,
+                    requestGroup: row.request_group,
+                    description: row.description,
+                    priority: row.priority,
+                    finalDecision: row.final_decision,
+                    planned: row.planned,
+                    comments: row.comments,
+                    dateTime: row.date_time,
+                    affectedGroupList: row.affected_group_list,
+                    jiraLink: row.jira_link,
+                    requestorName: row.requestor_name,
+                    emailRequestor: row.requestor_email,
+                    statuses: [] // Initialize the statuses array
+                };
+            }
+            requestMap[row.id].statuses.push({
+                groupId: row.group_id,
+                status: {
+                    id: row.status_id,
+                    status: row.status_description
+                }
+            });
+        });
+
+        const requests = Object.values(requestMap);
 
         return { totalCount, requests };
     } catch (err) {
@@ -343,5 +357,7 @@ export const filterRequests = async (
         throw err;
     }
 };
+
+
 
 export { getRequestById, getRequestsByGroupId };

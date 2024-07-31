@@ -157,16 +157,18 @@ export const createRequest = async (req: CustomRequest<RequestT>, res: Response)
       dateTime: new Date(req.body.dateTime),
       affectedGroupList: req.body.affectedGroupList,
       jiraLink: req.body.jiraLink,
-      emailRequestor: req.body.emailRequestor
+      emailRequestor: req.body.emailRequestor,
+      statuses: req.body.statuses // כולל את הסטטוסים
     };
 
-    await addRequest(request);
+    await addRequest(request); // להוסיף את הבקשה
     res.status(201).json({ message: 'Request added successfully' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Failed to add request' });
   }
 };
+
 
 
 //עדכון רבעון

@@ -32,6 +32,8 @@ router.get('/affectedGroups', affectedGroupCon_1.getAllAffectedGroupsController)
 router.put('/updateAffectedGroups/status', affectedGroupCon_1.updateAffectedGroupStatus);
 router.post('/createAffectedGroup', affectedGroupCon_1.createAffectedGroup);
 router.delete('/affectedGroups/:requestId', affectedGroupCon_1.deleteAffectedGroups);
+// נתיב לקבלת כל הבקשות עם הסטטוסים שלהן
+router.get('/requestsWithStatuses', affectedGroupCon_1.getAllRequestsWithStatusesController);
 //routings ProductManager
 router.get('/productManagers', productManagerCon_1.getAllProductManagers);
 router.get('/requests/:groupId', productManagerCon_1.getAllRequestsByProductManager);

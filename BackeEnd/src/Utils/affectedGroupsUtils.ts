@@ -40,8 +40,6 @@ export const updateAffectedGroupStatusInDB = async (affectedGroupId: number, sta
 
     return updatedAffectedGroup.rows[0];
 };
-
-
 //create new
 export const createAffectedGroupInDB = async (requestId: number, groupId: number, statusId: number) => {
     const statusResult = await pool.query('SELECT * FROM status WHERE id = $1', [statusId]);
@@ -65,3 +63,27 @@ export const deleteAffectedGroupsByRequestId = async (requestId: number): Promis
 
     await pool.query(query, [requestId]);
 };
+export const getAllRequestsWithStatusesFromDB = async () => {
+    const client = await pool.connect();
+    try {
+        const sql = `
+            SELECT 
+                r.id AS request_id, 
+                ag.group_id AS group_id, 
+                ag.status AS status_id, 
+                s.status AS status_description
+            FROM 
+                affected_group ag
+                JOIN request r ON ag.request_id = r.id
+                JOIN status s ON ag.status = s.id
+        `;
+        const { rows } = await client.query(sql);
+        return rows;
+    } catch (err) {
+        console.error('Error fetching requests with statuses:', err);
+        throw err;
+    } finally {
+        client.release(); // שחרור הקונקשן לאחר סיום השימוש
+    }
+};
+

@@ -9,7 +9,9 @@ import { getAllStatusController, getAllStatus } from '../Controllers/StatusCon';
 import { getAllPrioritiesController } from '../Controllers/PriorityCon';
 // import { getAllTSize } from '../Controllers/T_SizeCon';
 // import { getAllDecisionsController } from '../Controllers/final_decisionCon';
-import { getAllAffectedGroupsController,createAffectedGroup,updateAffectedGroupStatus,deleteAffectedGroups } from '../Controllers/affectedGroupCon';
+import { getAllAffectedGroupsController, createAffectedGroup, updateAffectedGroupStatus, deleteAffectedGroups, getAllRequestsWithStatusesController 
+    
+} from '../Controllers/affectedGroupCon';
 
 const router = express.Router();
 //groups routings
@@ -33,6 +35,8 @@ router.get('/affectedGroups', getAllAffectedGroupsController);
 router.put('/updateAffectedGroups/status', updateAffectedGroupStatus);
 router.post('/createAffectedGroup', createAffectedGroup);
 router.delete('/affectedGroups/:requestId', deleteAffectedGroups);
+// נתיב לקבלת כל הבקשות עם הסטטוסים שלהן
+router.get('/requestsWithStatuses', getAllRequestsWithStatusesController);
 
 //routings ProductManager
 router.get('/productManagers', getAllProductManagers);
@@ -41,6 +45,7 @@ router.get('/requests/:groupId', getAllRequestsByProductManager);
 //status routings
 router.get('/status', getAllStatusController);
 router.get('/Getstatus', getAllStatus);
+
 
 //priority routings
 router.get('/priority', getAllPrioritiesController);
