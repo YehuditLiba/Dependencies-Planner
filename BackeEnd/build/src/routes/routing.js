@@ -40,8 +40,8 @@ router.get('/status', StatusCon_1.getAllStatusController);
 router.get('/Getstatus', StatusCon_1.getAllStatus);
 //priority routings
 router.get('/priority', PriorityCon_1.getAllPrioritiesController);
-// router.put('/priority/:id', updatePriorityController);
 router.put('/requests/:ID/priority', PriorityCon_1.updatePriorityController);
+// router.put('/priority/:id', updatePriorityController);
 //T_Size routings
 // router.get('/GetTSize', getAllTSize);
 //Decisions routings

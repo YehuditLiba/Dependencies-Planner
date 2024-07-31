@@ -9,7 +9,7 @@ import TextField from '@mui/material/TextField';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import axios from 'axios';
-import { formatDateTime } from '../utils/formatDateUtil'; // נייבא את הפונקציה החדשה
+import { formatDateTime, priorityMap } from '../utils/utils'; // נייבא את הפונקציה החדשה
 
 
 
@@ -65,8 +65,14 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
     if (isEditing) {
       console.log('Updated Row Data:', rowData); // Debugging Line
       try {
-        const response = await axios.put(`http://localhost:3001/api/requests/${rowData.ID}`, rowData); // Updated URL to match the Postman example
-        onUpdate(response.data);
+        // אם העדכון הוא עבור priority
+        if (rowData.priority !== row.priority) {
+          const response = await axios.put(`http://localhost:3001/api/requests/${rowData.ID}/priority`, { priority: priorityMap[rowData.priority] });
+          onUpdate(response.data);
+        } else {
+          const response = await axios.put(`http://localhost:3001/api/requests/${rowData.ID}`, rowData); // Updated URL to match the Postman example
+          onUpdate(response.data);
+        }
       } catch (err) {
         console.error('Error updating request:', err);
       }
@@ -86,7 +92,6 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
   const handleBlur = () => {
     setEditCell(null);
   };
-
 
   return (
     <TableRow hover role="checkbox" tabIndex={-1}>
@@ -115,8 +120,8 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
               autoFocus
             >
               {priorities.map(priority => (
-                <MenuItem key={priority.id} value={priority.value}>
-                  {priority.value}
+                <MenuItem key={priority.id} value={priority.id}>
+                  {priorityMap[priority.id]}
                 </MenuItem>
               ))}
             </Select>
@@ -133,9 +138,6 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
                 </MenuItem>
               ))}
             </Select>
-          ) : column.id === 'dateTime' ? (
-            formatDateTime(rowData[column.id])
-
           ) : isEditing && column.id === 'requestGroup' ? (
             <Select
               value={rowData[column.id] || ''}
@@ -152,7 +154,9 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
           ) : column.id === 'dateTime' ? (
             formatDateTime(rowData[column.id])
           ) : (
-            rowData[column.id]
+            column.id === 'priority' ? (priorityMap[rowData[column.id]] || rowData[column.id]) : (
+              rowData[column.id]
+            )
           )}
         </TableCell>
       ))}
@@ -170,7 +174,7 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
               ))}
             </Select>
           ) : (
-            rowData[group.id] || 'Not Required' 
+            rowData[group.id] || 'Not Required'
           )}
         </TableCell>
       ))}
@@ -179,6 +183,101 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
 };
 
 export default EditableRow;
+
+
+//   return (
+//     <TableRow hover role="checkbox" tabIndex={-1}>
+//       <TableCell>
+//         <IconButton onClick={handleToggleEdit} color={isEditing ? "primary" : "default"}>
+//           {isEditing ? <SaveIcon /> : <EditIcon />}
+//         </IconButton>
+//       </TableCell>
+//       {columns.map(column => (
+//         <TableCell
+//           key={column.id}
+//           onDoubleClick={() => handleDoubleClick(column.id)}
+//         >
+//           {isEditing && (column.id === 'title' || column.id === 'description' || column.id === 'comments') && editCell === column.id ? (
+//             <TextField
+//               value={rowData[column.id]}
+//               onChange={(e) => handleChange(e, column.id)}
+//               onBlur={handleBlur}
+//               autoFocus
+//             />
+// // priorityMap[rowData[column.id]] || rowData[column.id]
+//           ) : isEditing && column.id === 'priority' ? (
+//             <Select
+//               value={rowData[column.id] || ''}
+//               onChange={(e) => handleChange(e, column.id)}
+//               onBlur={handleBlur}
+//               autoFocus
+//             >
+//               {priorities.map(priority => (
+//                 <MenuItem key={priority.id} value={priority.value}>
+//                   {/* {priority.value} */}
+//                   {priorityMap[priority.id]}
+//                 </MenuItem>
+//               ))}
+//             </Select>
+//           ) : isEditing && column.id === 'requestorName' ? (
+//             <Select
+//               value={rowData[column.id] || ''}
+//               onChange={(e) => handleChange(e, column.id)}
+//               onBlur={handleBlur}
+//               autoFocus
+//             >
+//               {productManagers.map(manager => (
+//                 <MenuItem key={manager.id} value={manager.name}>
+//                   {manager.name}
+//                 </MenuItem>
+//               ))}
+//             </Select>
+//           ) : column.id === 'dateTime' ? (
+//             formatDateTime(rowData[column.id])
+
+//           ) : isEditing && column.id === 'requestGroup' ? (
+//             <Select
+//               value={rowData[column.id] || ''}
+//               onChange={(e) => handleChange(e, column.id)}
+//               onBlur={handleBlur}
+//               autoFocus
+//             >
+//               {allGroups.map(group => (
+//                 <MenuItem key={group.id} value={group.name}>
+//                   {group.name}
+//                 </MenuItem>
+//               ))}
+//             </Select>
+//           ) : column.id === 'dateTime' ? (
+//             formatDateTime(rowData[column.id])
+//           ) : (
+//             rowData[column.id]
+//           )}
+//         </TableCell>
+//       ))}
+//       {groups.map(group => (
+//         <TableCell key={group.id}>
+//           {isEditing ? (
+//             <Select
+//               value={rowData[group.id] || ''}
+//               onChange={(e) => handleChange(e, group.id)}
+//             >
+//               {statuses.map(status => (
+//                 <MenuItem key={status} value={status}>
+//                   {status}
+//                 </MenuItem>
+//               ))}
+//             </Select>
+//           ) : (
+//             rowData[group.id] || 'Not Required'
+//           )}
+//         </TableCell>
+//       ))}
+//     </TableRow>
+//   );
+// };
+
+// export default EditableRow;
 
 // )}
 // </TableCell>

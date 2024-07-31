@@ -7,7 +7,8 @@ export interface RequestT {
     title: string;
     requestGroup: string;
     description: string;
-    priority: Priority;
+    // priority: Priority;
+    priority: string; // מתעדכן ל-string בגלל הסוג שנשמר במסד הנתונים
     finalDecision: boolean;
     planned: string; // שקול לשנות את הסוג ל-Date אם מדובר בתאריך
     comments: string;

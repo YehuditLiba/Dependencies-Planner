@@ -11,8 +11,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getRequestsByGroupId = exports.getRequestById = exports.filterRequests = exports.updatePlanned = exports.addRequest = exports.updateFinalDecision = exports.updateRequestById = exports.getRequestByIdForUp = exports.updateAffectedGroupList = exports.updateRequestFields = exports.deleteRequestById = exports.fetchAllRequests = void 0;
 const db_1 = require("../config/db");
+// import { createAffectedGroupInDB } from './affectedGroupsUtils';
+// import { deleteAffectedGroupsByRequestId } from './affectedGroupsUtils';
 const affectedGroupsUtils_1 = require("./affectedGroupsUtils");
-const affectedGroupsUtils_2 = require("./affectedGroupsUtils");
 //import { format } from 'date-fns';
 const fetchAllRequests = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -123,7 +124,7 @@ const deleteRequestById = (requestId, requestorEmail) => __awaiter(void 0, void 
             throw new Error('Unauthorized: Only the requestor can delete this request');
         }
         // Delete affected groups first
-        yield (0, affectedGroupsUtils_2.deleteAffectedGroupsByRequestId)(requestId);
+        yield (0, affectedGroupsUtils_1.deleteAffectedGroupsByRequestId)(requestId);
         // Delete the request
         const deleteRequestQuery = `
             DELETE FROM request
