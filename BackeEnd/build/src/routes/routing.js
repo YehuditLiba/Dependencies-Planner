@@ -35,11 +35,14 @@ router.delete('/affectedGroups/:requestId', affectedGroupCon_1.deleteAffectedGro
 //routings ProductManager
 router.get('/productManagers', productManagerCon_1.getAllProductManagers);
 router.get('/requests/:groupId', productManagerCon_1.getAllRequestsByProductManager);
+router.get('/admin-settings', productManagerCon_1.getAllGroupsWithProductManagers);
 //status routings
 router.get('/status', StatusCon_1.getAllStatusController);
 router.get('/Getstatus', StatusCon_1.getAllStatus);
 //priority routings
 router.get('/priority', PriorityCon_1.getAllPrioritiesController);
+// router.put('/priority/:id', updatePriorityController);
+router.put('/requests/:ID/priority', PriorityCon_1.updatePriorityController);
 //T_Size routings
 // router.get('/GetTSize', getAllTSize);
 //Decisions routings

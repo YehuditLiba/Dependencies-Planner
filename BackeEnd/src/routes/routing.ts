@@ -6,7 +6,7 @@ import {  getRequestByIdController, updateRequest,
     createRequest, updatePlannedField, getAllFilteredRequestsWithPagination} from '../Controllers/requestCon';
 import { getAllProductManagers, getAllRequestsByProductManager } from '../Controllers/productManagerCon';
 import { getAllStatusController, getAllStatus } from '../Controllers/StatusCon';
-import { getAllPrioritiesController } from '../Controllers/PriorityCon';
+import { getAllPrioritiesController, updatePriorityController } from '../Controllers/PriorityCon';
 // import { getAllTSize } from '../Controllers/T_SizeCon';
 // import { getAllDecisionsController } from '../Controllers/final_decisionCon';
 import { getAllAffectedGroupsController,createAffectedGroup,updateAffectedGroupStatus,deleteAffectedGroups } from '../Controllers/affectedGroupCon';
@@ -44,6 +44,9 @@ router.get('/Getstatus', getAllStatus);
 
 //priority routings
 router.get('/priority', getAllPrioritiesController);
+// router.put('/priority/:id', updatePriorityController);
+router.put('/requests/:ID/priority', updatePriorityController);
+
 
 //T_Size routings
 // router.get('/GetTSize', getAllTSize);

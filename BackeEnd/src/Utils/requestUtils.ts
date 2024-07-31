@@ -104,12 +104,12 @@ export const deleteRequestById = async (requestId: number, requestorEmail: strin
     }
   };
 //עריכת כותרת ותיאור
-export const updateRequestFields = async (id: number, updatedFields: Partial<Pick<RequestT, 'title' | 'description'>>): Promise<RequestT | null> => {
+export const updateRequestFields = async (id: number, updatedFields: Partial<Pick<RequestT, 'title' | 'description' | 'comments'>>): Promise<RequestT | null> => {
     try {
         const client = await pool.connect();
-        const { title, description } = updatedFields;
-        const sql = 'UPDATE request SET title = $1, description = $2 WHERE id = $3 RETURNING *;';
-        const { rows } = await client.query(sql, [title, description, id]);
+        const { title, description, comments } = updatedFields;
+        const sql = 'UPDATE request SET title = $1, description = $2, comments = $3 WHERE id = $4 RETURNING *;';
+        const { rows } = await client.query(sql, [title, description, comments, id]);
         client.release();
         if (rows.length === 0) {
             return null;
