@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 
 import {
+<<<<<<< HEAD
   updateRequestFields,
    fetchAllRequests,
    getRequestById,
@@ -12,19 +13,15 @@ updateAffectedGroupList,
   addRequest,
    updatePlanned,
     filterRequests
+=======
+  updateRequestFields ,getRequestById, getRequestByIdForUp, 
+updateAffectedGroupList, deleteRequestById, updateRequestById,updateFinalDecision,
+  addRequest, updatePlanned, filterRequests
+>>>>>>> d00085f83a3d41a98fb2b97bc8743f599c39b510
 } from '../Utils/requestUtils';
 import { RequestT } from '../types/requestTypes';
 
 
-export const getAllRequests = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const requests = await fetchAllRequests();
-    res.json(requests);
-  } catch (err) {
-    console.error('Error in getAllRequests:', err);
-    res.status(500).json({ error: 'Failed to fetch requests' });
-  }
-};
 
 
 export const getRequestByIdController = async (req: Request, res: Response): Promise<void> => {
@@ -48,25 +45,26 @@ export const getRequestByIdController = async (req: Request, res: Response): Pro
 };
 
 export const deleteRequest = async (req: Request, res: Response) => {
-  const { id } = req.params; // לקיחת requestId מה-URL
-  const { requestorEmail } = req.body; // לקיחת requestorEmail מה-גוף הבקשה
-  console.log('REQUEST ID:', id); // לוג לבדיקת requestId
-  console.log('REQUESTOR EMAIL:', requestorEmail); // לוג לבדיקת requestorEmail
+  const { id } = req.params;
+  const { requestorEmail } = req.body;
 
   if (!id || !requestorEmail) {
-      return res.status(400).json({ message: 'Missing requestId or requestorEmail' });
+    return res.status(400).json({ message: 'Missing requestId or requestorEmail' });
   }
 
   try {
-      await deleteRequestById(Number(id), requestorEmail);
-      res.status(200).json({ message: `Request with ID ${id} and its affected groups deleted successfully` });
+    await deleteRequestById(Number(id), requestorEmail);
+    res.status(200).json({ message: `Request with ID ${id} and its affected groups deleted successfully` });
   } catch (error: unknown) {
-      let errorMessage = 'Unknown error';
-      if (error instanceof Error) {
-          errorMessage = error.message;
-      }
-      console.error('Error deleting request:', errorMessage);
-      res.status(500).json({ message: errorMessage });
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+      return res.status(403).json({ message: error.message });
+    }
+    let errorMessage = 'Unknown error';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    console.error('Error deleting request:', errorMessage);
+    res.status(500).json({ message: errorMessage });
   }
 };
 //עדכון שדות בקשה
@@ -171,16 +169,18 @@ export const createRequest = async (req: CustomRequest<RequestT>, res: Response)
       dateTime: new Date(req.body.dateTime),
       affectedGroupList: req.body.affectedGroupList,
       jiraLink: req.body.jiraLink,
-      emailRequestor: req.body.emailRequestor
+      emailRequestor: req.body.emailRequestor,
+      statuses: req.body.statuses // כולל את הסטטוסים
     };
 
-    await addRequest(request);
+    await addRequest(request); // להוסיף את הבקשה
     res.status(201).json({ message: 'Request added successfully' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Failed to add request' });
   }
 };
+
 
 
 //עדכון רבעון
@@ -207,7 +207,7 @@ export const updatePlannedField = async (req: CustomRequest<UpdatePlannedBody>, 
 export const getAllFilteredRequestsWithPagination = async (req: Request, res: Response): Promise<void> => {
   console.log('Controller function called');
 
-  const limit = parseInt(req.query.limit as string) || 10;
+  const limit = parseInt(req.query.limit as string) || 0;
   const offset = parseInt(req.query.offset as string) || 0;
 
   try {

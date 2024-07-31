@@ -3,8 +3,7 @@ import { Chip, TextField, Select, MenuItem, FormControl, InputLabel, Button, Box
 import axios from 'axios';
 import { quarters } from '../config/quarters';
 
-
-export default function RequestForm({ onClose ,emailRequestor}) {
+export default function RequestForm({ onClose }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [requestorName, setRequestorName] = useState('');
@@ -16,8 +15,8 @@ export default function RequestForm({ onClose ,emailRequestor}) {
   const [planned, setPlanned] = useState('');
   const [jiraLink, setJiraLink] = useState('');
   const [pm, setPm] = useState([]);
-  //const [selectedQuarter, setSelectedQuarter] = useState('');
-//  const [newEmail,setNewEmail]=useState('');
+  const [email, setEmail] = useState('');
+
   useEffect(() => {
     const fetchGroups = async () => {
       try {
@@ -39,18 +38,24 @@ export default function RequestForm({ onClose ,emailRequestor}) {
 
     fetchPm();
     fetchGroups();
+
+    // שליפת המייל מ־localStorage
+    const userEmail = localStorage.getItem('userEmail');
+    if (userEmail) {
+      setEmail(userEmail);
+    }
   }, []);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log("Current Email:", emailRequestor); // זה יציג את הערך של newEmail בקונסול
+    console.log("Current Email:", email); // זה יציג את הערך של email בקונסול
 
     try {
       await axios.post('http://localhost:3001/api/requests/createRequest', {
         title,
         description,
         requestorName,
-        emailRequestor,
+        emailRequestor: email, // שליחת המייל המתעדכן
         priority,
         comments,
         affectedGroupList,
@@ -67,7 +72,6 @@ export default function RequestForm({ onClose ,emailRequestor}) {
       setRequestGroup('');
       setPlanned('');
       setJiraLink('');
-     // setNewEmail('');
       alert('Request added successfully!');
       onClose();
     } catch (error) {
@@ -90,6 +94,7 @@ export default function RequestForm({ onClose ,emailRequestor}) {
       autoComplete="off"
       onSubmit={handleSubmit}
       className="form"
+      sx={{ maxHeight: '80vh', overflowY: 'auto' }} // סגנון CSS לפופאפ לגלילה
     >
       <h2>Request Form</h2>
       <TextField
@@ -129,9 +134,9 @@ export default function RequestForm({ onClose ,emailRequestor}) {
         label="Email Requestor"
         fullWidth
         margin="normal"
-       // setNewEmail={email}
-        value={emailRequestor}
-      /> 
+        value={email} // הצגת המייל הנוכחי
+        disabled // השדה מנוטרל כדי שלא יוכל להתעדכן
+      />
       <FormControl fullWidth margin="normal">
         <InputLabel id="priority-label">Priority</InputLabel>
         <Select
@@ -193,9 +198,9 @@ export default function RequestForm({ onClose ,emailRequestor}) {
         </Select>
       </FormControl>
       <FormControl fullWidth margin="normal">
-      <InputLabel id="planned">planned</InputLabel>
+        <InputLabel id="planned">Planned</InputLabel>
         <Select
-          labelId="Planned"
+          labelId="planned"
           id="planned"
           value={planned}
           onChange={(e) => setPlanned(e.target.value)}
@@ -206,7 +211,7 @@ export default function RequestForm({ onClose ,emailRequestor}) {
             </MenuItem>
           ))}
         </Select>
-        </FormControl>
+      </FormControl>
       <TextField
         id="jiraLink"
         label="JIRA Link"

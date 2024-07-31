@@ -15,8 +15,9 @@ const affectedGroupCon_1 = require("../Controllers/affectedGroupCon");
 const router = express_1.default.Router();
 //groups routings
 router.get('/groups', GroupCon_1.getAllGroupsController);
+router.put('/groups/:groupId', GroupCon_1.editGroupByAdmin);
 //Requests routings
-router.get('/Allrequests', requestCon_1.getAllRequests);
+// router.get('/Allrequests', getAllRequests);
 router.get('/requests/:id', requestCon_1.getRequestByIdController);
 router.delete('/deleteRequests/:id', requestCon_1.deleteRequest);
 router.put('/requests/:id', requestCon_1.updateRequest);
@@ -32,9 +33,12 @@ router.get('/affectedGroups', affectedGroupCon_1.getAllAffectedGroupsController)
 router.put('/updateAffectedGroups/status', affectedGroupCon_1.updateAffectedGroupStatus);
 router.post('/createAffectedGroup', affectedGroupCon_1.createAffectedGroup);
 router.delete('/affectedGroups/:requestId', affectedGroupCon_1.deleteAffectedGroups);
+// נתיב לקבלת כל הבקשות עם הסטטוסים שלהן
+router.get('/requestsWithStatuses', affectedGroupCon_1.getAllRequestsWithStatusesController);
 //routings ProductManager
 router.get('/productManagers', productManagerCon_1.getAllProductManagers);
 router.get('/requests/:groupId', productManagerCon_1.getAllRequestsByProductManager);
+router.put('/productManagers/:email', productManagerCon_1.editProductManagerByAdmin);
 //status routings
 router.get('/status', StatusCon_1.getAllStatusController);
 router.get('/Getstatus', StatusCon_1.getAllStatus);

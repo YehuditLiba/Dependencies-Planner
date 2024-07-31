@@ -51,3 +51,4 @@ export const getAllStatuses = async (): Promise<Status[]> => {
         throw err;
     }
 };
+

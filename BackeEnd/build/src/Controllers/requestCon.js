@@ -20,19 +20,8 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllFilteredRequestsWithPagination = exports.updatePlannedField = exports.createRequest = exports.updateFinalDecisionController = exports.updateRequestByIdController = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequest = exports.getRequestByIdController = exports.getAllRequests = void 0;
+exports.getAllFilteredRequestsWithPagination = exports.updatePlannedField = exports.createRequest = exports.updateFinalDecisionController = exports.updateRequestByIdController = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequest = exports.getRequestByIdController = void 0;
 const requestUtils_1 = require("../Utils/requestUtils");
-const getAllRequests = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const requests = yield (0, requestUtils_1.fetchAllRequests)();
-        res.json(requests);
-    }
-    catch (err) {
-        console.error('Error in getAllRequests:', err);
-        res.status(500).json({ error: 'Failed to fetch requests' });
-    }
-});
-exports.getAllRequests = getAllRequests;
 const getRequestByIdController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = parseInt(req.params.id, 10);
     if (isNaN(id)) {
@@ -54,10 +43,8 @@ const getRequestByIdController = (req, res) => __awaiter(void 0, void 0, void 0,
 });
 exports.getRequestByIdController = getRequestByIdController;
 const deleteRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.params; // לקיחת requestId מה-URL
-    const { requestorEmail } = req.body; // לקיחת requestorEmail מה-גוף הבקשה
-    console.log('REQUEST ID:', id); // לוג לבדיקת requestId
-    console.log('REQUESTOR EMAIL:', requestorEmail); // לוג לבדיקת requestorEmail
+    const { id } = req.params;
+    const { requestorEmail } = req.body;
     if (!id || !requestorEmail) {
         return res.status(400).json({ message: 'Missing requestId or requestorEmail' });
     }
@@ -66,6 +53,9 @@ const deleteRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         res.status(200).json({ message: `Request with ID ${id} and its affected groups deleted successfully` });
     }
     catch (error) {
+        if (error instanceof Error && error.message.includes('Unauthorized')) {
+            return res.status(403).json({ message: error.message });
+        }
         let errorMessage = 'Unknown error';
         if (error instanceof Error) {
             errorMessage = error.message;
@@ -175,9 +165,10 @@ const createRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             dateTime: new Date(req.body.dateTime),
             affectedGroupList: req.body.affectedGroupList,
             jiraLink: req.body.jiraLink,
-            emailRequestor: req.body.emailRequestor
+            emailRequestor: req.body.emailRequestor,
+            statuses: req.body.statuses // כולל את הסטטוסים
         };
-        yield (0, requestUtils_1.addRequest)(request);
+        yield (0, requestUtils_1.addRequest)(request); // להוסיף את הבקשה
         res.status(201).json({ message: 'Request added successfully' });
     }
     catch (error) {
@@ -201,7 +192,7 @@ const updatePlannedField = (req, res) => __awaiter(void 0, void 0, void 0, funct
 exports.updatePlannedField = updatePlannedField;
 const getAllFilteredRequestsWithPagination = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log('Controller function called');
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 0;
     const offset = parseInt(req.query.offset) || 0;
     try {
         const requestorName = req.query.requestorName;

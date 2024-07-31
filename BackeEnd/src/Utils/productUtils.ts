@@ -39,5 +39,16 @@ const getProductManagers = async (): Promise<ProductManager[]> => {
         client.release();
     }
 };
-
+export const updateProductManagerByEmail = (email: string, newName: string, groupId: number, callback: (error: Error | null) => void) => {
+    const query = 'UPDATE product_manager SET name = $1, group_id = $2 WHERE email = $3';
+  
+    pool.query(query, [newName, groupId, email], (error) => {
+      if (error) {
+        callback(error);
+        return;
+      }
+      callback(null);
+    });
+  };
+  
 export { getProductManagers, getRequestsByProductManager };

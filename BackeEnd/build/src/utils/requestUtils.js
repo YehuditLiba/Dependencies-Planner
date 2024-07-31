@@ -9,11 +9,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRequestsByGroupId = exports.getRequestById = exports.filterRequests = exports.updatePlanned = exports.addRequest = exports.updateFinalDecision = exports.updateRequestById = exports.getRequestByIdForUp = exports.updateAffectedGroupList = exports.updateRequestFields = exports.deleteRequestById = exports.fetchAllRequests = void 0;
+exports.getRequestsByGroupId = exports.getRequestById = exports.filterRequests = exports.updatePlanned = exports.addRequest = exports.updateFinalDecision = exports.updateRequestById = exports.getRequestByIdForUp = exports.updateAffectedGroupList = exports.updateRequestFields = exports.deleteRequestById = void 0;
 const db_1 = require("../config/db");
 // import { createAffectedGroupInDB } from './affectedGroupsUtils';
 // import { deleteAffectedGroupsByRequestId } from './affectedGroupsUtils';
 const affectedGroupsUtils_1 = require("./affectedGroupsUtils");
+<<<<<<< HEAD
 //import { format } from 'date-fns';
 const fetchAllRequests = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -44,6 +45,9 @@ const fetchAllRequests = () => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.fetchAllRequests = fetchAllRequests;
+=======
+const affectedGroupsUtils_2 = require("./affectedGroupsUtils");
+>>>>>>> d00085f83a3d41a98fb2b97bc8743f599c39b510
 const getRequestById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     console.log({ id });
     try {
@@ -110,14 +114,13 @@ const getRequestsByGroupId = (groupId) => __awaiter(void 0, void 0, void 0, func
 exports.getRequestsByGroupId = getRequestsByGroupId;
 const deleteRequestById = (requestId, requestorEmail) => __awaiter(void 0, void 0, void 0, function* () {
     const client = yield db_1.pool.connect();
-    console.log(requestorEmail + "id" + requestId);
     try {
         yield client.query('BEGIN');
-        // Check if the request exists and the requestor matches the provided email
+        // בדיקת הרשאה
         const checkRequestorQuery = `
-            SELECT COUNT(*) FROM request
-            WHERE id = $1 AND requestor_email = $2;
-        `;
+        SELECT COUNT(*) FROM request
+        WHERE id = $1 AND requestor_email = $2;
+      `;
         const { rows } = yield client.query(checkRequestorQuery, [requestId, requestorEmail]);
         const requestorExists = parseInt(rows[0].count, 10) > 0;
         if (!requestorExists) {
@@ -298,55 +301,77 @@ const updatePlanned = (ID, planned) => __awaiter(void 0, void 0, void 0, functio
     yield db_1.pool.query(query, values);
 });
 exports.updatePlanned = updatePlanned;
-// Function to filter requests with optional parameters by requestor name and/or requestor group with limit and offset
-const filterRequests = (requestorName, requestorGroup, affectedGroupList, // נוסיף כאן את הפילטר החדש
-limit, offset) => __awaiter(void 0, void 0, void 0, function* () {
+const filterRequests = (requestorName, requestorGroup, affectedGroupList, limit, offset) => __awaiter(void 0, void 0, void 0, function* () {
     console.log('Filtering requests with parameters:', requestorName, requestorGroup, affectedGroupList);
     let sql = `
-      SELECT *, COUNT(*) OVER() AS total_count
-      FROM request
+      SELECT 
+        r.*, 
+        COUNT(*) OVER() AS total_count,
+        ag.group_id AS group_id,
+        ag.status AS status_id,
+        COALESCE(s.id, 0) AS status_id,
+        COALESCE(s.status, 'Not Required') AS status_description
+      FROM request r
+      LEFT JOIN affected_group ag ON r.id = ag.request_id
+      LEFT JOIN status s ON ag.status = s.id
       WHERE 1 = 1
     `;
     const values = [];
     if (requestorName) {
-        sql += ` AND requestor_name ILIKE $${values.length + 1}`;
+        sql += ` AND r.requestor_name ILIKE $${values.length + 1}`;
         values.push(`%${requestorName}%`);
     }
     if (requestorGroup) {
-        sql += ` AND request_group ILIKE $${values.length + 1}`;
+        sql += ` AND r.request_group ILIKE $${values.length + 1}`;
         values.push(`%${requestorGroup}%`);
     }
     if (affectedGroupList) {
-        sql += ` AND affected_group_list && $${values.length + 1}`; // מחפש אם יש חפיפות בין המערכים
-        values.push(`{${affectedGroupList}}`); // הפיכת המערך למבנה מתאים לשאילתה
+        sql += ` AND r.affected_group_list && $${values.length + 1}`;
+        values.push(`{${affectedGroupList}}`);
     }
-    sql += `
-      ORDER BY id
-      LIMIT $${values.length + 1} OFFSET $${values.length + 2};
-    `;
-    values.push(limit, offset);
-    //  console.log('Generated SQL:', sql, 'with values:', values);
+    if (limit > 0) {
+        sql += ` ORDER BY r.id LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
+        values.push(limit, offset);
+    }
+    else {
+        sql += ` ORDER BY r.id`;
+    }
     try {
         const client = yield db_1.pool.connect();
         const { rows } = yield client.query(sql, values);
         client.release();
         const totalCount = rows.length > 0 ? parseInt(rows[0].total_count, 10) : 0;
         console.log(rows);
-        const requests = rows.map((row) => ({
-            ID: row.id,
-            title: row.title,
-            requestGroup: row.request_group,
-            description: row.description,
-            priority: row.priority,
-            finalDecision: row.final_decision,
-            planned: row.planned,
-            comments: row.comments,
-            dateTime: row.date_time,
-            affectedGroupList: row.affected_group_list,
-            jiraLink: row.jira_link,
-            requestorName: row.requestor_name,
-            emailRequestor: row.requestor_email,
-        }));
+        // Group statuses by request ID
+        const requestMap = {};
+        rows.forEach((row) => {
+            if (!requestMap[row.id]) {
+                requestMap[row.id] = {
+                    ID: row.id,
+                    title: row.title,
+                    requestGroup: row.request_group,
+                    description: row.description,
+                    priority: row.priority,
+                    finalDecision: row.final_decision,
+                    planned: row.planned,
+                    comments: row.comments,
+                    dateTime: row.date_time,
+                    affectedGroupList: row.affected_group_list,
+                    jiraLink: row.jira_link,
+                    requestorName: row.requestor_name,
+                    emailRequestor: row.requestor_email,
+                    statuses: [] // Initialize the statuses array
+                };
+            }
+            requestMap[row.id].statuses.push({
+                groupId: row.group_id,
+                status: {
+                    id: row.status_id,
+                    status: row.status_description
+                }
+            });
+        });
+        const requests = Object.values(requestMap);
         return { totalCount, requests };
     }
     catch (err) {

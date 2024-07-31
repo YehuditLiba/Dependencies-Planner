@@ -38,7 +38,6 @@ const poolG = new Pool({
   ssl: { rejectUnauthorized: false } 
 
 });
-
 // Function to connect to both databases
 const connectToDatabases = () => {
   // Test connection to first database
@@ -49,7 +48,6 @@ const connectToDatabases = () => {
       console.log('Connected to first PostgreSQL database at:', process.env.DB_HOST);
     }
   });
-
   // Test connection to second database
   poolG.query('SELECT NOW()', (err, res) => {
     if (err) {
@@ -59,7 +57,6 @@ const connectToDatabases = () => {
     }
   });
 };
-
 // Exporting pools and connection function
 export { pool, poolG, connectToDatabases };
 

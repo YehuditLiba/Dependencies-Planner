@@ -1,4 +1,101 @@
 
+// import React, { useState, useEffect } from 'react';
+// import TableCell from '@mui/material/TableCell';
+// import TableRow from '@mui/material/TableRow';
+// import IconButton from '@mui/material/IconButton';
+// import EditIcon from '@mui/icons-material/Edit';
+// import SaveIcon from '@mui/icons-material/Save';
+// import TextField from '@mui/material/TextField';
+// import Select from '@mui/material/Select';
+// import MenuItem from '@mui/material/MenuItem';
+// import axios from 'axios';
+
+
+// const EditableRow = ({ row, columns, groups, statuses, onUpdate/*, updateRequest */ }) => {
+//   const [isEditing, setIsEditing] = useState(false);
+//   const [rowData, setRowData] = useState(row);
+//   const [editCell, setEditCell] = useState(null);
+
+//   useEffect(() => {
+//     setRowData(row);
+//   }, [row]);
+
+
+//   const handleToggleEdit = async () => {
+//     setIsEditing(!isEditing);
+//     if (isEditing) {
+//       console.log('Updated Row Data:', rowData); // Debugging Line
+//       try {
+//         const response = await axios.put(`http://localhost:3001/api/requests/${rowData.ID}`, rowData); // Updated URL to match the Postman example
+//         onUpdate(response.data);
+//       } catch (err) {
+//         console.error('Error updating request:', err);
+//       }
+//     }
+//   };
+
+//   const handleDoubleClick = (columnId) => {
+//     if (isEditing) {
+//       setEditCell(columnId);
+//     }
+//   };
+
+//   const handleChange = (e, columnId) => {
+//     setRowData({ ...rowData, [columnId]: e.target.value });
+//   };
+
+//   const handleBlur = () => {
+//     setEditCell(null);
+//   };
+
+
+//   return (
+//     <TableRow hover role="checkbox" tabIndex={-1}>
+//       <TableCell>
+//         <IconButton onClick={handleToggleEdit} color={isEditing ? "primary" : "default"}>
+//           {isEditing ? <SaveIcon /> : <EditIcon />}
+//         </IconButton>
+//       </TableCell>
+//       {columns.map(column => (
+//         <TableCell
+//           key={column.id}
+//           onDoubleClick={() => handleDoubleClick(column.id)}
+//         >
+//           {editCell === column.id ? (
+//             <TextField
+//               value={rowData[column.id]}
+//               onChange={(e) => handleChange(e, column.id)}
+//               onBlur={handleBlur}
+//               autoFocus
+//             />
+//           ) : (
+//             rowData[column.id]
+//           )}
+//         </TableCell>
+//       ))}
+//       {groups.map(group => (
+//         <TableCell key={group.id}>
+//           {isEditing ? (
+//             <Select
+//               value={rowData[group.id] || ''}
+//               onChange={(e) => handleChange(e, group.id)}
+//             >
+//               {statuses.map(status => (
+//                 <MenuItem key={status} value={status}>
+//                   {status}
+//                 </MenuItem>
+//               ))}
+//             </Select>
+//           ) : (
+//             rowData[group.id] || 'Not Required'
+//           )}
+//         </TableCell>
+//       ))}
+//     </TableRow>
+//   );
+// };
+
+// export default EditableRow;
 import React, { useState, useEffect } from 'react';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
@@ -10,7 +107,6 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import axios from 'axios';
 import { formatDateTime, priorityMap } from '../utils/utils'; // נייבא את הפונקציה החדשה
-
 
 
 const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
@@ -25,6 +121,7 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
   useEffect(() => {
     setRowData(row);
   }, [row]);
+
 
   useEffect(() => {
     const fetchProductManagers = async () => {
@@ -63,8 +160,9 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
   const handleToggleEdit = async () => {
     setIsEditing(!isEditing);
     if (isEditing) {
-      console.log('Updated Row Data:', rowData); // Debugging Line
+      console.log('Updated Row Data:', rowData);
       try {
+<<<<<<< HEAD
         // אם העדכון הוא עבור priority
         if (rowData.priority !== row.priority) {
           const response = await axios.put(`http://localhost:3001/api/requests/${rowData.ID}/priority`, { priority: priorityMap[rowData.priority] });
@@ -73,6 +171,10 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
           const response = await axios.put(`http://localhost:3001/api/requests/${rowData.ID}`, rowData); // Updated URL to match the Postman example
           onUpdate(response.data);
         }
+=======
+        const response = await axios.put(`http://localhost:3001/api/requests/${rowData.ID}`, rowData);
+        onUpdate(response.data);
+>>>>>>> d00085f83a3d41a98fb2b97bc8743f599c39b510
       } catch (err) {
         console.error('Error updating request:', err);
       }
@@ -93,6 +195,24 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
     setEditCell(null);
   };
 
+<<<<<<< HEAD
+=======
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Pending Response':
+        return 'yellow';
+      case 'Not Required':
+        return 'gray';
+      case 'In Q':
+        return 'green';
+      case 'Not in Q':
+        return 'red';
+      default:
+        return 'transparent';
+    }
+  };
+
+>>>>>>> d00085f83a3d41a98fb2b97bc8743f599c39b510
   return (
     <TableRow hover role="checkbox" tabIndex={-1}>
       <TableCell>
@@ -161,7 +281,10 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
         </TableCell>
       ))}
       {groups.map(group => (
-        <TableCell key={group.id}>
+        <TableCell
+          key={group.id}
+          style={{ backgroundColor: getStatusColor(rowData[group.id]) }}
+        >
           {isEditing ? (
             <Select
               value={rowData[group.id] || ''}
@@ -174,7 +297,11 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
               ))}
             </Select>
           ) : (
+<<<<<<< HEAD
             rowData[group.id] || 'Not Required'
+=======
+            rowData[group.id]
+>>>>>>> d00085f83a3d41a98fb2b97bc8743f599c39b510
           )}
         </TableCell>
       ))}
@@ -184,6 +311,98 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
 
 export default EditableRow;
 
+<<<<<<< HEAD
+=======
+// import React, { useState, useEffect } from 'react';
+// import TableCell from '@mui/material/TableCell';
+// import TableRow from '@mui/material/TableRow';
+// import IconButton from '@mui/material/IconButton';
+// import EditIcon from '@mui/icons-material/Edit';
+// import SaveIcon from '@mui/icons-material/Save';
+// import TextField from '@mui/material/TextField';
+// import Select from '@mui/material/Select';
+// import MenuItem from '@mui/material/MenuItem';
+// import axios from 'axios';
+// import { formatDateTime } from '../utils/formatDateUtil'; // נייבא את הפונקציה החדשה
+
+// const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
+//   const [isEditing, setIsEditing] = useState(false);
+//   const [rowData, setRowData] = useState(row);
+//   const [editCell, setEditCell] = useState(null);
+//   const [productManagers, setProductManagers] = useState([]);
+//   const [allGroups, setAllGroups] = useState([]);
+
+
+//   useEffect(() => {
+//     setRowData(row);
+//   }, [row]);
+
+//   useEffect(() => {
+//     const fetchProductManagers = async () => {
+//       try {
+//         const response = await axios.get('http://localhost:3001/api/productManagers');
+//         setProductManagers(response.data);
+//       } catch (err) {
+//         console.error('Error fetching product managers:', err);
+//       }
+//     };
+
+//     const fetchAllGroups = async () => {
+//       try {
+//         const response = await axios.get('http://localhost:3001/api/groups');
+//         setAllGroups(response.data);
+//       } catch (err) {
+//         console.error('Error fetching groups:', err);
+//       }
+//     };
+
+//     fetchProductManagers();
+//     fetchAllGroups();
+//   }, []);
+
+
+//   const handleToggleEdit = async () => {
+//     setIsEditing(!isEditing);
+//     if (isEditing) {
+//       console.log('Updated Row Data:', rowData);
+//       try {
+//         const response = await axios.put(`http://localhost:3001/api/requests/${rowData.ID}`, rowData);
+//         onUpdate(response.data);
+//       } catch (err) {
+//         console.error('Error updating request:', err);
+//       }
+//     }
+//   };
+
+//   const handleDoubleClick = (columnId) => {
+//     if (isEditing) {
+//       setEditCell(columnId);
+//     }
+//   };
+
+//   const handleChange = (e, columnId) => {
+//     setRowData({ ...rowData, [columnId]: e.target.value });
+//   };
+
+//   const handleBlur = () => {
+//     setEditCell(null);
+//   };
+
+//   const getStatusColor = (status) => {
+//     switch (status) {
+//       case 'Pending Response':
+//         return 'yellow';
+//       case 'Not Required':
+//         return 'gray';
+//       case 'In Q':
+//         return 'green';
+//       case 'Not in Q':
+//         return 'red';
+//       default:
+//         return 'transparent';
+//     }
+//   };
+>>>>>>> d00085f83a3d41a98fb2b97bc8743f599c39b510
 
 //   return (
 //     <TableRow hover role="checkbox" tabIndex={-1}>
@@ -197,13 +416,20 @@ export default EditableRow;
 //           key={column.id}
 //           onDoubleClick={() => handleDoubleClick(column.id)}
 //         >
+<<<<<<< HEAD
 //           {isEditing && (column.id === 'title' || column.id === 'description' || column.id === 'comments') && editCell === column.id ? (
+=======
+
+
+//           {isEditing && (column.id === 'title' || column.id === 'description') && editCell === column.id ? (
+>>>>>>> d00085f83a3d41a98fb2b97bc8743f599c39b510
 //             <TextField
 //               value={rowData[column.id]}
 //               onChange={(e) => handleChange(e, column.id)}
 //               onBlur={handleBlur}
 //               autoFocus
 //             />
+<<<<<<< HEAD
 // // priorityMap[rowData[column.id]] || rowData[column.id]
 //           ) : isEditing && column.id === 'priority' ? (
 //             <Select
@@ -219,6 +445,8 @@ export default EditableRow;
 //                 </MenuItem>
 //               ))}
 //             </Select>
+=======
+>>>>>>> d00085f83a3d41a98fb2b97bc8743f599c39b510
 //           ) : isEditing && column.id === 'requestorName' ? (
 //             <Select
 //               value={rowData[column.id] || ''}
@@ -256,7 +484,14 @@ export default EditableRow;
 //         </TableCell>
 //       ))}
 //       {groups.map(group => (
+<<<<<<< HEAD
 //         <TableCell key={group.id}>
+=======
+//         <TableCell
+//           key={group.id}
+//           style={{ backgroundColor: getStatusColor(rowData[group.id]) }}
+//         >
+>>>>>>> d00085f83a3d41a98fb2b97bc8743f599c39b510
 //           {isEditing ? (
 //             <Select
 //               value={rowData[group.id] || ''}
@@ -269,7 +504,11 @@ export default EditableRow;
 //               ))}
 //             </Select>
 //           ) : (
+<<<<<<< HEAD
 //             rowData[group.id] || 'Not Required'
+=======
+//             rowData[group.id] || 'Not Required' 
+>>>>>>> d00085f83a3d41a98fb2b97bc8743f599c39b510
 //           )}
 //         </TableCell>
 //       ))}
@@ -278,6 +517,7 @@ export default EditableRow;
 // };
 
 // export default EditableRow;
+<<<<<<< HEAD
 
 // )}
 // </TableCell>
@@ -288,3 +528,5 @@ export default EditableRow;
 
 // export default EditableRow;
 
+=======
+>>>>>>> d00085f83a3d41a98fb2b97bc8743f599c39b510
