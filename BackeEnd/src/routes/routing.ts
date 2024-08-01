@@ -11,8 +11,12 @@ import { getAllPrioritiesController, updatePriorityController } from '../Control
 import { getAllAffectedGroupsController, createAffectedGroup, updateAffectedGroupStatus, deleteAffectedGroups, getAllRequestsWithStatusesController 
     
 } from '../Controllers/affectedGroupCon';
+import { sendMessageToSlack } from '../Controllers/slackCon';
+
 
 const router = express.Router();
+router.post('/send-message', sendMessageToSlack);
+
 //groups routings
 router.get('/groups', getAllGroupsController);
 router.put('/groups/:groupId', editGroupByAdmin);
