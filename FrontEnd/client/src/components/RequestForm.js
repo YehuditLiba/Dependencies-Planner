@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect , useRef } from 'react';
 import { Chip, TextField, Select, MenuItem, FormControl, InputLabel, Button, Box } from '@mui/material';
 import axios from 'axios';
 import { quarters } from '../config/quarters';
@@ -16,9 +16,10 @@ export default function RequestForm({ onClose }) {
   const [jiraLink, setJiraLink] = useState('');
   const [pm, setPm] = useState([]);
   const [allPriority, setAllPriority] = useState([]);
-
   const [email, setEmail] = useState('');
-  
+
+  const isSubmitting = useRef(false); // מנגנון למניעת קריאות כפולות
+
   useEffect(() => {
     const fetchGroups = async () => {
       try {
