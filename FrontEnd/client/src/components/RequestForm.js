@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Chip, TextField, Select, MenuItem, FormControl, InputLabel, Button, Box } from '@mui/material';
 import axios from 'axios';
 import { quarters } from '../config/quarters';
-
+import { sendMessageToSlack } from './sendMessageToSlack';
 export default function RequestForm({ onClose }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -15,8 +15,10 @@ export default function RequestForm({ onClose }) {
   const [planned, setPlanned] = useState('');
   const [jiraLink, setJiraLink] = useState('');
   const [pm, setPm] = useState([]);
-  const [email, setEmail] = useState('');
+  const [allPriority, setAllPriority] = useState([]);
 
+  const [email, setEmail] = useState('');
+  
   useEffect(() => {
     const fetchGroups = async () => {
       try {
@@ -35,9 +37,18 @@ export default function RequestForm({ onClose }) {
         console.error('Failed to fetch PMs', error);
       }
     };
+    const fetchPriority = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/api/priority');
+        setAllPriority(response.data);
+      } catch (error) {
+        console.error('Failed to fetch priority', error);
+      }
+    };
 
     fetchPm();
     fetchGroups();
+   fetchPriority();
 
     // שליפת המייל מ־localStorage
     const userEmail = localStorage.getItem('userEmail');
@@ -74,6 +85,7 @@ export default function RequestForm({ onClose }) {
       setJiraLink('');
       alert('Request added successfully!');
       onClose();
+      sendMessageToSlack(`${email} Added a new request`)
     } catch (error) {
       console.error('Failed to add request', error);
       alert('Failed to add request');
@@ -138,18 +150,19 @@ export default function RequestForm({ onClose }) {
         disabled // השדה מנוטרל כדי שלא יוכל להתעדכן
       />
       <FormControl fullWidth margin="normal">
-        <InputLabel id="priority-label">Priority</InputLabel>
+        <InputLabel id="priority-label">priority</InputLabel>
         <Select
           labelId="priority-label"
           id="priority"
           value={priority}
           onChange={(e) => setPriority(e.target.value)}
         >
-          <MenuItem value="S">Low</MenuItem>
-          <MenuItem value="M">Medium</MenuItem>
-          <MenuItem value="L">High</MenuItem>
+          {allPriority.map(allPriority => (
+            <MenuItem key={allPriority.id} value={allPriority.id}>{allPriority.priority}</MenuItem>
+          ))}
         </Select>
       </FormControl>
+
       <TextField
         id="comments"
         label="Comments"
