@@ -11,6 +11,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getRequestsByGroupId = exports.getRequestById = exports.filterRequests = exports.updatePlanned = exports.addRequest = exports.updateFinalDecision = exports.updateRequestById = exports.getRequestByIdForUp = exports.updateAffectedGroupList = exports.updateRequestFields = exports.deleteRequestById = void 0;
 const db_1 = require("../config/db");
+// import { createAffectedGroupInDB } from './affectedGroupsUtils';
+// import { deleteAffectedGroupsByRequestId } from './affectedGroupsUtils';
 const affectedGroupsUtils_1 = require("./affectedGroupsUtils");
 const affectedGroupsUtils_2 = require("./affectedGroupsUtils");
 const getRequestById = (id) => __awaiter(void 0, void 0, void 0, function* () {
@@ -82,8 +84,12 @@ const deleteRequestById = (requestId, requestorEmail) => __awaiter(void 0, void 
     try {
         yield client.query('BEGIN');
         // בדיקת הרשאה
+        // בדיקת הרשאה
         const checkRequestorQuery = `
         SELECT COUNT(*) FROM request
+        WHERE id = $1 AND requestor_email = $2;
+      `;
+       ` SELECT COUNT(*) FROM request
         WHERE id = $1 AND requestor_email = $2;
       `;
         const { rows } = yield client.query(checkRequestorQuery, [requestId, requestorEmail]);
@@ -92,7 +98,7 @@ const deleteRequestById = (requestId, requestorEmail) => __awaiter(void 0, void 
             throw new Error('Unauthorized: Only the requestor can delete this request');
         }
         // Delete affected groups first
-        yield (0, affectedGroupsUtils_2.deleteAffectedGroupsByRequestId)(requestId);
+        yield (0, affectedGroupsUtils_1.deleteAffectedGroupsByRequestId)(requestId);
         // Delete the request
         const deleteRequestQuery = `
             DELETE FROM request
@@ -279,18 +285,39 @@ const filterRequests = (requestorName, requestorGroup, affectedGroupList, limit,
       FROM request r
       LEFT JOIN affected_group ag ON r.id = ag.request_id
       LEFT JOIN status s ON ag.status = s.id
+      SELECT 
+        r.*, 
+        COUNT(*) OVER() AS total_count,
+        ag.group_id AS group_id,
+        ag.status AS status_id,
+        COALESCE(s.id, 0) AS status_id,
+        COALESCE(s.status, 'Not Required') AS status_description
+      FROM request r
+      LEFT JOIN affected_group ag ON r.id = ag.request_id
+      LEFT JOIN status s ON ag.status = s.id
       WHERE 1 = 1
     `;
     const values = [];
     if (requestorName) {
         sql += ` AND r.requestor_name ILIKE $${values.length + 1}`;
+        sql += ` AND r.requestor_name ILIKE $${values.length + 1}`;
         values.push(`%${requestorName}%`);
     }
     if (requestorGroup) {
         sql += ` AND r.request_group ILIKE $${values.length + 1}`;
+        sql += ` AND r.request_group ILIKE $${values.length + 1}`;
         values.push(`%${requestorGroup}%`);
     }
     if (affectedGroupList) {
+        sql += ` AND r.affected_group_list && $${values.length + 1}`;
+        values.push(`{${affectedGroupList}}`);
+    }
+    if (limit > 0) {
+        sql += ` ORDER BY r.id LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
+        values.push(limit, offset);
+    }
+    else {
+        sql += ` ORDER BY r.id`;
         sql += ` AND r.affected_group_list && $${values.length + 1}`;
         values.push(`{${affectedGroupList}}`);
     }
@@ -337,6 +364,34 @@ const filterRequests = (requestorName, requestorGroup, affectedGroupList, limit,
             });
         });
         const requests = Object.values(requestMap);
+        // Group statuses by request ID
+        rows.forEach((row) => {
+            if (!requestMap[row.id]) {
+                requestMap[row.id] = {
+                    ID: row.id,
+                    title: row.title,
+                    requestGroup: row.request_group,
+                    description: row.description,
+                    priority: row.priority,
+                    finalDecision: row.final_decision,
+                    planned: row.planned,
+                    comments: row.comments,
+                    dateTime: row.date_time,
+                    affectedGroupList: row.affected_group_list,
+                    jiraLink: row.jira_link,
+                    requestorName: row.requestor_name,
+                    emailRequestor: row.requestor_email,
+                    statuses: [] // Initialize the statuses array
+                };
+            }
+            requestMap[row.id].statuses.push({
+                groupId: row.group_id,
+                status: {
+                    id: row.status_id,
+                    status: row.status_description
+                }
+            });
+        });
         return { totalCount, requests };
     }
     catch (err) {

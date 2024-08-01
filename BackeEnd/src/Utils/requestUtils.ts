@@ -1,7 +1,8 @@
 import { pool } from '../config/db';
 import { RequestT } from '../types/requestTypes';
-import { createAffectedGroupInDB } from './affectedGroupsUtils';
-import { deleteAffectedGroupsByRequestId } from './affectedGroupsUtils';
+// import { createAffectedGroupInDB } from './affectedGroupsUtils';
+// import { deleteAffectedGroupsByRequestId } from './affectedGroupsUtils';
+import { createAffectedGroupInDB, deleteAffectedGroupsByRequestId } from './affectedGroupsUtils';
 
 
 const getRequestById = async (id: number): Promise<RequestT | null> => {
@@ -127,6 +128,7 @@ export const updateRequestFields = async (id: number, updatedFields: Partial<Pic
             dateTime: row.date_time,
             affectedGroupList: row.affected_group_list,
             jiraLink: row.jira_link
+
         } as RequestT;
     } catch (err) {
         console.error('Error updating request:', err);

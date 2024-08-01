@@ -1,4 +1,4 @@
-import { pool } from '../config/db'; 
+import { pool } from '../config/db';
 import { Priority } from '../types/priorityTypes';
 
 export const fetchAllPriorities = async (): Promise<Priority[]> => {
@@ -17,14 +17,32 @@ export const fetchAllPriorities = async (): Promise<Priority[]> => {
     }
 };
 
-export const updatePriority = async (ID: number, priority: string): Promise<void> => {
+export const getPriorityIdByName = async (priorityName: string): Promise<number | null> => {
+    try {
+        const client = await pool.connect();
+        const sql = 'SELECT id FROM priority WHERE priority = $1;';
+        const { rows } = await client.query(sql, [priorityName]);
+        client.release();
+
+        if (rows.length === 0) {
+            return null;
+        }
+        return rows[0].id;
+    } catch (err) {
+        console.error('Error fetching priority ID:', err);
+        throw err;
+    }
+};
+
+
+export const updatePriority = async (ID: number, /*priority: string*/priorityId: number): Promise<void> => {
     const query = `
       UPDATE request
       SET priority = $1
       WHERE id = $2
     `;
 
-    const values = [priority, ID];
+    const values = [/*priority*/priorityId, ID];
 
     try {
         await pool.query(query, values);
