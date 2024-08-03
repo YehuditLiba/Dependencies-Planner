@@ -210,15 +210,23 @@ export const getAllFilteredRequestsWithPagination = async (req: Request, res: Re
   const limit = parseInt(req.query.limit as string) || 0;
   const offset = parseInt(req.query.offset as string) || 0;
 
+  // קבלת פרמטרי המיון מתוך הבקשה, אם קיימים
+  const sortBy = req.query.sortBy as string || 'r.id'; // ערך ברירת מחדל הוא 'r.id'
+  const sortDirection: 'ASC' | 'DESC' = (req.query.sortDirection as 'ASC' | 'DESC') || 'DESC'; // ערך ברירת מחדל הוא 'DESC'
+
   try {
     const requestorName = req.query.requestorName as string | undefined;
     const requestorGroup = req.query.requestorGroup as string | undefined;
     const affectedGroupList = req.query.affectedGroupList as string | undefined;
 
+    console.log('Query parameters:', { requestorName, requestorGroup, affectedGroupList, sortBy, sortDirection, limit, offset });
+
     const { totalCount, requests } = await filterRequests(
       requestorName,
       requestorGroup,
       affectedGroupList,
+      sortBy,           // הוסף את פרמטר המיון לפי עמודה
+      sortDirection,    // הוסף את פרמטר כיוון המיון
       limit,
       offset
     );
@@ -234,5 +242,3 @@ export const getAllFilteredRequestsWithPagination = async (req: Request, res: Re
     res.status(500).send('Internal Server Error');
   }
 };
-
-

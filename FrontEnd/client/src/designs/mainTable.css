@@ -1,58 +1,34 @@
-/* YourTableStyles.css */
+/* קובץ SCSS לסגנון הטבלה */
 
-/* עיצוב כללי של הטבלה */
-.MuiTable-root {
-  border-collapse: collapse;
-  width: 100%;
-}
-
-/* עיצוב לשורות עם רקע לפי סטטוס */
-.inQ {
-  background-color: transparent;
-  /* רקע שקוף לשורה */
-}
-
-.notInQ {
-  background-color: transparent;
-  /* רקע שקוף לשורה */
-}
-
-/* עיצוב רקע לאותיות בלב */
-.inQ .MuiTableCell-root::before {
-  content: 'In Queue';
-  color: white;
-  background-color: red;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.notInQ .MuiTableCell-root::before {
-  content: 'Not In Queue';
-  color: white;
-  background-color: green;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-/* עיצוב כללי של תאי הטבלה */
 .MuiTableCell-root {
-  position: relative;
+  font-size: 0.875rem;
+  /* הקטנת גודל הפונט */
 }
 
-/* הצג רקע עבור תיאור הטקסט */
-.MuiTableCell-root::before {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  transform: translateY(-50%);
-  white-space: nowrap;
-  display: block;
-  padding: 2px 6px;
+.MuiTableRow-root {
+  height: 40px;
+  /* הקטנת גובה השורות */
 }
-.MuiTableCell-root::before {
-  content: '';
-  display: none;
+
+.MuiTableContainer-root {
+  border: 1px solid #d0e4f5;
+  /* צבע הגבולות של הטבלה בתכלת */
+  border-radius: 4px;
+  /* רדיוס גבולות לפינות רכות */
 }
-.MuiTableCell-root {
-  border: 1px solid #ddd;
+
+.MuiTableHead-root {
+  .MuiTableCell-root {
+    background-color: #ff8000;
+    /* צבע רקע לכותרות הטבלה בתכלת */
+    font-weight: bold;
+    /* טקסט מודגש בכותרות */
+  }
+}
+
+.MuiTableBody-root {
+  .MuiTableCell-root {
+    border-bottom: 1px solid #d0e4f5;
+    /* גבולות תכלת בין השורות */
+  }
 }
