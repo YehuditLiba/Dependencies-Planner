@@ -412,14 +412,14 @@ export default function MainTable({ emailRequestor }) {
                   Actions
                 </TableCell> */}
                 {columns.map((column) => (
-                  column.id === 'requestGroup' && !showGroupColumns ? null : (
+                  // column.id === 'requestGroup' && !showGroupColumns ? null : (
                     <TableCell
                       key={column.id}
                       style={{ minWidth: column.minWidth, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}
                     >
                       {column.label}
                     </TableCell>
-                  )
+                  // )
                 ))}
                 {groups.map((group) =>
                   showGroupColumns ? (
@@ -449,7 +449,7 @@ export default function MainTable({ emailRequestor }) {
                   email={emailRequestor}
                   onDelete={handleDeleteRequest}
                   formatDate={formatDate}
-                  // showGroupColumns={showGroupColumns}
+                  showGroupColumns={showGroupColumns}
                 />
                     {/* {columns.map((column) => {
                       const value = row[column.id];

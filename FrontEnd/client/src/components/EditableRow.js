@@ -7,11 +7,10 @@ import axios from 'axios';
 import DeleteRequest from './DeleteRequest'; // Add this line
 
 
-const EditableRow = ({ row, columns, onSave, emailRequestor, handleDeleteRequest,formatDate,/*showGroupColumns*/ }) => {
+const EditableRow = ({ row, columns, onSave, emailRequestor, handleDeleteRequest,formatDate,showGroupColumns }) => {
     console.log("EditableRow row:", row); // הוסף את השורה הזו לבדוק את ה-row המתקבל
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState(row);
-    const [showGroupColumns, setShowGroupColumns] = useState(true);
 
 
     const handleToggleEdit = async () => {
@@ -59,7 +58,7 @@ const EditableRow = ({ row, columns, onSave, emailRequestor, handleDeleteRequest
                 </TableCell>
             ))} */}
             {columns.slice(1).map((column) => (
-                <React.Fragment key={row.id}>
+                // <React.Fragment key={row.id}>
                     <TableCell key={column.id} style={{ minWidth: column.minWidth }}>
                         {isEditing ? (
                             <TextField
@@ -72,7 +71,7 @@ const EditableRow = ({ row, columns, onSave, emailRequestor, handleDeleteRequest
                             )
                         )}
                     </TableCell>
-                </React.Fragment>
+                // </React.Fragment>
 
             ))}
         </TableRow>
