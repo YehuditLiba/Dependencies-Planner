@@ -12,8 +12,13 @@ const PriorityCon_1 = require("../Controllers/PriorityCon");
 // import { getAllTSize } from '../Controllers/T_SizeCon';
 // import { getAllDecisionsController } from '../Controllers/final_decisionCon';
 const affectedGroupCon_1 = require("../Controllers/affectedGroupCon");
+<<<<<<< HEAD
 const productManagerGroupCon_1 = require("../Controllers/productManagerGroupCon");
+=======
+const slackCon_1 = require("../Controllers/slackCon");
+>>>>>>> master
 const router = express_1.default.Router();
+router.post('/send-message', slackCon_1.sendMessageToSlack);
 //groups routings
 router.get('/groups', GroupCon_1.getAllGroupsController);
 router.put('/groups/:groupId', GroupCon_1.editGroupByAdmin);
@@ -54,8 +59,8 @@ router.get('/status', StatusCon_1.getAllStatusController);
 router.get('/Getstatus', StatusCon_1.getAllStatus);
 //priority routings
 router.get('/priority', PriorityCon_1.getAllPrioritiesController);
-// router.put('/priority/:id', updatePriorityController);
 router.put('/requests/:ID/priority', PriorityCon_1.updatePriorityController);
+// router.put('/priority/:id', updatePriorityController);
 //T_Size routings
 // router.get('/GetTSize', getAllTSize);
 //Decisions routings

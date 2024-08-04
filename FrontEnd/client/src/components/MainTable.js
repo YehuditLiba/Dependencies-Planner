@@ -17,6 +17,7 @@ import Checkbox from '@mui/material/Checkbox';
 // import FormGroup from '@mui/material/FormGroup';
 import axios from 'axios';
 import '../designs/TableStyles.scss';
+import '../designs/mainTable.css';
 import RequestForm from './RequestForm';
 import EditableRow from './EditableRow';
 // import AdminSettings from './AdminSettings';
@@ -58,7 +59,7 @@ const modalStyle = {
 
 export default function MainTable({ emailRequestor }) {
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(4);
+  const [rowsPerPage, setRowsPerPage] = useState(8);
   const [rows, setRows] = useState([]);
   const [totalRows, setTotalRows] = useState(0);
   const [groups, setGroups] = useState([]);
@@ -87,23 +88,49 @@ export default function MainTable({ emailRequestor }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/api/requests', {
-          params: {
-            limit: rowsPerPage === -1 ? undefined : rowsPerPage,
-            offset: rowsPerPage === -1 ? 0 : page * rowsPerPage,
-            requestorGroup: selectedGroup || undefined,
-            requestorName: selectedManager || undefined,
-            affectedGroupList: selectedAffectedGroups.length ? selectedAffectedGroups.join(',') : undefined
-          }
-        });
-        console.log('Fetched data:', response.data); // הדפס את הנתונים המלאים מהשרת
-        console.log('Fetched rows:', response.data.requests);
-        setRows(response.data.requests);
-        setTotalRows(response.data.totalCount || response.data.requests.length);
+        const params = {
+          limit: rowsPerPage === -1 ? undefined : rowsPerPage,
+          offset: rowsPerPage === -1 ? 0 : page * rowsPerPage,
+        };
+          console.log(params);
+        if (selectedGroup) {
+          params.requestorGroup = selectedGroup;
+        }
+
+        if (selectedManager) {
+          params.requestorName = selectedManager;
+        }
+
+        if (selectedAffectedGroups.length) {
+          params.affectedGroupList = selectedAffectedGroups.join(',');
+        }
+        console.log(params);
+        console.log('rowsPerPage:', rowsPerPage);
+        console.log('page:', page);
+
+        const response = await axios.get('http://localhost:3001/api/requests', { params });
+
+        // הדפס את כל הנתונים שמתקבלים מהשרת כדי לבדוק מה מגיע בפועל
+        console.log('Full response data:', response.data);
+
+        if (response.data.requests) {
+          console.log('Fetched rows:', response.data.requests);
+
+          setRows(response.data.requests);
+          console.log('Updated rows:', response.data.requests);
+          setTotalRows(response.data.totalCount || response.data.requests.length);
+          console.log('Updated totalRows:', response.data.totalCount || response.data.requests.length);
+
+        } else {
+          console.warn('No requests found in response data');
+        }
       } catch (error) {
         console.error("Failed to fetch data", error);
+        alert("Failed to fetch data from server. Please try again later.");
       }
     };
+
+
 
     const fetchGroups = async () => {
       try {
@@ -133,15 +160,11 @@ export default function MainTable({ emailRequestor }) {
         console.error('Failed to fetch statuses', error);
       }
     };
-
-
-
-
     fetchData();
     fetchGroups();
     fetchManagers();
     fetchStatuses();
-  }, [page, rowsPerPage, selectedGroup, selectedManager, selectedAffectedGroups]);
+  }, [page, rowsPerPage,selectedGroup, selectedManager, selectedAffectedGroups]);
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -229,10 +252,6 @@ export default function MainTable({ emailRequestor }) {
     return date.toLocaleDateString('he-IL');
   };
 
-  // const getStatusForGroup = (requestId, groupId) => {
-  //   return statuses.find(status => status.request_id === requestId && status.group_id === groupId)?.status_description || 'No Status';
-  // };
-
   const getGroupStatus = (row, groupId) => {
     // נניח שיש לך מבנה של סטטוסים ב- row, תוודא שהנתיב נכון לסטטוס של הקבוצה
     const status = row.statuses.find(status => status.groupId === groupId);
@@ -260,16 +279,6 @@ export default function MainTable({ emailRequestor }) {
     }
   };
 
-
-
-
-
-  // // דוגמה לשימוש בפונקציה
-  // const exampleUsage = () => {
-  //   const exampleRequestId = 112; // שים לב לנתון שהתקבל מה-API
-  //   const exampleGroupId = 4; // שים לב לנתון שהתקבל מה-API
-  //   console.log('Status:', getStatusForGroup(exampleRequestId, exampleGroupId));
-  // };
 
 
 
@@ -376,7 +385,7 @@ export default function MainTable({ emailRequestor }) {
           <Button
             className="filter-button"
             variant="contained"
-            onClick={(event) => handleOpenMenu(event, 'manager')}
+            onClick={(event) => handleOpenMenu(event, 'affectedGroup')}
           >
             Filter by Affected Groups
           </Button>

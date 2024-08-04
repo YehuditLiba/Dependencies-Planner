@@ -47,8 +47,11 @@ const deleteRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     const { requestorEmail } = req.body;
     if (!id || !requestorEmail) {
         return res.status(400).json({ message: 'Missing requestId or requestorEmail' });
+        return res.status(400).json({ message: 'Missing requestId or requestorEmail' });
     }
     try {
+        yield (0, requestUtils_1.deleteRequestById)(Number(id), requestorEmail);
+        res.status(200).json({ message: `Request with ID ${id} and its affected groups deleted successfully` });
         yield (0, requestUtils_1.deleteRequestById)(Number(id), requestorEmail);
         res.status(200).json({ message: `Request with ID ${id} and its affected groups deleted successfully` });
     }
@@ -57,6 +60,14 @@ const deleteRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             return res.status(403).json({ message: error.message });
         }
         let errorMessage = 'Unknown error';
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
+        console.error('Error deleting request:', errorMessage);
+        res.status(500).json({ message: errorMessage });
+        if (error instanceof Error && error.message.includes('Unauthorized')) {
+            return res.status(403).json({ message: error.message });
+        }
         if (error instanceof Error) {
             errorMessage = error.message;
         }
@@ -169,6 +180,7 @@ const createRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             statuses: req.body.statuses // כולל את הסטטוסים
         };
         yield (0, requestUtils_1.addRequest)(request); // להוסיף את הבקשה
+        yield (0, requestUtils_1.addRequest)(request); // להוסיף את הבקשה
         res.status(201).json({ message: 'Request added successfully' });
     }
     catch (error) {
@@ -194,11 +206,17 @@ const getAllFilteredRequestsWithPagination = (req, res) => __awaiter(void 0, voi
     console.log('Controller function called');
     const limit = parseInt(req.query.limit) || 0;
     const offset = parseInt(req.query.offset) || 0;
+    // קבלת פרמטרי המיון מתוך הבקשה, אם קיימים
+    const sortBy = req.query.sortBy || 'r.id'; // ערך ברירת מחדל הוא 'r.id'
+    const sortDirection = req.query.sortDirection || 'DESC'; // ערך ברירת מחדל הוא 'DESC'
     try {
         const requestorName = req.query.requestorName;
         const requestorGroup = req.query.requestorGroup;
         const affectedGroupList = req.query.affectedGroupList;
-        const { totalCount, requests } = yield (0, requestUtils_1.filterRequests)(requestorName, requestorGroup, affectedGroupList, limit, offset);
+        console.log('Query parameters:', { requestorName, requestorGroup, affectedGroupList, sortBy, sortDirection, limit, offset });
+        const { totalCount, requests } = yield (0, requestUtils_1.filterRequests)(requestorName, requestorGroup, affectedGroupList, sortBy, // הוסף את פרמטר המיון לפי עמודה
+        sortDirection, // הוסף את פרמטר כיוון המיון
+        limit, offset);
         res.json({
             limit,
             offset,

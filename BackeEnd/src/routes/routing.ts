@@ -10,8 +10,10 @@ import { getAllPrioritiesController, updatePriorityController } from '../Control
 // import { getAllDecisionsController } from '../Controllers/final_decisionCon';
 import { getAllAffectedGroupsController, createAffectedGroup, updateAffectedGroupStatus, deleteAffectedGroups, getAllRequestsWithStatusesController} from '../Controllers/affectedGroupCon';
 import {addProductManagerToGroupHandler,getProductManagerGroupsHandler , getAllProductManagerGroupsHandler} from '../Controllers/productManagerGroupCon';
-
+import { sendMessageToSlack } from '../Controllers/slackCon';
 const router = express.Router();
+router.post('/send-message', sendMessageToSlack);
+
 //groups routings
 router.get('/groups', getAllGroupsController);
 router.put('/groups/:groupId', editGroupByAdmin);
@@ -58,8 +60,8 @@ router.get('/Getstatus', getAllStatus);
 
 //priority routings
 router.get('/priority', getAllPrioritiesController);
-// router.put('/priority/:id', updatePriorityController);
 router.put('/requests/:ID/priority', updatePriorityController);
+// router.put('/priority/:id', updatePriorityController);
 
 
 //T_Size routings
