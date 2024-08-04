@@ -47,8 +47,11 @@ const deleteRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     const { requestorEmail } = req.body;
     if (!id || !requestorEmail) {
         return res.status(400).json({ message: 'Missing requestId or requestorEmail' });
+        return res.status(400).json({ message: 'Missing requestId or requestorEmail' });
     }
     try {
+        yield (0, requestUtils_1.deleteRequestById)(Number(id), requestorEmail);
+        res.status(200).json({ message: `Request with ID ${id} and its affected groups deleted successfully` });
         yield (0, requestUtils_1.deleteRequestById)(Number(id), requestorEmail);
         res.status(200).json({ message: `Request with ID ${id} and its affected groups deleted successfully` });
     }
@@ -57,6 +60,14 @@ const deleteRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             return res.status(403).json({ message: error.message });
         }
         let errorMessage = 'Unknown error';
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
+        console.error('Error deleting request:', errorMessage);
+        res.status(500).json({ message: errorMessage });
+        if (error instanceof Error && error.message.includes('Unauthorized')) {
+            return res.status(403).json({ message: error.message });
+        }
         if (error instanceof Error) {
             errorMessage = error.message;
         }
@@ -168,6 +179,7 @@ const createRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             emailRequestor: req.body.emailRequestor,
             statuses: req.body.statuses // כולל את הסטטוסים
         };
+        yield (0, requestUtils_1.addRequest)(request); // להוסיף את הבקשה
         yield (0, requestUtils_1.addRequest)(request); // להוסיף את הבקשה
         res.status(201).json({ message: 'Request added successfully' });
     }
