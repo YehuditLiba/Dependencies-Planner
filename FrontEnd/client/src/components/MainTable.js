@@ -26,7 +26,7 @@ import AdminSettings from './AdminSettings';
 import { formatDateTime } from '../utils/utils'; // נייבא את הפונקציה החדשה
 import StatusCell from './StatusCell';
 // או הנתיב הנכון לקובץ שבו הפונקציה מוגדרת
-import DeleteRequest from './DeleteRequest'; // Add this line
+// import DeleteRequest from './DeleteRequest'; // Add this line
 
 
 
@@ -408,9 +408,9 @@ export default function MainTable({ emailRequestor }) {
           <Table stickyHeader>
             <TableHead>
               <TableRow>
-                 <TableCell style={{ minWidth: 0, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}>
+                {/* <TableCell style={{ minWidth: 0, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}>
                   Actions
-                </TableCell>
+                </TableCell> */}
                 {columns.map((column) => (
                   column.id === 'requestGroup' && !showGroupColumns ? null : (
                     <TableCell
@@ -430,23 +430,28 @@ export default function MainTable({ emailRequestor }) {
                       {group.name}
                     </TableCell>
                   ) : null
-                )} 
-
-                <TableCell>Actions</TableCell>
+                )}
+                {/* <TableCell>Actions</TableCell>
                 {columns.slice(1).map((column) => ( // מוודאים שעמודת ה-Actions תוצג קודם
                   <TableCell key={column.id}>{column.label}</TableCell>
-                ))}
-
+                ))} */}
               </TableRow>
             </TableHead>
             <TableBody>
-               {rows.map((row, rowIndex) => (
+              {rows.map((row, rowIndex) => (
                 <React.Fragment key={row.id}>
                   <TableRow hover role="checkbox" tabIndex={-1}>
-                    <TableCell>
-                      <DeleteRequest id={row.ID} email={emailRequestor} onDelete={handleDeleteRequest} />
-                    </TableCell>
-                    {columns.map((column) => {
+                  <EditableRow
+                  key={row.id}
+                  row={row}
+                  columns={columns}
+                  onSave={handleSave}
+                  email={emailRequestor}
+                  onDelete={handleDeleteRequest}
+                  formatDate={formatDate}
+                  // showGroupColumns={showGroupColumns}
+                />
+                    {/* {columns.map((column) => {
                       const value = row[column.id];
                       return (
                         column.id === 'requestGroup' && !showGroupColumns ? null : (
@@ -455,7 +460,7 @@ export default function MainTable({ emailRequestor }) {
                           </TableCell>
                         )
                       );
-                    })}
+                    })} */}
                     {groups.map((group) => {
                       const status = row.statuses.find(status => status.groupId === group.id);
                       const statusDescription = status ? status.status.status : 'Not Required';
@@ -477,32 +482,23 @@ export default function MainTable({ emailRequestor }) {
                       ) : null;
                     })}
                   </TableRow>
-                  {/* {isEditingRow === rowIndex && (
-                    <EditableRow
-                      row={row}
-                      onSave={(updatedRow) => {
-                        updateRequest(row.id, updatedRow);
-                        setIsEditingRow(null);
-                      }}
-                      onCancel={() => setIsEditingRow(null)}
-                    />
-                  )} */}
                 </React.Fragment>
-              ))} 
-
-
-              {rows.map((row) => (
-                <EditableRow 
-                key={row.id} 
-                row={row} 
-                columns={columns} 
-                onSave={handleSave} />
               ))}
 
+              {/* {rows.map((row) => (
+                <EditableRow
+                  key={row.id}
+                  row={row}
+                  columns={columns}
+                  onSave={handleSave}
+                  email={emailRequestor}
+                  onDelete={handleDeleteRequest}
+                  formatDate={formatDate}
+                  showGroupColumns={showGroupColumns}
+                />
+              ))} */}
 
             </TableBody>
-
-
           </Table>
         </TableContainer>
         <TablePagination
