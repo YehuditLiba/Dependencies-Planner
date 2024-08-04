@@ -1,34 +1,114 @@
-/* קובץ SCSS לסגנון הטבלה */
-
-.MuiTableCell-root {
-  font-size: 0.875rem;
-  /* הקטנת גודל הפונט */
+/* קונטיינר לכפתורים */
+.filter-buttons-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: nowrap;
 }
 
-.MuiTableRow-root {
-  height: 40px;
-  /* הקטנת גובה השורות */
+/* סגנונות לכפתורים */
+.filter-button,
+.add-request-button,
+.column-toggle-button,
+.clear-filters-button {
+  color: #7fff29;
+  border-radius: 50% !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 0 !important;
+  align-items: center !important;
+  position: relative !important;
+  padding: 0 !important;
+  border: 2px solid transparent !important;
+  transition: background-color 0.3s, box-shadow 0.3s !important;
+  left: 0 !important;
 }
 
-.MuiTableContainer-root {
-  border: 1px solid #d0e4f5;
-  /* צבע הגבולות של הטבלה בתכלת */
-  border-radius: 4px;
-  /* רדיוס גבולות לפינות רכות */
+.group-button {
+  background-color: #a5d6a7;
 }
 
-.MuiTableHead-root {
-  .MuiTableCell-root {
-    background-color: #ff8000;
-    /* צבע רקע לכותרות הטבלה בתכלת */
-    font-weight: bold;
-    /* טקסט מודגש בכותרות */
-  }
+.manager-button {
+  background-color: #81c784;
 }
 
-.MuiTableBody-root {
-  .MuiTableCell-root {
-    border-bottom: 1px solid #d0e4f5;
-    /* גבולות תכלת בין השורות */
-  }
+.affected-group-button {
+  background-color: #66bb6a;
+}
+
+.filter-button:hover,
+.add-request-button:hover,
+.column-toggle-button:hover,
+.clear-filters-button:hover {
+  background-color: #388e3c;
+  border: 2px solid #88fb3b;
+  box-shadow: 0 0 8px rgba(0, 188, 0, 0.3);
+}
+
+/* צבעים שונים לאייקונים */
+.group-button .MuiSvgIcon-root {
+  color: #004d40;
+}
+
+.manager-button .MuiSvgIcon-root {
+  color: #12ff1a;
+}
+
+.affected-group-button .MuiSvgIcon-root {
+  color: #004d40;
+}
+
+/* סגנון לכפתור הוספת בקשה */
+.add-request-button {
+  background-color: #4caf50;
+  color: white;
+  transition: background-color 0.3s, box-shadow 0.3s, border 0.3s;
+}
+
+.add-request-button:hover {
+  background-color: #388e3c;
+  border: 2px solid #88fb3b;
+  box-shadow: 0 0 8px rgba(0, 188, 0, 0.3);
+}
+
+/* סגנון לאייקון ה-+ */
+.add-icon {
+  font-size: 24px;
+}
+
+/* סגנונות לכפתור ניהול עמודות */
+.column-toggle-button {
+  background-color: #4caf50;
+  color: white;
+  transition: background-color 0.3s, box-shadow 0.3s, border 0.3s;
+}
+
+.column-toggle-button:hover {
+  background-color: #388e3c;
+  border: 2px solid #88fb3b;
+  box-shadow: 0 0 8px rgba(0, 188, 0, 0.3);
+}
+
+/* סגנון לאייקון חיצים כפולים */
+.column-toggle-icon {
+  font-size: 24px;
+}
+
+.clear-filters-button {
+  background-color: #f44336;
+  color: white;
+  transition: background-color 0.3s, box-shadow 0.3s, border 0.3s;
+}
+
+.clear-filters-button:hover {
+  background-color: #d32f2f;
+  border: 2px solid #006f2c;
+  box-shadow: 0 0 8px rgba(255, 87, 34, 0.3);
+}
+
+/* סגנון לאייקון ניקוי פילטרים */
+.clear-filters-icon {
+  font-size: 24px;
 }

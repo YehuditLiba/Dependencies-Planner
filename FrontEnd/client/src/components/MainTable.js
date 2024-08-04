@@ -13,6 +13,18 @@ import Box from '@mui/material/Box';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Checkbox from '@mui/material/Checkbox';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import SearchIcon from '@mui/icons-material/Search';
+import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTimes } from '@fortawesome/free-solid-svg-icons'; // אייקון של איקס
+import logo from '../Practicum.png'; // עדכן את הנתיב ללוגו שלך
+import Icon from '@mui/icons-material/AddCircle'; // אם אתה משתמש ב-Material-UI
+
 // import FormControlLabel from '@mui/material/FormControlLabel';
 // import FormGroup from '@mui/material/FormGroup';
 import axios from 'axios';
@@ -28,6 +40,10 @@ import { formatDateTime } from '../utils/utils'; // נייבא את הפונקצ
 import StatusCell from './StatusCell';
  // או הנתיב הנכון לקובץ שבו הפונקציה מוגדרת
 import DeleteRequest from './DeleteRequest'; // Add this line
+import TuneIcon from '@mui/icons-material/Tune'; // שימוש באייקון Tune
+import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
+import { faArrowsAltH } from '@fortawesome/free-solid-svg-icons';
+
 
 
 
@@ -82,8 +98,11 @@ export default function MainTable({ emailRequestor }) {
   const [groupId, setGroupId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredRows, setFilteredRows] = useState([]);
+  const [selectedButton, setSelectedButton] = useState(null);
 
-  const [adminSettingsOpen, setAdminSettingsOpen] = useState(false);
+
+
+ const [adminSettingsOpen, setAdminSettingsOpen] = useState(false);
   
   useEffect(() => {
     const fetchData = async () => {
@@ -215,27 +234,22 @@ export default function MainTable({ emailRequestor }) {
     setSelectedGroup(group.id || '');
     handleCloseMenu('group');
   };
-
   const handleManagerSelect = (manager) => {
     setSelectedManager(manager.name || '');
     handleCloseMenu('manager');
   };
-
   const handleAffectedGroupSelect = (groupId) => {
     setSelectedAffectedGroups(prev =>
       prev.includes(groupId) ? prev.filter(id => id !== groupId) : [...prev, groupId]
     );
   };
-
   const handleDeleteRequest = (ID) => {
     console.log(`Removing row with ID: ${ID} from the table`);
     setRows(prevRows => prevRows.filter(row => row.ID !== ID));
   };
-
   const applyFilter = () => {
     handleCloseMenu('affectedGroup');
   };
-
   const clearFilters = () => {
     setSelectedGroup('');
     setSelectedManager('');
@@ -278,10 +292,6 @@ export default function MainTable({ emailRequestor }) {
       }
     }
   };
-
-
-
-
   const getStatusBackgroundColor = (status) => {
     switch (status) {
       case 'Completed':
@@ -294,9 +304,6 @@ export default function MainTable({ emailRequestor }) {
         return 'white';
     }
   };
-
-
-
   const updateRequest = async (id, updatedFields) => {
     try {
       const response = await axios.put(`http://localhost:3001/api/requests/${id}`, updatedFields);
@@ -308,105 +315,149 @@ export default function MainTable({ emailRequestor }) {
 
   if (redirectToAdminSettings) {
     return <Navigate to="/admin-settings" />;
-  }
-  
+  } 
 
+ 
   return (
-
+    
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 4 }}>
-      <Box className="header">
-        <img src="/path/to/logo.png" alt="Logo" className="logo" />
-        <h1>Dependencies-Planner</h1>
-      </Box>
-      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
-        <Button variant="contained" onClick={() => setOpen(true)}>Add Request</Button>
-        <Button variant="contained" onClick={handleToggleColumns}>
-          {showGroupColumns ? 'Hide Group Columns' : 'Show Group Columns'}
-        </Button>
-        <Button variant="contained" onClick={clearFilters}>Clear Filters</Button>
-        {/* <Button variant="contained" onClick={() => setAdminSettingsOpen(true)}>Admin Settings</Button> */}
-
-            <Button
-          variant="contained"
-          color="primary"
-          onClick={() => setRedirectToAdminSettings(true)}
-        >
-          Admin Settings
-        </Button>
-
-      </Box>
       <Paper sx={{ width: '80%', overflow: 'hidden', marginTop: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, padding: 2 }}>
+          <div className="filter-buttons-container">
 
-          <Button
-            className="filter-button"
-            variant="contained"
-            onClick={(event) => handleOpenMenu(event, 'group')}
-          >
-            Filter by Group
-          </Button>
-          <Menu
-            anchorEl={anchorElGroup}
-            open={Boolean(anchorElGroup)}
-            onClose={() => handleCloseMenu('group')}
-          >
-            {groups.map((group) => (
-              <MenuItem
-                key={group.id}
-                selected={group.id === selectedGroup}
-                onClick={() => handleGroupSelect(group)}
+           
+            <Tooltip title="Add Request" arrow>
+              <Button
+                className="add-request-button"
+                onClick={() => setOpen(true)}
+                variant="contained"
               >
-                {group.name}
-              </MenuItem>
-            ))}
-          </Menu>
-          <Button
-            className="filter-button"
-            variant="contained"
-            onClick={(event) => handleOpenMenu(event, 'manager')}
-          > Filter by Manager
-          </Button>
-          <Menu
-            anchorEl={anchorElManager}
-            open={Boolean(anchorElManager)}
-            onClose={() => handleCloseMenu('manager')}
-          >
-            {managers.map((manager) => (
-              <MenuItem
-                key={manager.id}
-                selected={manager.name === selectedManager}
-                onClick={() => handleManagerSelect(manager)}
-              >
-                <Checkbox checked={manager.name === selectedManager} />
-                {manager.name}
-              </MenuItem>
-            ))}
-          </Menu>
-          <Button
-            className="filter-button"
-            variant="contained"
-            onClick={(event) => handleOpenMenu(event, 'affectedGroup')}
-          >
-            Filter by Affected Groups
-          </Button>
-          <Menu
-            anchorEl={anchorElAffectedGroup}
-            open={Boolean(anchorElAffectedGroup)}
-            onClose={() => handleCloseMenu('affectedGroup')}
-          >
+                <FontAwesomeIcon icon={faPlusCircle} size="2x" className="add-icon" />
+              </Button>
+            </Tooltip>
 
-            {groups.map((group) => (
-              <MenuItem
-                key={group.id}
-                onClick={() => handleAffectedGroupSelect(group.id)}
+            <Tooltip title="Filter by Group" arrow>
+              <Button
+                className="filter-button group-button"
+                variant="contained"
+                onClick={(event) => handleOpenMenu(event, 'group')}
               >
-                <Checkbox checked={selectedAffectedGroups.includes(group.id)} />
-                {group.name}
-              </MenuItem>
-            ))}
-            <MenuItem onClick={applyFilter}>Apply</MenuItem>
-          </Menu>
+                <SearchIcon />
+              </Button>
+            </Tooltip>
+            <Menu
+              anchorEl={anchorElGroup}
+              open={Boolean(anchorElGroup)}
+              onClose={() => handleCloseMenu('group')}
+            >
+              {groups.map((group) => (
+                <MenuItem
+                  key={group.id}
+                  selected={group.id === selectedGroup}
+                  onClick={() => handleGroupSelect(group)}
+                >
+                  {group.name}
+                </MenuItem>
+              ))}
+            </Menu>
+
+            <Tooltip title="Filter by Manager" arrow>
+              <Button
+                className="filter-button manager-button"
+                variant="contained"
+                onClick={(event) => handleOpenMenu(event, 'manager')}
+              >
+                <SearchOutlinedIcon />
+              </Button>
+            </Tooltip>
+            <Menu
+              anchorEl={anchorElManager}
+              open={Boolean(anchorElManager)}
+              onClose={() => handleCloseMenu('manager')}
+            >
+              {managers.map((manager) => (
+                <MenuItem
+                  key={manager.id}
+                  selected={manager.name === selectedManager}
+                  onClick={() => handleManagerSelect(manager)}
+                >
+                  <Checkbox checked={manager.name === selectedManager} />
+                  {manager.name}
+                </MenuItem>
+              ))}
+            </Menu>
+
+            <Tooltip title="Filter by Affected Groups" arrow>
+              <Button
+                className="filter-button affected-group-button"
+                variant="contained"
+                onClick={(event) => handleOpenMenu(event, 'affectedGroup')}
+              >
+                <SearchOutlinedIcon />
+              </Button>
+            </Tooltip>
+            <Menu
+              anchorEl={anchorElAffectedGroup}
+              open={Boolean(anchorElAffectedGroup)}
+              onClose={() => handleCloseMenu('affectedGroup')}
+            >
+              {groups.map((group) => (
+                <MenuItem
+                  key={group.id}
+                  onClick={() => handleAffectedGroupSelect(group.id)}
+                >
+                  <Checkbox checked={selectedAffectedGroups.includes(group.id)} />
+                  {group.name}
+                </MenuItem>
+              ))}
+              <MenuItem onClick={applyFilter}>Apply</MenuItem>
+            </Menu>
+            <Tooltip title="Clear Filters" arrow>
+              <Button
+                className="clear-filters-button"
+                onClick={clearFilters}
+                variant="contained"
+              >
+                <FontAwesomeIcon icon={faTimes} className="clear-filters-icon" />
+              </Button>
+            </Tooltip>
+
+            <Tooltip title={showGroupColumns ? "Hide Group Columns" : "Show Group Columns"} arrow>
+              <Button
+                className="column-toggle-button"
+                onClick={handleToggleColumns}
+                variant="contained"
+              >
+                <FontAwesomeIcon icon={faArrowsAltH} className="column-toggle-icon" />
+              </Button>
+            </Tooltip>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'flex-end', // למקם את התוכן לימין
+              }}
+            >
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => setRedirectToAdminSettings(true)}
+                sx={{
+                  borderRadius: '8px', // שינוי לצורת מלבן עם פינות עגולות
+                  padding: '8px 16px', // התאמת גובה ורוחב הכפתור
+                  minWidth: 'auto', // אין צורך ברוחב מינימלי
+                  fontSize: '0.8rem', // התאמת גודל הטקסט
+                  boxShadow: '0 0 10px rgba(0, 255, 0, 0.5)', // מסגרת זוהרת בצבע ירוק
+                }}
+              >
+                Admin Settings
+              </Button>
+            </Box>
+          </div>
+
+
+
         </Box>
+        
         <TableContainer sx={{ maxHeight: 440 }}>
           <Table stickyHeader>
             <TableHead>
