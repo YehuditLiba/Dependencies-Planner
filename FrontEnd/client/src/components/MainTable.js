@@ -26,7 +26,7 @@ import logo from '../Practicum.png'; // עדכן את הנתיב ללוגו של
 import Icon from '@mui/icons-material/AddCircle'; // אם אתה משתמש ב-Material-UI
 
 // import FormControlLabel from '@mui/material/FormControlLabel';
-// import FormGroup from '@mui/material/FormGroup';
+import FormGroup from '@mui/material/FormGroup';
 import axios from 'axios';
 import '../designs/TableStyles.scss';
 import '../designs/mainTable.css';
