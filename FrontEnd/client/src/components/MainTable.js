@@ -281,26 +281,40 @@ export default function MainTable({ emailRequestor }) {
     return status ? status.status_description : 'No Status';
   };
 
-  const handleStatusChange = async (rowId, groupId) => {
-    const newStatus = prompt("Enter new status:");
-    if (newStatus) {
+  // const handleStatusChange = async (rowId, groupId) => {
+  //   const newStatus = prompt("Enter new status:");
+  //   if (newStatus) {
+  //     try {
+  //       const response = await axios.post('http://localhost:3001/api/updateStatus', {
+  //         requestId: rowId,
+  //         groupId: groupId,
+  //         status: newStatus
+  //       });
+  //       // עדכון סטטוסים מקומי אם נדרש
+  //       setStatuses(prevStatuses => prevStatuses.map(status =>
+  //         status.request_id === rowId && status.group_id === groupId
+  //           ? { ...status, status_description: newStatus }
+  //           : status
+  //       ));
+  //     } catch (error) {
+  //       console.error("Failed to update status", error);
+  //     }
+  //   }
+  // };
+
+    // פונקציה לשליחת שינוי סטטוס לשרת
+    const handleStatusChange = async (affectedGroupId, statusId) => {
       try {
-        const response = await axios.post('http://localhost:3001/api/updateStatus', {
-          requestId: rowId,
-          groupId: groupId,
-          status: newStatus
-        });
-        // עדכון סטטוסים מקומי אם נדרש
-        setStatuses(prevStatuses => prevStatuses.map(status =>
-          status.request_id === rowId && status.group_id === groupId
-            ? { ...status, status_description: newStatus }
-            : status
-        ));
+          await axios.put('http://localhost:3001/api/updateAffectedGroups/status', {
+              affectedGroupId,
+              statusId
+          });
       } catch (error) {
-        console.error("Failed to update status", error);
+          console.error('Error updating affected group status:', error);
       }
-    }
   };
+
+
   const getStatusBackgroundColor = (status) => {
     switch (status) {
       case 'Completed':
@@ -333,6 +347,37 @@ export default function MainTable({ emailRequestor }) {
       ));
   };
 
+  const onDrop = async (e, rowIndex) => {
+    const draggedRowIndex = e.dataTransfer.getData('rowIndex');
+    const newRows = [...rows];
+    const [draggedRow] = newRows.splice(draggedRowIndex, 1);
+    newRows.splice(rowIndex, 0, draggedRow);
+  
+    // עדכון order_index בהתאם למיקום החדש של השורות
+    const updatedRows = newRows.map((row, index) => ({
+        ...row,
+        order_index: index  // מניחים ש-order_index מתחיל מ-0
+    }));
+  
+    // עדכון מצב השורות והנתונים במסד הנתונים
+    setRows(updatedRows);
+  
+    try {
+        await fetch('http://localhost:3001/api/update-order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedRows),
+        });
+    } catch (error) {
+        console.error('עדכון הסדר נכשל:', error);
+    }
+  };
+  
+  // סידור השורות לפי order_index
+  const sortedRows = [...rows].sort((a, b) => a.order_index - b.order_index);
+  
 
   const handleExportCSV = () => {
     const csvData = Papa.unparse(rows); // המרת המידע מהטבלה ל-CSV
@@ -523,7 +568,7 @@ export default function MainTable({ emailRequestor }) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row, rowIndex) => (
+              {sortedRows.map((row, rowIndex) => (
                 <React.Fragment key={row.id}>
                   <EditableRow
                     key={row.id}
@@ -538,6 +583,8 @@ export default function MainTable({ emailRequestor }) {
                     getStatusBackgroundColor={getStatusBackgroundColor}
                     getGroupStatus={getGroupStatus}
                     handleStatusChange={handleStatusChange}
+                    rowIndex={rowIndex}
+                    onDrop={onDrop}
                   />
                   {/* {columns.map((column) => {
                       const value = row[column.id];
