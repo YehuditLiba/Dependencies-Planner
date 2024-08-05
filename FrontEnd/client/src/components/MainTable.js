@@ -13,10 +13,22 @@ import Box from '@mui/material/Box';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Checkbox from '@mui/material/Checkbox';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import SearchIcon from '@mui/icons-material/Search';
+import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import logo from '../Practicum.png'; // עדכן את הנתיב ללוגו שלך
+import Icon from '@mui/icons-material/AddCircle'; // אם אתה משתמש ב-Material-UI
+
 // import FormControlLabel from '@mui/material/FormControlLabel';
-// import FormGroup from '@mui/material/FormGroup';
+import FormGroup from '@mui/material/FormGroup';
 import axios from 'axios';
 import '../designs/TableStyles.scss';
+import '../designs/mainTable.css';
 import RequestForm from './RequestForm';
 import EditableRow from './EditableRow';
 // import AdminSettings from './AdminSettings';
@@ -27,6 +39,10 @@ import { formatDateTime } from '../utils/utils'; // נייבא את הפונקצ
 import StatusCell from './StatusCell';
  // או הנתיב הנכון לקובץ שבו הפונקציה מוגדרת
 import DeleteRequest from './DeleteRequest'; // Add this line
+import TuneIcon from '@mui/icons-material/Tune'; // שימוש באייקון Tune
+import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
+import { faArrowsAltH } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faSearch } from '@fortawesome/free-solid-svg-icons';
 
 
 
@@ -41,7 +57,9 @@ const columns = [
   { id: 'planned', label: 'Planned', minWidth: 100 },
   { id: 'comments', label: 'Comments', minWidth: 150 },
   { id: 'emailRequestor', label: 'Email Requestor', minWidth: 150 },
-  { id: 'dateTime', label: 'DateTime', minWidth: 100 }
+  { id: 'dateTime', label: 'DateTime', minWidth: 100 },
+  { id: 'jiraLink', label: 'Jira Link', minWidth: 100 }  //  Jira Link
+
 ];
 
 const modalStyle = {
@@ -58,7 +76,7 @@ const modalStyle = {
 
 export default function MainTable({ emailRequestor }) {
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(4);
+  const [rowsPerPage, setRowsPerPage] = useState(8);
   const [rows, setRows] = useState([]);
   const [totalRows, setTotalRows] = useState(0);
   const [groups, setGroups] = useState([]);
@@ -81,29 +99,58 @@ export default function MainTable({ emailRequestor }) {
   const [groupId, setGroupId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredRows, setFilteredRows] = useState([]);
+  const [selectedButton, setSelectedButton] = useState(null);
 
-  const [adminSettingsOpen, setAdminSettingsOpen] = useState(false);
+
+
+ const [adminSettingsOpen, setAdminSettingsOpen] = useState(false);
   
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/api/requests', {
-          params: {
-            limit: rowsPerPage === -1 ? undefined : rowsPerPage,
-            offset: rowsPerPage === -1 ? 0 : page * rowsPerPage,
-            requestorGroup: selectedGroup || undefined,
-            requestorName: selectedManager || undefined,
-            affectedGroupList: selectedAffectedGroups.length ? selectedAffectedGroups.join(',') : undefined
-          }
-        });
-        console.log('Fetched data:', response.data); // הדפס את הנתונים המלאים מהשרת
-        console.log('Fetched rows:', response.data.requests);
-        setRows(response.data.requests);
-        setTotalRows(response.data.totalCount || response.data.requests.length);
+        const params = {
+          limit: rowsPerPage === -1 ? undefined : rowsPerPage,
+          offset: rowsPerPage === -1 ? 0 : page * rowsPerPage,
+        };
+          console.log(params);
+        if (selectedGroup) {
+          params.requestorGroup = selectedGroup;
+        }
+
+        if (selectedManager) {
+          params.requestorName = selectedManager;
+        }
+
+        if (selectedAffectedGroups.length) {
+          params.affectedGroupList = selectedAffectedGroups.join(',');
+        }
+        console.log(params);
+        console.log('rowsPerPage:', rowsPerPage);
+        console.log('page:', page);
+
+        const response = await axios.get('http://localhost:3001/api/requests', { params });
+
+        // הדפס את כל הנתונים שמתקבלים מהשרת כדי לבדוק מה מגיע בפועל
+        console.log('Full response data:', response.data);
+
+        if (response.data.requests) {
+          console.log('Fetched rows:', response.data.requests);
+
+          setRows(response.data.requests);
+          console.log('Updated rows:', response.data.requests);
+          setTotalRows(response.data.totalCount || response.data.requests.length);
+          console.log('Updated totalRows:', response.data.totalCount || response.data.requests.length);
+
+        } else {
+          console.warn('No requests found in response data');
+        }
       } catch (error) {
         console.error("Failed to fetch data", error);
+        alert("Failed to fetch data from server. Please try again later.");
       }
     };
+
+
 
     const fetchGroups = async () => {
       try {
@@ -133,15 +180,11 @@ export default function MainTable({ emailRequestor }) {
         console.error('Failed to fetch statuses', error);
       }
     };
-
-
-
-
     fetchData();
     fetchGroups();
     fetchManagers();
     fetchStatuses();
-  }, [page, rowsPerPage, selectedGroup, selectedManager, selectedAffectedGroups]);
+  }, [page, rowsPerPage,selectedGroup, selectedManager, selectedAffectedGroups]);
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -189,30 +232,31 @@ export default function MainTable({ emailRequestor }) {
   };
 
   const handleGroupSelect = (group) => {
-    setSelectedGroup(group.id || '');
-    handleCloseMenu('group');
+    if (selectedGroup === group.id) {
+      setSelectedGroup(null); // ביטול בחירת הקבוצה אם היא כבר נבחרה
+    } else {
+      setSelectedGroup(group.id); // בחירת הקבוצה
+    }
   };
-
   const handleManagerSelect = (manager) => {
-    setSelectedManager(manager.name || '');
-    handleCloseMenu('manager');
+    if (selectedManager === manager.name) {
+      setSelectedManager(null); // ביטול בחירת המנהל אם הוא כבר נבחר
+    } else {
+      setSelectedManager(manager.name); // בחירת המנהל
+    }
   };
-
   const handleAffectedGroupSelect = (groupId) => {
     setSelectedAffectedGroups(prev =>
       prev.includes(groupId) ? prev.filter(id => id !== groupId) : [...prev, groupId]
     );
   };
-
   const handleDeleteRequest = (ID) => {
     console.log(`Removing row with ID: ${ID} from the table`);
     setRows(prevRows => prevRows.filter(row => row.ID !== ID));
   };
-
   const applyFilter = () => {
     handleCloseMenu('affectedGroup');
   };
-
   const clearFilters = () => {
     setSelectedGroup('');
     setSelectedManager('');
@@ -228,10 +272,6 @@ export default function MainTable({ emailRequestor }) {
     const date = new Date(value);
     return date.toLocaleDateString('he-IL');
   };
-
-  // const getStatusForGroup = (requestId, groupId) => {
-  //   return statuses.find(status => status.request_id === requestId && status.group_id === groupId)?.status_description || 'No Status';
-  // };
 
   const getGroupStatus = (row, groupId) => {
     // נניח שיש לך מבנה של סטטוסים ב- row, תוודא שהנתיב נכון לסטטוס של הקבוצה
@@ -259,20 +299,6 @@ export default function MainTable({ emailRequestor }) {
       }
     }
   };
-
-
-
-
-
-  // // דוגמה לשימוש בפונקציה
-  // const exampleUsage = () => {
-  //   const exampleRequestId = 112; // שים לב לנתון שהתקבל מה-API
-  //   const exampleGroupId = 4; // שים לב לנתון שהתקבל מה-API
-  //   console.log('Status:', getStatusForGroup(exampleRequestId, exampleGroupId));
-  // };
-
-
-
   const getStatusBackgroundColor = (status) => {
     switch (status) {
       case 'Completed':
@@ -285,9 +311,6 @@ export default function MainTable({ emailRequestor }) {
         return 'white';
     }
   };
-
-
-
   const updateRequest = async (id, updatedFields) => {
     try {
       const response = await axios.put(`http://localhost:3001/api/requests/${id}`, updatedFields);
@@ -299,105 +322,150 @@ export default function MainTable({ emailRequestor }) {
 
   if (redirectToAdminSettings) {
     return <Navigate to="/admin-settings" />;
-  }
-  
+  } 
 
+ 
   return (
-
+    
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 4 }}>
-      <Box className="header">
-        <img src="/path/to/logo.png" alt="Logo" className="logo" />
-        <h1>Dependencies-Planner</h1>
-      </Box>
-      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
-        <Button variant="contained" onClick={() => setOpen(true)}>Add Request</Button>
-        <Button variant="contained" onClick={handleToggleColumns}>
-          {showGroupColumns ? 'Hide Group Columns' : 'Show Group Columns'}
-        </Button>
-        <Button variant="contained" onClick={clearFilters}>Clear Filters</Button>
-        {/* <Button variant="contained" onClick={() => setAdminSettingsOpen(true)}>Admin Settings</Button> */}
-
-            <Button
-          variant="contained"
-          color="primary"
-          onClick={() => setRedirectToAdminSettings(true)}
-        >
-          Admin Settings
-        </Button>
-
-      </Box>
       <Paper sx={{ width: '80%', overflow: 'hidden', marginTop: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, padding: 2 }}>
+          <div className="filter-buttons-container">
 
-          <Button
-            className="filter-button"
-            variant="contained"
-            onClick={(event) => handleOpenMenu(event, 'group')}
-          >
-            Filter by Group
-          </Button>
-          <Menu
-            anchorEl={anchorElGroup}
-            open={Boolean(anchorElGroup)}
-            onClose={() => handleCloseMenu('group')}
-          >
-            {groups.map((group) => (
-              <MenuItem
-                key={group.id}
-                selected={group.id === selectedGroup}
-                onClick={() => handleGroupSelect(group)}
+           
+            <Tooltip title="Add Request" arrow>
+              <Button
+                className="add-request-button"
+                onClick={() => setOpen(true)}
+                variant="contained"
               >
-                {group.name}
-              </MenuItem>
-            ))}
-          </Menu>
-          <Button
-            className="filter-button"
-            variant="contained"
-            onClick={(event) => handleOpenMenu(event, 'manager')}
-          > Filter by Manager
-          </Button>
-          <Menu
-            anchorEl={anchorElManager}
-            open={Boolean(anchorElManager)}
-            onClose={() => handleCloseMenu('manager')}
-          >
-            {managers.map((manager) => (
-              <MenuItem
-                key={manager.id}
-                selected={manager.name === selectedManager}
-                onClick={() => handleManagerSelect(manager)}
-              >
-                <Checkbox checked={manager.name === selectedManager} />
-                {manager.name}
-              </MenuItem>
-            ))}
-          </Menu>
-          <Button
-            className="filter-button"
-            variant="contained"
-            onClick={(event) => handleOpenMenu(event, 'manager')}
-          >
-            Filter by Affected Groups
-          </Button>
-          <Menu
-            anchorEl={anchorElAffectedGroup}
-            open={Boolean(anchorElAffectedGroup)}
-            onClose={() => handleCloseMenu('affectedGroup')}
-          >
+                <FontAwesomeIcon icon={faPlusCircle} size="2x" className="add-icon" />
+              </Button>
+            </Tooltip>
 
-            {groups.map((group) => (
-              <MenuItem
-                key={group.id}
-                onClick={() => handleAffectedGroupSelect(group.id)}
+            <Tooltip title="Filter by Group" arrow>
+              <Button
+                className="filter-button group-button"
+                variant="contained"
+                onClick={(event) => handleOpenMenu(event, 'group')}
               >
-                <Checkbox checked={selectedAffectedGroups.includes(group.id)} />
-                {group.name}
-              </MenuItem>
-            ))}
-            <MenuItem onClick={applyFilter}>Apply</MenuItem>
-          </Menu>
+                <SearchIcon />
+              </Button>
+            </Tooltip>
+            <Menu
+              anchorEl={anchorElGroup}
+              open={Boolean(anchorElGroup)}
+              onClose={() => handleCloseMenu('group')}
+            >
+              {groups.map((group) => (
+                <MenuItem
+                  key={group.id}
+                  selected={group.id === selectedGroup}
+                  onClick={() => handleGroupSelect(group)}
+                >
+                  <Checkbox checked={group.id === selectedGroup} />
+                  {group.name}
+                </MenuItem>
+              ))}
+            </Menu>
+
+            <Tooltip title="Filter by Manager" arrow>
+              <Button
+                className="filter-button manager-button"
+                variant="contained"
+                onClick={(event) => handleOpenMenu(event, 'manager')}
+              >
+                <SearchOutlinedIcon />
+              </Button>
+            </Tooltip>
+            <Menu
+              anchorEl={anchorElManager}
+              open={Boolean(anchorElManager)}
+              onClose={() => handleCloseMenu('manager')}
+            >
+              {managers.map((manager) => (
+                <MenuItem
+                  key={manager.id}
+                  selected={manager.name === selectedManager}
+                  onClick={() => handleManagerSelect(manager)}
+                >
+                  <Checkbox checked={manager.name === selectedManager} />
+                  {manager.name}
+                </MenuItem>
+              ))}
+            </Menu>
+
+            <Tooltip title="Filter by Affected Groups" arrow>
+              <Button
+                className="filter-button affected-group-button"
+                variant="contained"
+                onClick={(event) => handleOpenMenu(event, 'affectedGroup')}
+              >
+                <SearchOutlinedIcon />
+              </Button>
+            </Tooltip>
+            <Menu
+              anchorEl={anchorElAffectedGroup}
+              open={Boolean(anchorElAffectedGroup)}
+              onClose={() => handleCloseMenu('affectedGroup')}
+            >
+              {groups.map((group) => (
+                <MenuItem
+                  key={group.id}
+                  onClick={() => handleAffectedGroupSelect(group.id)}
+                >
+                  <Checkbox checked={selectedAffectedGroups.includes(group.id)} />
+                  {group.name}
+                </MenuItem>
+              ))}
+              <MenuItem onClick={applyFilter}>Apply</MenuItem>
+            </Menu>
+            <Tooltip title="Clear Filters" arrow>
+              <Button
+                className="clear-filters-button"
+                onClick={clearFilters}
+                variant="contained"
+              >
+                <FontAwesomeIcon icon={faSearch} className="clear-filters-icon" />
+              </Button>
+            </Tooltip>
+            
+            <Tooltip title={showGroupColumns ? "Hide Group Columns" : "Show Group Columns"} arrow>
+              <Button
+                className="column-toggle-button"
+                onClick={handleToggleColumns}
+                variant="contained"
+              >
+                <FontAwesomeIcon icon={faArrowsAltH} className="column-toggle-icon" />
+              </Button>
+            </Tooltip>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'flex-end', // למקם את התוכן לימין
+              }}
+            >
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => setRedirectToAdminSettings(true)}
+                sx={{
+                  borderRadius: '8px', // שינוי לצורת מלבן עם פינות עגולות
+                  padding: '8px 16px', // התאמת גובה ורוחב הכפתור
+                  minWidth: 'auto', // אין צורך ברוחב מינימלי
+                  fontSize: '0.8rem', // התאמת גודל הטקסט
+                  boxShadow: '0 0 10px rgba(0, 255, 0, 0.5)', // מסגרת זוהרת בצבע ירוק
+                }}
+              >
+                Admin Settings
+              </Button>
+            </Box>
+          </div>
+
+
+
         </Box>
+        
         <TableContainer sx={{ maxHeight: 440 }}>
           <Table stickyHeader>
             <TableHead>
@@ -439,7 +507,13 @@ export default function MainTable({ emailRequestor }) {
                       return (
                         column.id === 'requestGroup' && !showGroupColumns ? null : (
                           <TableCell key={column.id} style={{ minWidth: column.minWidth }}>
-                            {column.id === 'dateTime' ? formatDate(value) : value}
+                            {column.id === 'dateTime' ? formatDate(value) :
+                              column.id === 'jiraLink' ? (
+                                <a href={value} target="_blank" rel="noopener noreferrer">
+                                  Jira
+                                </a>
+                              ) : value
+                            }
                           </TableCell>
                         )
                       );

@@ -6,7 +6,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import axios from 'axios';
-
+import { sendMessageToSlack } from './sendMessageToSlack';
 const modalStyle = {
   position: 'absolute',
   top: '50%',
@@ -41,6 +41,7 @@ const DeleteRequest = ({ id, email, onDelete }) => {
       console.log(`Successfully deleted request with ID: ${id}`);
       onDelete(id);
       handleClose();
+      sendMessageToSlack(`Request delete by ${requestorEmail}`)
     } catch (error) {
       // console.error(`Failed to delete request with ID: ${id}`, error);
       // console.error(`Failed to delete request with requestorEmail: ${email}`, error);
