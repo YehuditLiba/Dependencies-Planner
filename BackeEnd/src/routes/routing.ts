@@ -3,7 +3,7 @@ import { getAllGroupsController, editGroupByAdmin, addGroup , deleteGroup} from 
 import {  getRequestByIdController, updateRequest, 
     deleteRequest, updateRequestByIdController,updateFinalDecisionController ,
     createRequest, updatePlannedField, getAllFilteredRequestsWithPagination} from '../Controllers/requestCon';
-import { getAllProductManagers, getAllRequestsByProductManager, editProductManagerByAdmin,addProductManager, getGroupsByProductManager , deleteProductManager } from '../Controllers/productManagerCon';
+import { getAllProductManagers, getAllRequestsByProductManager, editProductManagerByAdmin,addProductManager , deleteProductManager } from '../Controllers/productManagerCon';
 import { getAllStatusController, getAllStatus } from '../Controllers/StatusCon';
 import { getAllPrioritiesController, updatePriorityController } from '../Controllers/PriorityCon';
 // import { getAllTSize } from '../Controllers/T_SizeCon';
@@ -46,13 +46,13 @@ router.get('/productManagers', getAllProductManagers);
 router.get('/requests/:groupId', getAllRequestsByProductManager);
 router.put('/editProductManagers/:email', editProductManagerByAdmin);
 router.post('/addProductManagers', addProductManager);
-router.get('/product-managers/:email/groups', getGroupsByProductManager);
+// router.get('/product-managers/:email/groups', getGroupsByProductManager);
 router.delete('/productManagers/:email', deleteProductManager);
 
 //routings ProductManagerGroups 
-router.post('/product-manager-group', addProductManagerToGroupHandler);
-router.get('/product-manager-group/:email', getProductManagerGroupsHandler);
-router.get('/all-product-manager-groups', getAllProductManagerGroupsHandler); 
+// router.post('/product-manager-group', addProductManagerToGroupHandler);
+// router.get('/product-manager-group/:email', getProductManagerGroupsHandler);
+// router.get('/all-product-manager-groups', getAllProductManagerGroupsHandler); 
 //status routings
 router.get('/status', getAllStatusController);
 router.get('/Getstatus', getAllStatus);

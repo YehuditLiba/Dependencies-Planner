@@ -45,7 +45,7 @@ router.get('/productManagers', productManagerCon_1.getAllProductManagers);
 router.get('/requests/:groupId', productManagerCon_1.getAllRequestsByProductManager);
 router.put('/editProductManagers/:email', productManagerCon_1.editProductManagerByAdmin);
 router.post('/addProductManagers', productManagerCon_1.addProductManager);
-router.get('/product-managers/:email/groups', productManagerCon_1.getGroupsByProductManager);
+// router.get('/product-managers/:email/groups', getGroupsByProductManager);
 router.delete('/productManagers/:email', productManagerCon_1.deleteProductManager);
 //routings ProductManagerGroups 
 router.post('/product-manager-group', productManagerGroupCon_1.addProductManagerToGroupHandler);

@@ -20,58 +20,58 @@ const AdminSettings = () => {
   const [newProductManagerGroupId, setNewProductManagerGroupId] = useState('');
   const navigate = useNavigate();
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     setLoading(true);
-  //     try {
-  //       const groupsResponse = await axios.get('http://localhost:3001/api/groups');
-  //       const productManagersResponse = await axios.get('http://localhost:3001/api/productManagers');
-  //       console.log('Fetched Groups:', groupsResponse.data); 
-  //       console.log('Fetched Product Managers:', productManagersResponse.data);
-  //       setGroups(groupsResponse.data);
-  //       setProductManagers(productManagersResponse.data);
-  //     } catch (error) {
-  //       console.error('Error fetching data:', error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, []);
-
   useEffect(() => {
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const [groupsResponse, productManagersResponse, allProductManagerGroupsResponse] = await Promise.all([
-        axios.get('http://localhost:3001/api/groups'),
-        axios.get('http://localhost:3001/api/productManagers'),
-        axios.get('http://localhost:3001/api/all-product-manager-groups')
-      ]);
-      console.log('Fetched Groups:', groupsResponse.data); 
-      console.log('Fetched Product Managers:', productManagersResponse.data);
-      console.log('Fetched All Product Manager Groups:', allProductManagerGroupsResponse.data);
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const groupsResponse = await axios.get('http://localhost:3001/api/groups');
+        const productManagersResponse = await axios.get('http://localhost:3001/api/productManagers');
+        console.log('Fetched Groups:', groupsResponse.data); 
+        console.log('Fetched Product Managers:', productManagersResponse.data);
+        setGroups(groupsResponse.data);
+        setProductManagers(productManagersResponse.data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+//   useEffect(() => {
+//   const fetchData = async () => {
+//     setLoading(true);
+//     try {
+//       const [groupsResponse, productManagersResponse, allProductManagerGroupsResponse] = await Promise.all([
+//         axios.get('http://localhost:3001/api/groups'),
+//         axios.get('http://localhost:3001/api/productManagers'),
+//         axios.get('http://localhost:3001/api/all-product-manager-groups')
+//       ]);
+//       console.log('Fetched Groups:', groupsResponse.data); 
+//       console.log('Fetched Product Managers:', productManagersResponse.data);
+//       console.log('Fetched All Product Manager Groups:', allProductManagerGroupsResponse.data);
       
-      setGroups(groupsResponse.data);
-      setProductManagers(productManagersResponse.data);
+//       setGroups(groupsResponse.data);
+//       setProductManagers(productManagersResponse.data);
 
-      // מיזוג קבוצות מנהלי המוצר עם המידע שהתקבל
-      const updatedProductManagers = productManagersResponse.data.map(pm => {
-        const groupData = allProductManagerGroupsResponse.data.find(group => group.email === pm.email);
-        return { ...pm, group_ids: groupData ? groupData.group_ids : [] };
-      });
-      setProductManagers(updatedProductManagers);
+//       // מיזוג קבוצות מנהלי המוצר עם המידע שהתקבל
+//       const updatedProductManagers = productManagersResponse.data.map(pm => {
+//         const groupData = allProductManagerGroupsResponse.data.find(group => group.email === pm.email);
+//         return { ...pm, group_ids: groupData ? groupData.group_ids : [] };
+//       });
+//       setProductManagers(updatedProductManagers);
 
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+//     } catch (error) {
+//       console.error('Error fetching data:', error);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
 
-  fetchData();
-}, []);
+//   fetchData();
+// }, []);
 
 
   const handleGroupChange = async (groupId) => {
@@ -149,6 +149,7 @@ const handleProductManagerChange = async (email) => {
   const handleDeleteGroup = async (groupId) => {
     try {
       await axios.delete(`http://localhost:3001/api/groups/${groupId}`);
+      alert("are you sure you want to delet?");
       setGroups(groups.filter(group => group.id !== groupId));
     } catch (error) {
       console.error('Error deleting group:', error);
@@ -157,6 +158,7 @@ const handleProductManagerChange = async (email) => {
   const handleDeleteProductManager = async (email) => {
     try {
       await axios.delete(`http://localhost:3001/api/productManagers/${email}`);
+      alert("are you sure you want to delet?");
       // עדכן את הסטייט של מנהלי המוצר על מנת להסיר את המנהל שנמחק
       setProductManagers(productManagers.filter(pm => pm.email !== email));
     } catch (error) {
