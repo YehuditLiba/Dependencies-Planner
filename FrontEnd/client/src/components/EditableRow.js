@@ -13,7 +13,8 @@ import MenuItem from '@mui/material/MenuItem';
 
 const EditableRow = ({ row, columns, onSave, emailRequestor,
     handleDeleteRequest, formatDate, showGroupColumns, groups,
-    getStatusBackgroundColor, getGroupStatus, handleStatusChange
+    getStatusBackgroundColor, getGroupStatus, handleStatusChange,
+    rowIndex,onDrop
 }) => {
     console.log("EditableRow row:", row); // הוסף את השורה הזו לבדוק את ה-row המתקבל
     const [isEditing, setIsEditing] = useState(false);
@@ -59,8 +60,25 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
     //     setEditData(prev => ({ ...prev, [columnId]: value }));
     // };
 
+    const onDragStart = (e, rowIndex) => {
+        e.dataTransfer.setData('rowIndex', rowIndex);
+    };
+
+    const onDragOver = (e) => {
+        e.preventDefault();
+    };
+
+    
+
     return (
-        <TableRow hover role="checkbox" tabIndex={-1}>
+        <TableRow 
+        hover
+        role="checkbox"
+        tabIndex={-1}
+        draggable
+        onDragStart={(e) => onDragStart(e, rowIndex)}
+        onDragOver={onDragOver}
+        onDrop={(e) => onDrop(e, rowIndex)}>
             <TableCell>
                 <DeleteRequest id={row.ID} emailRequestor={emailRequestor} onDelete={handleDeleteRequest} />
                 <IconButton onClick={handleToggleEdit}>
