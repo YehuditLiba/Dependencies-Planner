@@ -32,12 +32,11 @@ import '../designs/mainTable.css';
 import RequestForm from './RequestForm';
 import EditableRow from './EditableRow';
 // import AdminSettings from './AdminSettings';
-// import { formatDateTime } from '../utils/utils'; // נייבא את הפונקציה החדשה
 import { Navigate } from 'react-router-dom';
 import AdminSettings from './AdminSettings';
 import { formatDateTime } from '../utils/utils'; // נייבא את הפונקציה החדשה
 import StatusCell from './StatusCell';
- // או הנתיב הנכון לקובץ שבו הפונקציה מוגדרת
+// או הנתיב הנכון לקובץ שבו הפונקציה מוגדרת
 import DeleteRequest from './DeleteRequest'; // Add this line
 import TuneIcon from '@mui/icons-material/Tune'; // שימוש באייקון Tune
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
@@ -50,6 +49,7 @@ import Papa from 'papaparse';
 
 
 const columns = [
+  { id: 'actions', label: 'Actions', minWidth: 100 },
   { id: 'title', label: 'Title', minWidth: 100 },
   { id: 'requestorName', label: 'Requestor Name', minWidth: 100 },
   { id: 'requestGroup', label: 'Request Group', minWidth: 100, show: true },
@@ -105,8 +105,8 @@ export default function MainTable({ emailRequestor }) {
 
 
 
- const [adminSettingsOpen, setAdminSettingsOpen] = useState(false);
-  
+  const [adminSettingsOpen, setAdminSettingsOpen] = useState(false);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -114,7 +114,7 @@ export default function MainTable({ emailRequestor }) {
           limit: rowsPerPage === -1 ? undefined : rowsPerPage,
           offset: rowsPerPage === -1 ? 0 : page * rowsPerPage,
         };
-          console.log(params);
+        console.log(params);
         if (selectedGroup) {
           params.requestorGroup = selectedGroup;
         }
@@ -186,7 +186,7 @@ export default function MainTable({ emailRequestor }) {
     fetchGroups();
     fetchManagers();
     fetchStatuses();
-  }, [page, rowsPerPage,selectedGroup, selectedManager, selectedAffectedGroups]);
+  }, [page, rowsPerPage, selectedGroup, selectedManager, selectedAffectedGroups]);
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -324,7 +324,15 @@ export default function MainTable({ emailRequestor }) {
 
   if (redirectToAdminSettings) {
     return <Navigate to="/admin-settings" />;
-  } 
+  }
+
+  const handleSave = (updatedRow) => {
+    setRows(prevRows =>
+      prevRows.map(row => 
+          row.ID === updatedRow.ID ? updatedRow : row
+      ));
+  };
+
 
   const handleExportCSV = () => {
     const csvData = Papa.unparse(rows); // המרת המידע מהטבלה ל-CSV
@@ -341,13 +349,13 @@ export default function MainTable({ emailRequestor }) {
   };
 
   return (
-    
+
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 4 }}>
       <Paper sx={{ width: '80%', overflow: 'hidden', marginTop: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, padding: 2 }}>
           <div className="filter-buttons-container">
 
-           
+
             <Tooltip title="Add Request" arrow>
               <Button
                 className="add-request-button"
@@ -444,7 +452,7 @@ export default function MainTable({ emailRequestor }) {
                 <FontAwesomeIcon icon={faSearch} className="clear-filters-icon" />
               </Button>
             </Tooltip>
-            
+
             <Tooltip title={showGroupColumns ? "Hide Group Columns" : "Show Group Columns"} arrow>
               <Button
                 className="column-toggle-button"
@@ -480,23 +488,23 @@ export default function MainTable({ emailRequestor }) {
 
 
         </Box>
-        
+
         <TableContainer sx={{ maxHeight: 440 }}>
           <Table stickyHeader>
             <TableHead>
               <TableRow>
-              <TableCell style={{ minWidth: 50, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}>
-                Actions
-              </TableCell>
+                {/* <TableCell style={{ minWidth: 0, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}>
+                  Actions
+                </TableCell> */}
                 {columns.map((column) => (
-                  column.id === 'requestGroup' && !showGroupColumns ? null : (
-                    <TableCell
-                      key={column.id}
-                      style={{ minWidth: column.minWidth, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}
-                    >
-                      {column.label}
-                    </TableCell>
-                  )
+                  // column.id === 'requestGroup' && !showGroupColumns ? null : (
+                  <TableCell
+                    key={column.id}
+                    style={{ minWidth: column.minWidth, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}
+                  >
+                    {column.label}
+                  </TableCell>
+                  // )
                 ))}
                 {groups.map((group) =>
                   showGroupColumns ? (
@@ -508,32 +516,40 @@ export default function MainTable({ emailRequestor }) {
                     </TableCell>
                   ) : null
                 )}
+                {/* <TableCell>Actions</TableCell>
+                {columns.slice(1).map((column) => ( // מוודאים שעמודת ה-Actions תוצג קודם
+                  <TableCell key={column.id}>{column.label}</TableCell>
+                ))} */}
               </TableRow>
             </TableHead>
             <TableBody>
               {rows.map((row, rowIndex) => (
                 <React.Fragment key={row.id}>
-                  <TableRow hover role="checkbox" tabIndex={-1}>
-                    <TableCell>
-                      <DeleteRequest id={row.ID} email={emailRequestor} onDelete={handleDeleteRequest} />
-                    </TableCell>
-                    {columns.map((column) => {
+                  <EditableRow
+                    key={row.id}
+                    row={row}
+                    columns={columns}
+                    onSave={handleSave}
+                    email={emailRequestor}
+                    onDelete={handleDeleteRequest}
+                    formatDate={formatDate}
+                    showGroupColumns={showGroupColumns}
+                    groups={groups}
+                    getStatusBackgroundColor={getStatusBackgroundColor}
+                    getGroupStatus={getGroupStatus}
+                    handleStatusChange={handleStatusChange}
+                  />
+                  {/* {columns.map((column) => {
                       const value = row[column.id];
                       return (
                         column.id === 'requestGroup' && !showGroupColumns ? null : (
                           <TableCell key={column.id} style={{ minWidth: column.minWidth }}>
-                            {column.id === 'dateTime' ? formatDate(value) :
-                              column.id === 'jiraLink' ? (
-                                <a href={value} target="_blank" rel="noopener noreferrer">
-                                  Jira
-                                </a>
-                              ) : value
-                            }
+                            {column.id === 'dateTime' ? formatDate(value) : value}
                           </TableCell>
                         )
                       );
-                    })}
-                    {groups.map((group) => {
+                    })} */}
+                  {/* {groups.map((group) => {
                       const status = row.statuses.find(status => status.groupId === group.id);
                       const statusDescription = status ? status.status.status : 'Not Required';
 
@@ -552,23 +568,24 @@ export default function MainTable({ emailRequestor }) {
                           {statusDescription}
                         </TableCell>
                       ) : null;
-                    })}
-                  </TableRow>
-                  {isEditingRow === rowIndex && (
-                    <EditableRow
-                      row={row}
-                      onSave={(updatedRow) => {
-                        updateRequest(row.id, updatedRow);
-                        setIsEditingRow(null);
-                      }}
-                      onCancel={() => setIsEditingRow(null)}
-                    />
-                  )}
+                    })} */}
                 </React.Fragment>
               ))}
+
+              {/* {rows.map((row) => (
+                <EditableRow
+                  key={row.id}
+                  row={row}
+                  columns={columns}
+                  onSave={handleSave}
+                  email={emailRequestor}
+                  onDelete={handleDeleteRequest}
+                  formatDate={formatDate}
+                  showGroupColumns={showGroupColumns}
+                />
+              ))} */}
+
             </TableBody>
-
-
           </Table>
         </TableContainer>
         <TablePagination
