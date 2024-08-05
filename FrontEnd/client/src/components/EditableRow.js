@@ -89,30 +89,28 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                 if (statusDescription === 'Not Required') {
                     cellStyle = { color: 'gray' }; // צבע אפור ל-'Not Required'
                 }
-                return showGroupColumns ? (
-                    
-                    <Select
-                        key={group.id}
-                        value={statusDescription}
-                        onChange={(e) => setEditData({ ...editData, [group.id]: e.target.value })}
-                    >
-                        {/* console.warn([`MUI: You have provided an out-of-range value \`${value}\` for the select ${name ? `(name="${name}") ` : ''}component.`, "Consider providing a value that matches one of the available options or ''.", `The available values are ${values.filter(x => x != null).map(x => `\`${x}\``).join(', ') || '""'}.`].join('\n')); */}
-                        {console.log('statuses:', statuses)}
-                        {statuses.map(status => (
-                            <MenuItem key={status.id} value={status.status}>
-                                {status.status}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                ) : showGroupColumns ? (
+                return (
                     <TableCell
                         key={group.id}
                         style={{ backgroundColor: getStatusBackgroundColor(getGroupStatus(row, group.id)), ...cellStyle }}
-                    // onClick={() => handleStatusChange(row.id, group.id, 'newStatus')}
                     >
-                        {statusDescription}
+                        {isEditing ? (
+                            <Select
+                                value={statusDescription}
+                                onChange={(e) => setEditData({ ...editData, [group.id]: e.target.value })}
+                            >
+                                {/* console.warn([`MUI: You have provided an out-of-range value \`${value}\` for the select ${name ? `(name="${name}") ` : ''}component.`, "Consider providing a value that matches one of the available options or ''.", `The available values are ${values.filter(x => x != null).map(x => `\`${x}\``).join(', ') || '""'}.`].join('\n')); */}
+                                {statuses.map(status => (
+                                    <MenuItem key={status.id} value={status.status}>
+                                        {status.status}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        ) : (
+                            statusDescription
+                        )}
                     </TableCell>
-                ) : null;
+                );
             })}
         </TableRow>
     );
