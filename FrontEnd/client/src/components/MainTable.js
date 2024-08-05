@@ -45,9 +45,6 @@ import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import { faArrowsAltH } from '@fortawesome/free-solid-svg-icons';
 
 
-
-
-
 const columns = [
   { id: 'title', label: 'Title', minWidth: 100 },
   { id: 'requestorName', label: 'Requestor Name', minWidth: 100 },
@@ -317,7 +314,46 @@ export default function MainTable({ emailRequestor }) {
     return <Navigate to="/admin-settings" />;
   } 
 
- 
+  const onDragStart = (e, rowIndex) => {
+    e.dataTransfer.setData('rowIndex', rowIndex);
+};
+
+const onDragOver = (e) => {
+    e.preventDefault();
+};
+
+const onDrop = async (e, rowIndex) => {
+  const draggedRowIndex = e.dataTransfer.getData('rowIndex');
+  const newRows = [...rows];
+  const [draggedRow] = newRows.splice(draggedRowIndex, 1);
+  newRows.splice(rowIndex, 0, draggedRow);
+
+  // עדכון order_index בהתאם למיקום החדש של השורות
+  const updatedRows = newRows.map((row, index) => ({
+      ...row,
+      order_index: index  // מניחים ש-order_index מתחיל מ-0
+  }));
+
+  // עדכון מצב השורות והנתונים במסד הנתונים
+  setRows(updatedRows);
+
+  try {
+      await fetch('http://localhost:3001/api/update-order', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updatedRows),
+      });
+  } catch (error) {
+      console.error('עדכון הסדר נכשל:', error);
+  }
+};
+
+// סידור השורות לפי order_index
+const sortedRows = [...rows].sort((a, b) => a.order_index - b.order_index);
+
+
   return (
     
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 4 }}>
@@ -459,89 +495,59 @@ export default function MainTable({ emailRequestor }) {
         </Box>
         
         <TableContainer sx={{ maxHeight: 440 }}>
-          <Table stickyHeader>
-            <TableHead>
-              <TableRow>
-              <TableCell style={{ minWidth: 50, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}>
-                Actions
-              </TableCell>
+    <Table stickyHeader>
+        <TableHead>
+            <TableRow>
+                <TableCell style={{ minWidth: 50, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}>
+                    Actions
+                </TableCell>
                 {columns.map((column) => (
-                  column.id === 'requestGroup' && !showGroupColumns ? null : (
                     <TableCell
-                      key={column.id}
-                      style={{ minWidth: column.minWidth, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}
+                        key={column.id}
+                        style={{ minWidth: column.minWidth, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}
                     >
-                      {column.label}
+                        {column.label}
                     </TableCell>
-                  )
                 ))}
-                {groups.map((group) =>
-                  showGroupColumns ? (
-                    <TableCell
-                      key={group.id}
-                      style={{ minWidth: 100, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}
-                    >
-                      {group.name}
-                    </TableCell>
-                  ) : null
-                )}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {rows.map((row, rowIndex) => (
+            </TableRow>
+        </TableHead>
+        <TableBody>
+            {sortedRows.map((row, rowIndex) => (
                 <React.Fragment key={row.id}>
-                  <TableRow hover role="checkbox" tabIndex={-1}>
-                    <TableCell>
-                      <DeleteRequest id={row.ID} email={emailRequestor} onDelete={handleDeleteRequest} />
-                    </TableCell>
-                    {columns.map((column) => {
-                      const value = row[column.id];
-                      return (
-                        column.id === 'requestGroup' && !showGroupColumns ? null : (
-                          <TableCell key={column.id} style={{ minWidth: column.minWidth }}>
-                            {column.id === 'dateTime' ? formatDate(value) : value}
-                          </TableCell>
-                        )
-                      );
-                    })}
-                    {groups.map((group) => {
-                      const status = row.statuses.find(status => status.groupId === group.id);
-                      const statusDescription = status ? status.status.status : 'Not Required';
-
-                      // הגדרת סגנון התא
-                      let cellStyle = {};
-                      if (statusDescription === 'Not Required') {
-                        cellStyle = { color: 'gray' }; // צבע אפור ל-'Not Required'
-                      }
-
-                      return showGroupColumns ? (
-                        <TableCell
-                          key={group.id}
-                          style={{ backgroundColor: getStatusBackgroundColor(getGroupStatus(row, group.id)), ...cellStyle }}
-                          onClick={() => handleStatusChange(row.id, group.id, 'newStatus')}
-                        >
-                          {statusDescription}
+                    <TableRow
+                        hover
+                        role="checkbox"
+                        tabIndex={-1}
+                        draggable
+                        onDragStart={(e) => onDragStart(e, rowIndex)}
+                        onDragOver={onDragOver}
+                        onDrop={(e) => onDrop(e, rowIndex)}
+                    >
+                        <TableCell>
+                            <DeleteRequest id={row.id} onDelete={() => {}} />
                         </TableCell>
-                      ) : null;
-                    })}
-                  </TableRow>
-                  {isEditingRow === rowIndex && (
-                    <EditableRow
-                      row={row}
-                      onSave={(updatedRow) => {
-                        updateRequest(row.id, updatedRow);
-                        setIsEditingRow(null);
-                      }}
-                      onCancel={() => setIsEditingRow(null)}
-                    />
-                  )}
+                        {columns.map((column) => (
+                            <TableCell key={column.id} style={{ minWidth: column.minWidth }}>
+                                {row[column.id]}
+                            </TableCell>
+                        ))}
+                    </TableRow>
+                    {isEditingRow === rowIndex && (
+                        <EditableRow
+                            row={row}
+                            onSave={(updatedRow) => {
+                                const updatedRows = sortedRows.map((r, i) => (i === rowIndex ? updatedRow : r));
+                                setRows(updatedRows);
+                                setIsEditingRow(null);
+                            }}
+                            onCancel={() => setIsEditingRow(null)}
+                        />
+                    )}
                 </React.Fragment>
-              ))}
-            </TableBody>
-
-
-          </Table>
-        </TableContainer>
+            ))}
+        </TableBody>
+    </Table>
+</TableContainer>   
         <TablePagination
           rowsPerPageOptions={[4, 8, 12, { label: 'All', value: -1 }]}
           component="div"

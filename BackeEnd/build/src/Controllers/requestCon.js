@@ -20,8 +20,35 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllFilteredRequestsWithPagination = exports.updatePlannedField = exports.createRequest = exports.updateFinalDecisionController = exports.updateRequestByIdController = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequest = exports.getRequestByIdController = void 0;
+exports.getAllFilteredRequestsWithPagination = exports.updatePlannedField = exports.createRequest = exports.updateFinalDecisionController = exports.updateRequestByIdController = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequest = exports.getRequestByIdController = exports.updateOrder = void 0;
 const requestUtils_1 = require("../Utils/requestUtils");
+//עידכון סדר
+const updateOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const updatedRows = req.body;
+        // בדוק אם הקלט הוא מערך
+        if (!Array.isArray(updatedRows)) {
+            res.status(400).json({ message: 'פורמט קלט לא תקין' });
+            return;
+        }
+        // עיבוד כל שורה ועדכון ה-order_index במסד הנתונים
+        for (const row of updatedRows) {
+            if (row.ID && row.order_index !== undefined) {
+                yield (0, requestUtils_1.updateRequestOrder)(row.ID, row.order_index);
+            }
+            else {
+                res.status(400).json({ message: 'חסר ID או order_index באחת השורות' });
+                return;
+            }
+        }
+        res.status(200).json({ message: 'הסדר עודכן בהצלחה' });
+    }
+    catch (error) {
+        console.error('שגיאה בעדכון הסדר:', error);
+        res.status(500).json({ message: 'שגיאה בעדכון הסדר' });
+    }
+});
+exports.updateOrder = updateOrder;
 const getRequestByIdController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = parseInt(req.params.id, 10);
     if (isNaN(id)) {
@@ -203,7 +230,6 @@ const updatePlannedField = (req, res) => __awaiter(void 0, void 0, void 0, funct
 });
 exports.updatePlannedField = updatePlannedField;
 const getAllFilteredRequestsWithPagination = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log('Controller function called');
     const limit = parseInt(req.query.limit) || 0;
     const offset = parseInt(req.query.offset) || 0;
     // קבלת פרמטרי המיון מתוך הבקשה, אם קיימים
@@ -213,7 +239,6 @@ const getAllFilteredRequestsWithPagination = (req, res) => __awaiter(void 0, voi
         const requestorName = req.query.requestorName;
         const requestorGroup = req.query.requestorGroup;
         const affectedGroupList = req.query.affectedGroupList;
-        console.log('Query parameters:', { requestorName, requestorGroup, affectedGroupList, sortBy, sortDirection, limit, offset });
         const { totalCount, requests } = yield (0, requestUtils_1.filterRequests)(requestorName, requestorGroup, affectedGroupList, sortBy, // הוסף את פרמטר המיון לפי עמודה
         sortDirection, // הוסף את פרמטר כיוון המיון
         limit, offset);
