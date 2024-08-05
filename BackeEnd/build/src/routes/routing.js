@@ -12,10 +12,15 @@ const PriorityCon_1 = require("../Controllers/PriorityCon");
 // import { getAllTSize } from '../Controllers/T_SizeCon';
 // import { getAllDecisionsController } from '../Controllers/final_decisionCon';
 const affectedGroupCon_1 = require("../Controllers/affectedGroupCon");
+const productManagerGroupCon_1 = require("../Controllers/productManagerGroupCon");
+const slackCon_1 = require("../Controllers/slackCon");
 const router = express_1.default.Router();
+router.post('/send-message', slackCon_1.sendMessageToSlack);
 //groups routings
 router.get('/groups', GroupCon_1.getAllGroupsController);
 router.put('/groups/:groupId', GroupCon_1.editGroupByAdmin);
+router.post('/groups', GroupCon_1.addGroup);
+router.delete('/groups/:groupId', GroupCon_1.deleteGroup);
 //Requests routings
 // router.get('/Allrequests', getAllRequests);
 router.get('/requests/:id', requestCon_1.getRequestByIdController);
@@ -38,7 +43,14 @@ router.get('/requestsWithStatuses', affectedGroupCon_1.getAllRequestsWithStatuse
 //routings ProductManager
 router.get('/productManagers', productManagerCon_1.getAllProductManagers);
 router.get('/requests/:groupId', productManagerCon_1.getAllRequestsByProductManager);
-router.put('/productManagers/:email', productManagerCon_1.editProductManagerByAdmin);
+router.put('/editProductManagers/:email', productManagerCon_1.editProductManagerByAdmin);
+router.post('/addProductManagers', productManagerCon_1.addProductManager);
+router.get('/product-managers/:email/groups', productManagerCon_1.getGroupsByProductManager);
+router.delete('/productManagers/:email', productManagerCon_1.deleteProductManager);
+//routings ProductManagerGroups 
+router.post('/product-manager-group', productManagerGroupCon_1.addProductManagerToGroupHandler);
+router.get('/product-manager-group/:email', productManagerGroupCon_1.getProductManagerGroupsHandler);
+router.get('/all-product-manager-groups', productManagerGroupCon_1.getAllProductManagerGroupsHandler);
 //status routings
 router.get('/status', StatusCon_1.getAllStatusController);
 router.get('/Getstatus', StatusCon_1.getAllStatus);

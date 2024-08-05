@@ -3,6 +3,7 @@ import { TextField, Button, Container, Typography, Box, Avatar, Alert } from '@m
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import '../designs/Login.css';
 const LoginPage = ({ emailRequestor, setEmailRequestor }) => {
   const [error, setError] = useState('');
   const navigate = useNavigate();

@@ -206,11 +206,17 @@ const getAllFilteredRequestsWithPagination = (req, res) => __awaiter(void 0, voi
     console.log('Controller function called');
     const limit = parseInt(req.query.limit) || 0;
     const offset = parseInt(req.query.offset) || 0;
+    // קבלת פרמטרי המיון מתוך הבקשה, אם קיימים
+    const sortBy = req.query.sortBy || 'r.id'; // ערך ברירת מחדל הוא 'r.id'
+    const sortDirection = req.query.sortDirection || 'DESC'; // ערך ברירת מחדל הוא 'DESC'
     try {
         const requestorName = req.query.requestorName;
         const requestorGroup = req.query.requestorGroup;
         const affectedGroupList = req.query.affectedGroupList;
-        const { totalCount, requests } = yield (0, requestUtils_1.filterRequests)(requestorName, requestorGroup, affectedGroupList, limit, offset);
+        console.log('Query parameters:', { requestorName, requestorGroup, affectedGroupList, sortBy, sortDirection, limit, offset });
+        const { totalCount, requests } = yield (0, requestUtils_1.filterRequests)(requestorName, requestorGroup, affectedGroupList, sortBy, // הוסף את פרמטר המיון לפי עמודה
+        sortDirection, // הוסף את פרמטר כיוון המיון
+        limit, offset);
         res.json({
             limit,
             offset,
