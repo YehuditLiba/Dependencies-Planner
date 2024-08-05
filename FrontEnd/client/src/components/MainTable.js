@@ -324,6 +324,12 @@ export default function MainTable({ emailRequestor }) {
     return <Navigate to="/admin-settings" />;
   } 
 
+  const handleSave = (updatedRow) => {
+    setRows((prevRows) =>
+      prevRows.map((row) => (row.id === updatedRow.id ? updatedRow : row))
+    );
+  };
+
  
   return (
     
