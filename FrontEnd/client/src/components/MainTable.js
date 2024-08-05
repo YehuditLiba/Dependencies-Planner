@@ -20,7 +20,6 @@ import '../designs/TableStyles.scss';
 import RequestForm from './RequestForm';
 import EditableRow from './EditableRow';
 // import AdminSettings from './AdminSettings';
-// import { formatDateTime } from '../utils/utils'; // נייבא את הפונקציה החדשה
 import { Navigate } from 'react-router-dom';
 import AdminSettings from './AdminSettings';
 import { formatDateTime } from '../utils/utils'; // נייבא את הפונקציה החדשה
@@ -450,6 +449,10 @@ export default function MainTable({ emailRequestor }) {
                   onDelete={handleDeleteRequest}
                   formatDate={formatDate}
                   showGroupColumns={showGroupColumns}
+                  groups={groups}
+                  getStatusBackgroundColor={getStatusBackgroundColor}
+                  getGroupStatus={getGroupStatus}
+                  handleStatusChange={handleStatusChange}
                 />
                     {/* {columns.map((column) => {
                       const value = row[column.id];
@@ -461,7 +464,7 @@ export default function MainTable({ emailRequestor }) {
                         )
                       );
                     })} */}
-                    {groups.map((group) => {
+                    {/* {groups.map((group) => {
                       const status = row.statuses.find(status => status.groupId === group.id);
                       const statusDescription = status ? status.status.status : 'Not Required';
 
@@ -480,7 +483,7 @@ export default function MainTable({ emailRequestor }) {
                           {statusDescription}
                         </TableCell>
                       ) : null;
-                    })}
+                    })} */}
                   </TableRow>
                 </React.Fragment>
               ))}
