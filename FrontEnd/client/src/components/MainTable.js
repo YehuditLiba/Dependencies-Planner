@@ -32,7 +32,6 @@ import '../designs/mainTable.css';
 import RequestForm from './RequestForm';
 import EditableRow from './EditableRow';
 // import AdminSettings from './AdminSettings';
-// import { formatDateTime } from '../utils/utils'; // נייבא את הפונקציה החדשה
 import { Navigate } from 'react-router-dom';
 import AdminSettings from './AdminSettings';
 import { formatDateTime } from '../utils/utils'; // נייבא את הפונקציה החדשה
@@ -48,6 +47,7 @@ import { faTimes, faSearch } from '@fortawesome/free-solid-svg-icons';
 
 
 const columns = [
+  { id: 'actions', label: 'Actions', minWidth: 100 },
   { id: 'title', label: 'Title', minWidth: 100 },
   { id: 'requestorName', label: 'Requestor Name', minWidth: 100 },
   { id: 'requestGroup', label: 'Request Group', minWidth: 100, show: true },
@@ -324,6 +324,12 @@ export default function MainTable({ emailRequestor }) {
     return <Navigate to="/admin-settings" />;
   } 
 
+  const handleSave = (updatedRow) => {
+    setRows((prevRows) =>
+      prevRows.map((row) => (row.id === updatedRow.id ? updatedRow : row))
+    );
+  };
+
  
   return (
     
@@ -470,18 +476,18 @@ export default function MainTable({ emailRequestor }) {
           <Table stickyHeader>
             <TableHead>
               <TableRow>
-              <TableCell style={{ minWidth: 50, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}>
-                Actions
-              </TableCell>
+                {/* <TableCell style={{ minWidth: 0, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}>
+                  Actions
+                </TableCell> */}
                 {columns.map((column) => (
-                  column.id === 'requestGroup' && !showGroupColumns ? null : (
+                  // column.id === 'requestGroup' && !showGroupColumns ? null : (
                     <TableCell
                       key={column.id}
                       style={{ minWidth: column.minWidth, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}
                     >
                       {column.label}
                     </TableCell>
-                  )
+                  // )
                 ))}
                 {groups.map((group) =>
                   showGroupColumns ? (
@@ -493,32 +499,40 @@ export default function MainTable({ emailRequestor }) {
                     </TableCell>
                   ) : null
                 )}
+                {/* <TableCell>Actions</TableCell>
+                {columns.slice(1).map((column) => ( // מוודאים שעמודת ה-Actions תוצג קודם
+                  <TableCell key={column.id}>{column.label}</TableCell>
+                ))} */}
               </TableRow>
             </TableHead>
             <TableBody>
               {rows.map((row, rowIndex) => (
                 <React.Fragment key={row.id}>
-                  <TableRow hover role="checkbox" tabIndex={-1}>
-                    <TableCell>
-                      <DeleteRequest id={row.ID} email={emailRequestor} onDelete={handleDeleteRequest} />
-                    </TableCell>
-                    {columns.map((column) => {
+                  <EditableRow
+                  key={row.id}
+                  row={row}
+                  columns={columns}
+                  onSave={handleSave}
+                  email={emailRequestor}
+                  onDelete={handleDeleteRequest}
+                  formatDate={formatDate}
+                  showGroupColumns={showGroupColumns}
+                  groups={groups}
+                  getStatusBackgroundColor={getStatusBackgroundColor}
+                  getGroupStatus={getGroupStatus}
+                  handleStatusChange={handleStatusChange}
+                />
+                    {/* {columns.map((column) => {
                       const value = row[column.id];
                       return (
                         column.id === 'requestGroup' && !showGroupColumns ? null : (
                           <TableCell key={column.id} style={{ minWidth: column.minWidth }}>
-                            {column.id === 'dateTime' ? formatDate(value) :
-                              column.id === 'jiraLink' ? (
-                                <a href={value} target="_blank" rel="noopener noreferrer">
-                                  Jira
-                                </a>
-                              ) : value
-                            }
+                            {column.id === 'dateTime' ? formatDate(value) : value}
                           </TableCell>
                         )
                       );
-                    })}
-                    {groups.map((group) => {
+                    })} */}
+                    {/* {groups.map((group) => {
                       const status = row.statuses.find(status => status.groupId === group.id);
                       const statusDescription = status ? status.status.status : 'Not Required';
 
@@ -537,23 +551,24 @@ export default function MainTable({ emailRequestor }) {
                           {statusDescription}
                         </TableCell>
                       ) : null;
-                    })}
-                  </TableRow>
-                  {isEditingRow === rowIndex && (
-                    <EditableRow
-                      row={row}
-                      onSave={(updatedRow) => {
-                        updateRequest(row.id, updatedRow);
-                        setIsEditingRow(null);
-                      }}
-                      onCancel={() => setIsEditingRow(null)}
-                    />
-                  )}
+                    })} */}
                 </React.Fragment>
               ))}
+
+              {/* {rows.map((row) => (
+                <EditableRow
+                  key={row.id}
+                  row={row}
+                  columns={columns}
+                  onSave={handleSave}
+                  email={emailRequestor}
+                  onDelete={handleDeleteRequest}
+                  formatDate={formatDate}
+                  showGroupColumns={showGroupColumns}
+                />
+              ))} */}
+
             </TableBody>
-
-
           </Table>
         </TableContainer>
         <TablePagination
