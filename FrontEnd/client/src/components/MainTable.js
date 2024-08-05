@@ -21,7 +21,6 @@ import Tooltip from '@mui/material/Tooltip';
 import SearchIcon from '@mui/icons-material/Search';
 import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes } from '@fortawesome/free-solid-svg-icons'; // אייקון של איקס
 import logo from '../Practicum.png'; // עדכן את הנתיב ללוגו שלך
 import Icon from '@mui/icons-material/AddCircle'; // אם אתה משתמש ב-Material-UI
 
@@ -43,6 +42,10 @@ import DeleteRequest from './DeleteRequest'; // Add this line
 import TuneIcon from '@mui/icons-material/Tune'; // שימוש באייקון Tune
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import { faArrowsAltH } from '@fortawesome/free-solid-svg-icons';
+
+import { faTimes, faSearch } from '@fortawesome/free-solid-svg-icons';
+
+
 
 const columns = [
   { id: 'title', label: 'Title', minWidth: 100 },
@@ -229,12 +232,18 @@ export default function MainTable({ emailRequestor }) {
   };
 
   const handleGroupSelect = (group) => {
-    setSelectedGroup(group.id || '');
-    handleCloseMenu('group');
+    if (selectedGroup === group.id) {
+      setSelectedGroup(null); // ביטול בחירת הקבוצה אם היא כבר נבחרה
+    } else {
+      setSelectedGroup(group.id); // בחירת הקבוצה
+    }
   };
   const handleManagerSelect = (manager) => {
-    setSelectedManager(manager.name || '');
-    handleCloseMenu('manager');
+    if (selectedManager === manager.name) {
+      setSelectedManager(null); // ביטול בחירת המנהל אם הוא כבר נבחר
+    } else {
+      setSelectedManager(manager.name); // בחירת המנהל
+    }
   };
   const handleAffectedGroupSelect = (groupId) => {
     setSelectedAffectedGroups(prev =>
@@ -354,6 +363,7 @@ export default function MainTable({ emailRequestor }) {
                   selected={group.id === selectedGroup}
                   onClick={() => handleGroupSelect(group)}
                 >
+                  <Checkbox checked={group.id === selectedGroup} />
                   {group.name}
                 </MenuItem>
               ))}
@@ -416,10 +426,10 @@ export default function MainTable({ emailRequestor }) {
                 onClick={clearFilters}
                 variant="contained"
               >
-                <FontAwesomeIcon icon={faTimes} className="clear-filters-icon" />
+                <FontAwesomeIcon icon={faSearch} className="clear-filters-icon" />
               </Button>
             </Tooltip>
-
+            
             <Tooltip title={showGroupColumns ? "Hide Group Columns" : "Show Group Columns"} arrow>
               <Button
                 className="column-toggle-button"

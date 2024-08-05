@@ -21,9 +21,12 @@
   align-items: center !important;
   position: relative !important;
   padding: 0 !important;
-  border: 2px solid transparent !important;
-  transition: background-color 0.3s, box-shadow 0.3s !important;
+  border: 2px solid #88fb3b !important;
+  /* מסגרת ירוקה רגילה */
+  transition: background-color 0.3s, box-shadow 0.3s, border 0.3s !important;
   left: 0 !important;
+  box-shadow: 0 0 8px rgba(0, 188, 0, 0.3);
+  /* מסגרת זוהרת ירוקה רגילה */
 }
 
 .group-button {
@@ -44,7 +47,9 @@
 .clear-filters-button:hover {
   background-color: #388e3c;
   border: 2px solid #88fb3b;
-  box-shadow: 0 0 8px rgba(0, 188, 0, 0.3);
+  /* מסגרת ירוקה במצב ריחוף */
+  box-shadow: 0 0 16px rgba(0, 188, 0, 0.5);
+  /* מסגרת זוהרת ירוקה במצב ריחוף */
 }
 
 /* צבעים שונים לאייקונים */
@@ -60,6 +65,11 @@
   color: #004d40;
 }
 
+.clear-filters-button .clear-filters-icon {
+  color: red;
+  /* צבע האייקון לאדום */
+}
+
 /* סגנון לכפתור הוספת בקשה */
 .add-request-button {
   background-color: #4caf50;
@@ -70,7 +80,9 @@
 .add-request-button:hover {
   background-color: #388e3c;
   border: 2px solid #88fb3b;
-  box-shadow: 0 0 8px rgba(0, 188, 0, 0.3);
+  /* מסגרת ירוקה במצב ריחוף */
+  box-shadow: 0 0 16px rgba(0, 188, 0, 0.5);
+  /* מסגרת זוהרת ירוקה במצב ריחוף */
 }
 
 /* סגנון לאייקון ה-+ */
@@ -88,7 +100,9 @@
 .column-toggle-button:hover {
   background-color: #388e3c;
   border: 2px solid #88fb3b;
-  box-shadow: 0 0 8px rgba(0, 188, 0, 0.3);
+  /* מסגרת ירוקה במצב ריחוף */
+  box-shadow: 0 0 16px rgba(0, 188, 0, 0.5);
+  /* מסגרת זוהרת ירוקה במצב ריחוף */
 }
 
 /* סגנון לאייקון חיצים כפולים */
@@ -96,19 +110,28 @@
   font-size: 24px;
 }
 
+/* סגנונות לכפתור ניקוי פילטרים */
 .clear-filters-button {
   background-color: #f44336;
   color: white;
   transition: background-color 0.3s, box-shadow 0.3s, border 0.3s;
+  border: 2px solid #88fb3b;
+  /* מסגרת ירוקה רגילה */
+  box-shadow: 0 0 8px rgba(0, 188, 0, 0.3);
+  /* מסגרת זוהרת ירוקה רגילה */
 }
 
 .clear-filters-button:hover {
   background-color: #d32f2f;
-  border: 2px solid #006f2c;
-  box-shadow: 0 0 8px rgba(255, 87, 34, 0.3);
+  border: 2px solid #88fb3b;
+  /* מסגרת ירוקה במצב ריחוף */
+  box-shadow: 0 0 16px rgba(0, 188, 0, 0.5);
+  /* מסגרת זוהרת ירוקה במצב ריחוף */
 }
 
 /* סגנון לאייקון ניקוי פילטרים */
 .clear-filters-icon {
   font-size: 24px;
+  color: red;
+  /* צבע האייקון לאדום */
 }
