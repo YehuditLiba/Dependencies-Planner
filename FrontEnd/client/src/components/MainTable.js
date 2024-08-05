@@ -279,26 +279,40 @@ export default function MainTable({ emailRequestor }) {
     return status ? status.status_description : 'No Status';
   };
 
-  const handleStatusChange = async (rowId, groupId) => {
-    const newStatus = prompt("Enter new status:");
-    if (newStatus) {
+  // const handleStatusChange = async (rowId, groupId) => {
+  //   const newStatus = prompt("Enter new status:");
+  //   if (newStatus) {
+  //     try {
+  //       const response = await axios.post('http://localhost:3001/api/updateStatus', {
+  //         requestId: rowId,
+  //         groupId: groupId,
+  //         status: newStatus
+  //       });
+  //       // עדכון סטטוסים מקומי אם נדרש
+  //       setStatuses(prevStatuses => prevStatuses.map(status =>
+  //         status.request_id === rowId && status.group_id === groupId
+  //           ? { ...status, status_description: newStatus }
+  //           : status
+  //       ));
+  //     } catch (error) {
+  //       console.error("Failed to update status", error);
+  //     }
+  //   }
+  // };
+
+    // פונקציה לשליחת שינוי סטטוס לשרת
+    const handleStatusChange = async (affectedGroupId, statusId) => {
       try {
-        const response = await axios.post('http://localhost:3001/api/updateStatus', {
-          requestId: rowId,
-          groupId: groupId,
-          status: newStatus
-        });
-        // עדכון סטטוסים מקומי אם נדרש
-        setStatuses(prevStatuses => prevStatuses.map(status =>
-          status.request_id === rowId && status.group_id === groupId
-            ? { ...status, status_description: newStatus }
-            : status
-        ));
+          await axios.put('http://localhost:3001/api/updateAffectedGroups/status', {
+              affectedGroupId,
+              statusId
+          });
       } catch (error) {
-        console.error("Failed to update status", error);
+          console.error('Error updating affected group status:', error);
       }
-    }
   };
+
+
   const getStatusBackgroundColor = (status) => {
     switch (status) {
       case 'Completed':

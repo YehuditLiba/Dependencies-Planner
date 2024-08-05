@@ -55,9 +55,9 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
         setIsEditing(!isEditing);
     };
 
-    const handleChange = (columnId, value) => {
-        setEditData(prev => ({ ...prev, [columnId]: value }));
-    };
+    // const handleChange = (columnId, value) => {
+    //     setEditData(prev => ({ ...prev, [columnId]: value }));
+    // };
 
     return (
         <TableRow hover role="checkbox" tabIndex={-1}>
