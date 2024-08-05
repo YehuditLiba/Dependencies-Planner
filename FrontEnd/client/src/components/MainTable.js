@@ -57,7 +57,9 @@ const columns = [
   { id: 'planned', label: 'Planned', minWidth: 100 },
   { id: 'comments', label: 'Comments', minWidth: 150 },
   { id: 'emailRequestor', label: 'Email Requestor', minWidth: 150 },
-  { id: 'dateTime', label: 'DateTime', minWidth: 100 }
+  { id: 'dateTime', label: 'DateTime', minWidth: 100 },
+  { id: 'jiraLink', label: 'Jira Link', minWidth: 100 }  //  Jira Link
+
 ];
 
 const modalStyle = {
@@ -505,7 +507,13 @@ export default function MainTable({ emailRequestor }) {
                       return (
                         column.id === 'requestGroup' && !showGroupColumns ? null : (
                           <TableCell key={column.id} style={{ minWidth: column.minWidth }}>
-                            {column.id === 'dateTime' ? formatDate(value) : value}
+                            {column.id === 'dateTime' ? formatDate(value) :
+                              column.id === 'jiraLink' ? (
+                                <a href={value} target="_blank" rel="noopener noreferrer">
+                                  Jira
+                                </a>
+                              ) : value
+                            }
                           </TableCell>
                         )
                       );
