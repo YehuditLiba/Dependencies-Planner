@@ -439,7 +439,6 @@ export default function MainTable({ emailRequestor }) {
             <TableBody>
               {rows.map((row, rowIndex) => (
                 <React.Fragment key={row.id}>
-                  <TableRow hover role="checkbox" tabIndex={-1}>
                   <EditableRow
                   key={row.id}
                   row={row}
@@ -484,7 +483,6 @@ export default function MainTable({ emailRequestor }) {
                         </TableCell>
                       ) : null;
                     })} */}
-                  </TableRow>
                 </React.Fragment>
               ))}
 

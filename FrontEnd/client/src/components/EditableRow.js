@@ -89,7 +89,8 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                 if (statusDescription === 'Not Required') {
                     cellStyle = { color: 'gray' }; // צבע אפור ל-'Not Required'
                 }
-                return showGroupColumns && isEditing ? (
+                return showGroupColumns ? (
+                    
                     <Select
                         key={group.id}
                         value={statusDescription}
