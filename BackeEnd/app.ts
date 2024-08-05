@@ -14,7 +14,7 @@ const app = express();
 const port = process.env.EXPRESS_PORT || 3001;
 
 app.use(express.json());
-app.use(cors())
+app.use(cors());
 connectToDatabases();
 
 app.use('/api', routing);
