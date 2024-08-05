@@ -42,6 +42,8 @@ import TuneIcon from '@mui/icons-material/Tune'; // שימוש באייקון Tu
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import { faArrowsAltH } from '@fortawesome/free-solid-svg-icons';
 import { faTimes, faSearch } from '@fortawesome/free-solid-svg-icons';
+import Papa from 'papaparse';
+
 
 
 
@@ -331,6 +333,20 @@ export default function MainTable({ emailRequestor }) {
       ));
   };
 
+
+  const handleExportCSV = () => {
+    const csvData = Papa.unparse(rows); // המרת המידע מהטבלה ל-CSV
+
+    // יצירת אובייקט Blob עם המידע והורדתו
+    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'data.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
 

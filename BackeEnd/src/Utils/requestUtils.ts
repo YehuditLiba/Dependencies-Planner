@@ -384,7 +384,60 @@ export const filterRequests = async (
         if (client) client.release();
     }
 };
+export const fetchAllRequests = async (): Promise<any[]> => {
+    const sql = `
+    WITH affected_groups AS (
+      SELECT
+        ag.request_id,
+        json_agg(json_build_object(
+          'groupId', ag.group_id,  -- ודא שהעמודה הזו קיימת
+          'status', json_build_object(
+            'id', COALESCE(s.id, 0),
+            'status', COALESCE(s.status, 'Not Required')
+          )
+        )) AS statuses,
+        ARRAY_AGG(ag.group_id) AS affected_group_list  -- ודא שהעמודה הזו קיימת
+      FROM
+        affected_group ag
+      LEFT JOIN
+        status s ON ag.status = s.id
+      GROUP BY
+        ag.request_id
+    )
+    SELECT
+      r.id,
+      r.title,
+      r.request_group,
+      r.description,
+      r.priority,
+      r.final_decision,
+      r.planned,
+      r.comments,
+      r.date_time,
+      COALESCE(ag.affected_group_list, '{}') AS affected_group_list,
+      COALESCE(ag.statuses, '[]'::json) AS statuses,
+      r.jira_link,
+      r.requestor_name,
+      r.requestor_email
+    FROM
+      request r
+    LEFT JOIN
+      affected_groups ag ON r.id = ag.request_id
+    ORDER BY r.id;
+  `;
 
+    let client;
+    try {
+        client = await pool.connect();
+        const { rows } = await client.query(sql);
+        return rows;
+    } catch (err) {
+        console.error('Error fetching requests:', err);
+        throw err;
+    } finally {
+        if (client) client.release();
+    }
+};
 
 
 
