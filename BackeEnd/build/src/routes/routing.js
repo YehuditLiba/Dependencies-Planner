@@ -12,7 +12,6 @@ const PriorityCon_1 = require("../Controllers/PriorityCon");
 // import { getAllTSize } from '../Controllers/T_SizeCon';
 // import { getAllDecisionsController } from '../Controllers/final_decisionCon';
 const affectedGroupCon_1 = require("../Controllers/affectedGroupCon");
-const productManagerGroupCon_1 = require("../Controllers/productManagerGroupCon");
 const slackCon_1 = require("../Controllers/slackCon");
 const router = express_1.default.Router();
 router.post('/send-message', slackCon_1.sendMessageToSlack);
@@ -45,12 +44,11 @@ router.get('/productManagers', productManagerCon_1.getAllProductManagers);
 router.get('/requests/:groupId', productManagerCon_1.getAllRequestsByProductManager);
 router.put('/editProductManagers/:email', productManagerCon_1.editProductManagerByAdmin);
 router.post('/addProductManagers', productManagerCon_1.addProductManager);
-// router.get('/product-managers/:email/groups', getGroupsByProductManager);
 router.delete('/productManagers/:email', productManagerCon_1.deleteProductManager);
 //routings ProductManagerGroups 
-router.post('/product-manager-group', productManagerGroupCon_1.addProductManagerToGroupHandler);
-router.get('/product-manager-group/:email', productManagerGroupCon_1.getProductManagerGroupsHandler);
-router.get('/all-product-manager-groups', productManagerGroupCon_1.getAllProductManagerGroupsHandler);
+// router.post('/product-manager-group', addProductManagerToGroupHandler);
+// router.get('/product-manager-group/:email', getProductManagerGroupsHandler);
+// router.get('/all-product-manager-groups', getAllProductManagerGroupsHandler); 
 //status routings
 router.get('/status', StatusCon_1.getAllStatusController);
 router.get('/Getstatus', StatusCon_1.getAllStatus);
