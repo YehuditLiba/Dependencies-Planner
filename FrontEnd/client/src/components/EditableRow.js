@@ -146,6 +146,7 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                 </TableCell>
             ))}
             {groups.map((group) => {
+                const status = row.statuses ? row.statuses.find(status => status.groupId === group.id) : null;
                 const statusDescription = getGroupStatus(row, group.id);
                 // הגדרת סגנון התא
                 let cellStyle = {};
@@ -154,25 +155,25 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                 }
                 return (
                     showGroupColumns ? (
-                    <TableCell
-                        key={group.id}
-                        style={{ backgroundColor: getStatusBackgroundColor(statusDescription), ...cellStyle }}
-                    >
-                        {isEditing ? (
-                            <Select
-                                value={statusDescription}
-                                onChange={(e) => setEditData({ ...editData, [group.id]: e.target.value })}
-                            >
-                                {statuses.map(status => (
-                                    <MenuItem key={status.id} value={status.status}>
-                                        {status.status}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        ) : (
-                            statusDescription
-                        )}
-                    </TableCell>
+                        <TableCell
+                            key={group.id}
+                            style={{ backgroundColor: getStatusBackgroundColor(statusDescription), ...cellStyle }}
+                        >
+                            {isEditing ? (
+                                <Select
+                                    value={statusDescription}
+                                    onChange={(e) => setEditData({ ...editData, [group.id]: e.target.value })}
+                                >
+                                    {statuses.map(status => (
+                                        <MenuItem key={status.id} value={status.status}>
+                                            {status.status}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            ) : (
+                                statusDescription
+                            )}
+                        </TableCell>
                     ) : null
                 );
             })}
