@@ -49,9 +49,9 @@ const AdminSettings = () => {
         axios.get('http://localhost:3001/api/productManagers'),
         axios.get('http://localhost:3001/api/all-product-manager-groups')
       ]);
-      console.log('Fetched Groups:', groupsResponse.data); 
-      console.log('Fetched Product Managers:', productManagersResponse.data);
-      console.log('Fetched All Product Manager Groups:', allProductManagerGroupsResponse.data);
+      // console.log('Fetched Groups:', groupsResponse.data); 
+      // console.log('Fetched Product Managers:', productManagersResponse.data);
+      // console.log('Fetched All Product Manager Groups:', allProductManagerGroupsResponse.data);
       
       setGroups(groupsResponse.data);
       setProductManagers(productManagersResponse.data);

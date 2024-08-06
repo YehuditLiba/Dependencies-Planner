@@ -13,10 +13,6 @@ export const getAllGroupsController = (req: Request, res: Response) => {
 export const editGroupByAdmin = (req: Request, res: Response) => {
     const groupId = parseInt(req.params.groupId, 10);
     const { name } = req.body;
-
-    console.log('Received groupId:', groupId);
-    console.log('Received name:', name);
-
     updateGroupById(groupId, name, (err) => {
         if (err) {
             console.error('Error updating group:', err);
@@ -27,9 +23,6 @@ export const editGroupByAdmin = (req: Request, res: Response) => {
 };
 export const addGroup = (req: Request, res: Response) => {
     const { name } = req.body;
-
-    console.log('Received new group:', name);
-
     addGroupToDatabase(name, (err) => {
         if (err) {
             console.error('Error adding group:', err);
