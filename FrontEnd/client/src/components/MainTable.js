@@ -31,6 +31,7 @@ import '../designs/mainTable.css';
 import RequestForm from './RequestForm';
 import EditableRow from './EditableRow';
 // import AdminSettings from './AdminSettings';
+// import { formatDateTime } from '../utils/utils'; 
 import { Navigate } from 'react-router-dom';
 import AdminSettings from './AdminSettings';
 import { formatDateTime } from '../utils/utils'; // נייבא את הפונקציה החדשה
@@ -78,7 +79,7 @@ export default function MainTable({ emailRequestor }) {
   const [totalRows, setTotalRows] = useState(0);
   const [groups, setGroups] = useState([]);
   const [managers, setManagers] = useState([]);
-  const [affectedGroups, setAffectedGroups] = useState([]);
+  // const [affectedGroups, setAffectedGroups] = useState([]);
   const [showGroupColumns, setShowGroupColumns] = useState(true);
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -92,6 +93,7 @@ export default function MainTable({ emailRequestor }) {
   const [editValue, setEditValue] = useState('');
   const [isEditingRow, setIsEditingRow] = useState(null);
   const [redirectToAdminSettings, setRedirectToAdminSettings] = useState(false);
+
   const [requestId, setRequestId] = useState(null);
   const [groupId, setGroupId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
