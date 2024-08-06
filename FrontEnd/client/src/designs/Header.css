@@ -1,4 +1,4 @@
-/* Header.css */
+Header.css
 .header {
     display: flex;
     justify-content: center;
@@ -33,7 +33,7 @@
     /* למקם את הלוגו בחלק העליון */
     right: 0;
     /* למקם את הלוגו בחלק הימני */
-    margin: 10px;
+    margin: 100px;
     /* רווח מהקצוות */
 }
 
