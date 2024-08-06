@@ -545,10 +545,6 @@ export default function MainTable({ emailRequestor }) {
                     </TableCell>
                   ) : null
                 )}
-                {/* <TableCell>Actions</TableCell>
-                {columns.slice(1).map((column) => ( // מוודאים שעמודת ה-Actions תוצג קודם
-                  <TableCell key={column.id}>{column.label}</TableCell>
-                ))} */}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -565,7 +561,7 @@ export default function MainTable({ emailRequestor }) {
                     showGroupColumns={showGroupColumns}
                     groups={groups}
                     getStatusBackgroundColor={getStatusBackgroundColor}
-                    getGroupStatus={getGroupStatus}
+                    // getGroupStatus={getGroupStatus}
                     handleStatusChange={handleStatusChange}
                     rowIndex={rowIndex}
                     onDrop={onDrop}

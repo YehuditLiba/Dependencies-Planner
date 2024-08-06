@@ -196,7 +196,6 @@ export const createRequest = async (req: CustomRequest<RequestT>, res: Response)
     };
 
     await addRequest(request); // להוסיף את הבקשה
-    await addRequest(request); // להוסיף את הבקשה
     res.status(201).json({ message: 'Request added successfully' });
   } catch (error) {
     console.error(error);
@@ -216,7 +215,7 @@ export const updatePlannedField = async (req: CustomRequest<UpdatePlannedBody>, 
     const { ID } = req.params;
     const { planned } = req.body;
 
-    await updatePlanned(Number(ID), planned);
+    await updatePlanned(planned, Number(ID));
     res.status(200).json({ message: 'Planned field updated successfully' });
   } catch (error) {
     console.error(error);
