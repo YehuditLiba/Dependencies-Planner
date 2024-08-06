@@ -44,6 +44,7 @@ import Papa from 'papaparse';
 import Header from './Header'; // ודא שהייבוא נכון
 
 const columns = [
+  { id: 'actions', label: 'Actions', minWidth: 100 },
   { id: 'title', label: 'Title', minWidth: 100 },
   { id: 'requestorName', label: 'Requestor Name', minWidth: 100 },
   { id: 'requestGroup', label: 'Request Group', minWidth: 100, show: true },
@@ -53,7 +54,9 @@ const columns = [
   { id: 'planned', label: 'Planned', minWidth: 100 },
   { id: 'comments', label: 'Comments', minWidth: 150 },
   { id: 'emailRequestor', label: 'Email Requestor', minWidth: 150 },
-  { id: 'dateTime', label: 'DateTime', minWidth: 100 }
+  { id: 'dateTime', label: 'DateTime', minWidth: 100 },
+  { id: 'jiraLink', label: 'Jira Link', minWidth: 100 }  //  Jira Link
+
 ];
 
 const modalStyle = {
@@ -94,23 +97,19 @@ export default function MainTable({ emailRequestor }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredRows, setFilteredRows] = useState([]);
   const [selectedButton, setSelectedButton] = useState(null);
-  const [adminSettingsOpen, setAdminSettingsOpen] = useState(false);
+ const [adminSettingsOpen, setAdminSettingsOpen] = useState(false);
 
-  useEffect(() => {
- const fetchData = async () => {
-  try {
-    const params = {
-      limit: rowsPerPage === -1 ? undefined : rowsPerPage,
-      offset: rowsPerPage === -1 ? 0 : page * rowsPerPage,
-    };
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const params = {
+            limit: rowsPerPage === -1 ? undefined : rowsPerPage,
+            offset: rowsPerPage === -1 ? 0 : page * rowsPerPage,
+          };
 
-    if (selectedGroup) {
-      params.requestorGroup = selectedGroup;
-    }
-
-    if (selectedManager) {
-      params.requestorName = selectedManager;
-    }
+          if (selectedGroup) {
+            params.requestorGroup = selectedGroup;
+          }
 
     if (selectedAffectedGroups.length) {
       params.affectedGroupList = selectedAffectedGroups.join(',');
@@ -164,7 +163,7 @@ export default function MainTable({ emailRequestor }) {
     fetchGroups();
     fetchManagers();
     fetchStatuses();
-  }, [page, rowsPerPage,selectedGroup, selectedManager, selectedAffectedGroups]);
+  }, [page, rowsPerPage, selectedGroup, selectedManager, selectedAffectedGroups]);
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -284,16 +283,16 @@ export default function MainTable({ emailRequestor }) {
   //   }
   // };
 
-    // פונקציה לשליחת שינוי סטטוס לשרת
-    const handleStatusChange = async (affectedGroupId, statusId) => {
-      try {
-          await axios.put('http://localhost:3001/api/updateAffectedGroups/status', {
-              affectedGroupId,
-              statusId
-          });
-      } catch (error) {
-          console.error('Error updating affected group status:', error);
-      }
+  // פונקציה לשליחת שינוי סטטוס לשרת
+  const handleStatusChange = async (affectedGroupId, statusId) => {
+    try {
+      await axios.put('http://localhost:3001/api/updateAffectedGroups/status', {
+        affectedGroupId,
+        statusId
+      });
+    } catch (error) {
+      console.error('Error updating affected group status:', error);
+    }
   };
 
 
@@ -320,12 +319,12 @@ export default function MainTable({ emailRequestor }) {
 
   if (redirectToAdminSettings) {
     return <Navigate to="/admin-settings" />;
-  } 
+  }
 
   const handleSave = (updatedRow) => {
     setRows(prevRows =>
-      prevRows.map(row => 
-          row.ID === updatedRow.ID ? updatedRow : row
+      prevRows.map(row =>
+        row.ID === updatedRow.ID ? updatedRow : row
       ));
   };
 
@@ -334,30 +333,33 @@ export default function MainTable({ emailRequestor }) {
     const newRows = [...rows];
     const [draggedRow] = newRows.splice(draggedRowIndex, 1);
     newRows.splice(rowIndex, 0, draggedRow);
-  
+
     // עדכון order_index בהתאם למיקום החדש של השורות
     const updatedRows = newRows.map((row, index) => ({
-        ...row,
-        order_index: index  // מניחים ש-order_index מתחיל מ-0
+      ...row,
+      order_index: index  // מניחים ש-order_index מתחיל מ-0
     }));
-  
+
     // עדכון מצב השורות והנתונים במסד הנתונים
     setRows(updatedRows);
-  
+
     try {
-        await fetch('http://localhost:3001/api/update-order', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(updatedRows),
-        });
+      await fetch('http://localhost:3001/api/update-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedRows),
+      });
     } catch (error) {
-        console.error('עדכון הסדר נכשל:', error);
+      console.error('עדכון הסדר נכשל:', error);
     }
   };
   // סידור השורות לפי order_index
   const sortedRows = [...rows].sort((a, b) => a.order_index - b.order_index);
+  
+
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 4 }}>
       <Header /> {/* הוספת ה-Header */}
@@ -394,7 +396,7 @@ export default function MainTable({ emailRequestor }) {
                   selected={group.id === selectedGroup}
                   onClick={() => handleGroupSelect(group)}
                 >
-                   <Checkbox checked={group.id === selectedGroup} />
+                  <Checkbox checked={group.id === selectedGroup} />
                   {group.name}
                 </MenuItem>
               ))}
@@ -512,18 +514,16 @@ export default function MainTable({ emailRequestor }) {
           
         </Box>
         <TableContainer sx={{ maxHeight: 440 }}>
-    <Table stickyHeader>
-        <TableHead>
-            <TableRow>
-                <TableCell style={{ minWidth: 50, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}>    
-                </TableCell>         
+          <Table stickyHeader>
+            <TableHead>
+              <TableRow>
                 {columns.map((column) => (
-                    <TableCell
-                        key={column.id}
-                        style={{ minWidth: column.minWidth, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}
-                    >
-                        {column.label}
-                    </TableCell>
+                  <TableCell
+                    key={column.id}
+                    style={{ minWidth: column.minWidth, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}
+                  >
+                    {column.label}
+                  </TableCell>
                 ))}
                 {groups.map((group) =>
                   showGroupColumns ? (
@@ -544,7 +544,7 @@ export default function MainTable({ emailRequestor }) {
             <TableBody>
               {sortedRows.map((row, rowIndex) => (
                 <React.Fragment key={row.id}>
-            <EditableRow
+                    <EditableRow
                     key={row.id}
                     row={row}
                     columns={columns}
@@ -591,10 +591,10 @@ export default function MainTable({ emailRequestor }) {
                       ) : null;
                     })} */}
                 </React.Fragment>
-            ))}
-        </TableBody>
-    </Table>
-</TableContainer>   
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
         <TablePagination
           rowsPerPageOptions={[4, 8, 12, { label: 'All', value: -1 }]}
           component="div"

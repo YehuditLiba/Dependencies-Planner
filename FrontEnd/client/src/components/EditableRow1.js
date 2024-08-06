@@ -154,7 +154,9 @@ const EditableRow = ({ row, columns, groups, statuses, onUpdate }) => {
           ) : column.id === 'dateTime' ? (
             formatDateTime(rowData[column.id])
           ) : (
-            column.id === 'priority' ? (priorityMap[rowData[column.id]] || rowData[column.id]) : (
+            column.id === 'priority' ? (
+              priorityMap[rowData[column.id]] || rowData[column.id]
+            ) : (
               rowData[column.id]
             )
           )}
