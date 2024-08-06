@@ -1,22 +1,14 @@
-// EditableRow.js
 import React, { useEffect, useState } from 'react';
 import { TableRow, TableCell, IconButton, TextField } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import axios from 'axios';
-import DeleteRequest from './DeleteRequest'; // Add this line
+import DeleteRequest from './DeleteRequest';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import { priorityMap } from '../utils/utils';
 
-
-
-const EditableRow = ({ row, columns, onSave, emailRequestor,
-    handleDeleteRequest, formatDate, showGroupColumns, groups,
-    getStatusBackgroundColor, /*getGroupStatus,*/ handleStatusChange,
-    rowIndex, onDrop
-}) => {
-    console.log("EditableRow row:", row); // הוסף את השורה הזו לבדוק את ה-row המתקבל
+const EditableRow = ({ row, columns, onSave, emailRequestor, handleDeleteRequest, formatDate, showGroupColumns, groups, getStatusBackgroundColor, rowIndex, onDrop }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState(row);
     const [statuses, setStatuses] = useState([]);
@@ -26,15 +18,12 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
         setEditData(row);
     }, [row]);
 
-
     useEffect(() => {
         const fetchStatuses = async () => {
             try {
                 const response = await axios.get('http://localhost:3001/api/status');
-                console.log('Statuses fetched from server:', response.data);
-                console.log('statuses:', statuses)
                 setStatuses(response.data);
-                console.log('statuses:', statuses)
+                console.log('Fetched statuses:', response.data); // לוג כאן
             } catch (error) {
                 console.error('Failed to fetch statuses', error);
             }
@@ -44,31 +33,36 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
             try {
                 const response = await axios.get('http://localhost:3001/api/priority');
                 setPriorities(response.data);
+                console.log('Fetched priorities:', response.data); // לוג כאן
             } catch (err) {
                 console.error('Error fetching priorities:', err);
             }
         };
 
-        fetchStatuses()
+        fetchStatuses();
         fetchPriorities();
-    }, [])
+    }, []);
 
     const handleToggleEdit = async () => {
         if (isEditing) {
-            console.log('Updated Row Data:', editData); // Debugging Line
             try {
-                // אם העדכון הוא עבור priority
-                if (editData.priority !== row.priority) {
-                    const response = await axios.put(`http://localhost:3001/api/requests/${editData.ID}/priority`, { priority: priorityMap[editData.priority] });
-                    onSave(response.data);
-                } else {
-                    const response = await axios.put(`http://localhost:3001/api/requests/${editData.ID}`, {
-                        title: editData.title,
-                        description: editData.description,
-                        comments: editData.comments
-                    }); // Updated URL to match the Postman example
-                    onSave(response.data);
-                }
+                const updateData = {
+                    title: editData.title,
+                    description: editData.description,
+                    comments: editData.comments,
+                    priority: editData.priority,
+                    statuses: editData.statuses.map(status => ({
+                        groupId: status.groupId,
+                        status: status.status.id // נשלח את הסטטוס לפי ה-ID שלו
+                    }))
+                };
+    
+                console.log('Sending updateData:', updateData); // לוג כאן
+    
+                const response = await axios.put(`http://localhost:3001/api/requests/${editData.ID}`, updateData);
+                console.log('Received response:', response.data); // לוג כאן
+                onSave(response.data);
+                console.log('Row updated in table:', response.data); // לוג נוסף כאן
             } catch (error) {
                 console.error('Error updating row:', error);
             }
@@ -90,12 +84,19 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
 
     const getGroupStatus = (row, groupId) => {
         if (!row.statuses) {
-            return 'Not Required'; // או כל ערך אחר שיתאים למקרה שבו אין סטטוסים.
+            return 'Not Required';
         }
         const status = row.statuses.find(status => status.groupId === groupId);
         return status ? status.status.status : 'Not Required';
     };
-    
+
+    const handleStatusChange = (e, groupId) => {
+        const updatedStatuses = (editData.statuses || []).map(status =>
+            status.groupId === groupId ? { ...status, status: statuses.find(s => s.status === e.target.value) } : status
+        );
+        setEditData({ ...editData, statuses: updatedStatuses });
+        console.log('Updated statuses:', updatedStatuses); // לוג כאן
+    };
 
     return (
         <TableRow
@@ -124,7 +125,6 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                             <Select
                                 value={editData[column.id] || ''}
                                 onChange={(e) => handleChange(e, column.id)}
-                                // onBlur={handleBlur}
                                 autoFocus
                             >
                                 {priorities.map(priority => (
@@ -145,25 +145,23 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                     )}
                 </TableCell>
             ))}
-            {/* {groups.map((group) => {
-                // console.log(editData.statuses.find(status => status.groupId === group.id))
-                // const status = editData.statuses.find(status => status.groupId === group.id);
-                const status = (row.statuses || []).find(status => status.groupId === group.id);
+            {groups.map((group) => {
+                const status = (editData.statuses || []).find(status => status.groupId === group.id);
                 const statusDescription = status ? status.status.status : 'Not Required';
-                // הגדרת סגנון התא
-                let cellStyle = {};
+                     let cellStyle = {};
                 if (statusDescription === 'Not Required') {
-                    cellStyle = { color: 'gray' }; // צבע אפור ל-'Not Required'
+                    cellStyle = { color: 'gray' };
                 }
                 return (
                     <TableCell
                         key={group.id}
-                        style={{ backgroundColor: getStatusBackgroundColor(getGroupStatus(row, group.id)), ...cellStyle }}
+                        style={{ backgroundColor: getStatusBackgroundColor(statusDescription), ...cellStyle }}
                     >
-                        {/* {isEditing ? (
+                        {isEditing ? (
                             <Select
                                 value={statusDescription}
-                                onChange={(e) => setEditData({ ...editData, [group.id]: e.target.value })}
+                                onChange={(e) => handleStatusChange(e, group.id)}
+                                disabled={statusDescription === 'Not Required'}
                             >
                                 {statuses.map(status => (
                                     <MenuItem key={status.id} value={status.status}>
@@ -173,41 +171,10 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                             </Select>
                         ) : (
                             statusDescription
-                        )} */}{/*}
-                        {statusDescription}
+                        )}
                     </TableCell>
                 );
-            })} */}
-            {groups.map((group) => {
-    const statusDescription = getGroupStatus(row, group.id);
-    // הגדרת סגנון התא
-    let cellStyle = {};
-    if (statusDescription === 'Not Required') {
-        cellStyle = { color: 'gray' }; // צבע אפור ל-'Not Required'
-    }
-    return (
-        <TableCell
-            key={group.id}
-            style={{ backgroundColor: getStatusBackgroundColor(statusDescription), ...cellStyle }}
-        >
-            {isEditing ? (
-                <Select
-                    value={statusDescription}
-                    onChange={(e) => setEditData({ ...editData, [group.id]: e.target.value })}
-                >
-                    {statuses.map(status => (
-                        <MenuItem key={status.id} value={status.status}>
-                            {status.status}
-                        </MenuItem>
-                    ))}
-                </Select>
-            ) : (
-                statusDescription
-            )}
-        </TableCell>
-    );
-})}
-
+            })}
         </TableRow>
     );
 };
