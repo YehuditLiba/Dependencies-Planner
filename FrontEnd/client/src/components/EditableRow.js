@@ -65,13 +65,15 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                 if (editData.planned !== row.planned) {
                     const response = await axios.put(`http://localhost:3001/api/requests/${editData.ID}/planned`, { planned: editData.planned });
                     onSave(response.data);
-                }
+                } 
+                //else {
                 const response = await axios.put(`http://localhost:3001/api/requests/${editData.ID}`, {
                     title: editData.title,
                     description: editData.description,
                     comments: editData.comments
                 }); // Updated URL to match the Postman example
                 onSave(response.data);
+            //}
             } catch (error) {
                 console.error('Error updating row:', error);
             }
