@@ -7,7 +7,7 @@ import axios from 'axios';
 import DeleteRequest from './DeleteRequest'; // Add this line
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import { priorityMap } from '../utils/utils';
+import { priorityMap,finalDecissionMap } from '../utils/utils';
 import { quarters } from '../config/quarters';
 
 
@@ -16,7 +16,7 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
     getStatusBackgroundColor, /*getGroupStatus,*/ handleStatusChange,
     rowIndex, onDrop
 }) => {
-    console.log("EditableRow row:", row); // הוסף את השורה הזו לבדוק את ה-row המתקבל
+    // console.log("EditableRow row:", row); // הוסף את השורה הזו לבדוק את ה-row המתקבל
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState(row);
     const [statuses, setStatuses] = useState([]);
@@ -31,10 +31,10 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
         const fetchStatuses = async () => {
             try {
                 const response = await axios.get('http://localhost:3001/api/status');
-                console.log('Statuses fetched from server:', response.data);
-                console.log('statuses:', statuses)
+                // console.log('Statuses fetched from server:', response.data);
+                // console.log('statuses:', statuses)
                 setStatuses(response.data);
-                console.log('statuses:', statuses)
+                // console.log('statuses:', statuses)
             } catch (error) {
                 console.error('Failed to fetch statuses', error);
             }
@@ -55,7 +55,7 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
 
     const handleToggleEdit = async () => {
         if (isEditing) {
-            console.log('Updated Row Data:', editData); // Debugging Line
+            // console.log('Updated Row Data:', editData); // Debugging Line
             try {
                 // אם העדכון הוא עבור priority
                 if (editData.priority !== row.priority) {
@@ -157,6 +157,8 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                                             </Select>
                                         ) : column.id === 'dateTime' ? (
                                             formatDate(row[column.id])
+                                        ): column.id === 'finalDecision' ? (
+                                            finalDecissionMap[editData[column.id]] || editData[column.id]
                                         ) : row[column.id]
                         ) : column.id === 'dateTime' ? (
                             formatDate(row[column.id])
