@@ -207,14 +207,23 @@ export default function MainTable({ emailRequestor }) {
     }
   };
 
+
   const handleGroupSelect = (group) => {
-    setSelectedGroup(group.id || '');
-    handleCloseMenu('group');
+    if (group.id === selectedGroup) {
+      // אם הפריט כבר מסומן, ננקה את הבחירה
+      setSelectedGroup('');
+    } else {
+      setSelectedGroup(group.id || '');
+    }
   };
+
   const handleManagerSelect = (manager) => {
-    setSelectedManager(manager.name || '');
-    handleCloseMenu('manager');
+    setSelectedManager(prev =>
+      prev === manager.name ? '' : manager.name
+    );
   };
+
+
   const handleAffectedGroupSelect = (groupId) => {
     setSelectedAffectedGroups(prev =>
       prev.includes(groupId) ? prev.filter(id => id !== groupId) : [...prev, groupId]
@@ -357,15 +366,13 @@ export default function MainTable({ emailRequestor }) {
   };
   // סידור השורות לפי order_index
   const sortedRows = [...rows].sort((a, b) => a.order_index - b.order_index);
-  
-
-
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 4 }}>
+    <Box className="table-container">
+      <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 4 }}>
       <Header /> {/* הוספת ה-Header */}
       <Box className="table-container">
-      <Paper sx={{ width: '100%', overflow: 'hidden', marginTop: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, padding: 2 }}>
+          <Paper sx={{ width: '100%', overflow: 'hidden', marginTop: 4 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, padding: 2 }}>
           <div className="filter-buttons-container">
             <Tooltip title="Add Request" arrow>
               <Button
@@ -376,57 +383,60 @@ export default function MainTable({ emailRequestor }) {
                 <FontAwesomeIcon icon={faPlusCircle} size="2x" className="add-icon" />
               </Button>
             </Tooltip>
-            <Tooltip title="Filter by Group" arrow>
-              <Button
-                className="filter-button group-button"
-                variant="contained"
-                onClick={(event) => handleOpenMenu(event, 'group')}
-              >
-                <SearchIcon />
-              </Button>
-            </Tooltip>
-            <Menu
-              anchorEl={anchorElGroup}
-              open={Boolean(anchorElGroup)}
-              onClose={() => handleCloseMenu('group')}
-            >
-              {groups.map((group) => (
-                <MenuItem
-                  key={group.id}
-                  selected={group.id === selectedGroup}
-                  onClick={() => handleGroupSelect(group)}
+                <Tooltip title="Filter by Group" arrow>
+                  <Button
+                    className="filter-button group-button"
+                    variant="contained"
+                    onClick={(event) => handleOpenMenu(event, 'group')}
+                  >
+                    <SearchIcon />
+                  </Button>
+                </Tooltip>
+                <Menu
+                  anchorEl={anchorElGroup}
+                  open={Boolean(anchorElGroup)}
+                  onClose={() => handleCloseMenu('group')}
                 >
-                  <Checkbox checked={group.id === selectedGroup} />
-                  {group.name}
-                </MenuItem>
-              ))}
-            </Menu>
+                  {groups.map((group) => (
+                    <MenuItem
+                      key={group.id}
+                      selected={group.id === selectedGroup}
+                      onClick={(event) => {
+                        event.stopPropagation(); // עצור את האירוע כך שלא יסגור את התפריט
+                        handleGroupSelect(group);
+                      }}
+                    >
+                      <Checkbox checked={group.id === selectedGroup} />
+                      {group.name}
+                    </MenuItem>
+                  ))}
+                </Menu>
 
-            <Tooltip title="Filter by Manager" arrow>
-              <Button
-                className="filter-button manager-button"
-                variant="contained"
-                onClick={(event) => handleOpenMenu(event, 'manager')}
-              >
-                <SearchOutlinedIcon />
-              </Button>
-            </Tooltip>
-            <Menu
-              anchorEl={anchorElManager}
-              open={Boolean(anchorElManager)}
-              onClose={() => handleCloseMenu('manager')}
-            >
-              {managers.map((manager) => (
-                <MenuItem
-                  key={manager.id}
-                  selected={manager.name === selectedManager}
-                  onClick={() => handleManagerSelect(manager)}
+                <Tooltip title="Filter by Manager" arrow>
+                  <Button
+                    className="filter-button manager-button"
+                    variant="contained"
+                    onClick={(event) => handleOpenMenu(event, 'manager')}
+                  >
+                    <SearchOutlinedIcon />
+                  </Button>
+                </Tooltip>
+                <Menu
+                  anchorEl={anchorElManager}
+                  open={Boolean(anchorElManager)}
+                  onClose={() => handleCloseMenu('manager')}
                 >
-                  <Checkbox checked={manager.name === selectedManager} />
-                  {manager.name}
-                </MenuItem>
-              ))}
-            </Menu>
+                  {managers.map((manager) => (
+                    <MenuItem
+                      key={manager.id}
+                      onClick={() => handleManagerSelect(manager)}
+                    >
+                      <Checkbox checked={manager.name === selectedManager} />
+                      {manager.name}
+                    </MenuItem>
+                  ))}
+                </Menu>
+
 
             <Tooltip title="Filter by Affected Groups" arrow>
               <Button
@@ -516,7 +526,7 @@ export default function MainTable({ emailRequestor }) {
         <TableContainer sx={{ maxHeight: 440 }}>
           <Table stickyHeader>
             <TableHead>
-              <TableRow>
+                  <TableRow className="custom-table-row">
                 {columns.map((column) => (
                   <TableCell
                     key={column.id}
@@ -601,6 +611,7 @@ export default function MainTable({ emailRequestor }) {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
+      </Box>
       </Box>
       <Modal
         open={open}
