@@ -555,7 +555,7 @@ export default function MainTable({ emailRequestor }) {
                     showGroupColumns={showGroupColumns}
                     groups={groups}
                     getStatusBackgroundColor={getStatusBackgroundColor}
-                    getGroupStatus={getGroupStatus}
+                    // getGroupStatus={getGroupStatus}
                     handleStatusChange={handleStatusChange}
                     rowIndex={rowIndex}
                     onDrop={onDrop}
