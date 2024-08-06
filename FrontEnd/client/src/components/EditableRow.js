@@ -9,13 +9,12 @@ import MenuItem from '@mui/material/MenuItem';
 import { priorityMap } from '../utils/utils';
 import { quarters } from '../config/quarters';
 
-
 const EditableRow = ({ row, columns, onSave, emailRequestor,
     handleDeleteRequest, formatDate, showGroupColumns, groups,
-    getStatusBackgroundColor, /*getGroupStatus,*/ handleStatusChange,
+    getStatusBackgroundColor,
     rowIndex, onDrop
 }) => {
-    console.log("EditableRow row:", row); // הוסף את השורה הזו לבדוק את ה-row המתקבל
+    console.log("EditableRow row:", row); // שורת בדיקה
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState(row);
     const [statuses, setStatuses] = useState([]);
@@ -30,7 +29,7 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
             try {
                 const response = await axios.get('http://localhost:3001/api/status');
                 setStatuses(response.data);
-                console.log('Fetched statuses:', response.data); // לוג כאן
+                console.log('Fetched statuses:', response.data); // שורת בדיקה
             } catch (error) {
                 console.error('Failed to fetch statuses', error);
             }
@@ -40,7 +39,7 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
             try {
                 const response = await axios.get('http://localhost:3001/api/priority');
                 setPriorities(response.data);
-                console.log('Fetched priorities:', response.data); // לוג כאן
+                console.log('Fetched priorities:', response.data); // שורת בדיקה
             } catch (err) {
                 console.error('Error fetching priorities:', err);
             }
@@ -52,7 +51,7 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
 
     const handleToggleEdit = async () => {
         if (isEditing) {
-            console.log('Updated Row Data:', editData); // Debugging Line
+            console.log('Updated Row Data:', editData); // שורת בדיקה
             try {
                 // אם העדכון הוא עבור priority
                 if (editData.priority !== row.priority) {
@@ -63,7 +62,7 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                         title: editData.title,
                         description: editData.description,
                         comments: editData.comments
-                    }); // Updated URL to match the Postman example
+                    }); // URL מעודכן לפי דוגמת Postman
                     onSave(response.data);
                 }
             } catch (error) {
@@ -92,12 +91,13 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
         const status = row.statuses.find(status => status.groupId === groupId);
         return status ? status.status.status : 'Not Required';
     };
+
     const handleStatusChange = (e, groupId) => {
         const updatedStatuses = (editData.statuses || []).map(status =>
             status.groupId === groupId ? { ...status, status: statuses.find(s => s.status === e.target.value) } : status
         );
         setEditData({ ...editData, statuses: updatedStatuses });
-        console.log('Updated statuses:', updatedStatuses); // לוג כאן
+        console.log('Updated statuses:', updatedStatuses); // שורת בדיקה
     };
 
     return (
@@ -127,7 +127,6 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                             <Select
                                 value={editData[column.id] || ''}
                                 onChange={(e) => handleChange(e, column.id)}
-                                // onBlur={handleBlur}
                                 autoFocus
                             >
                                 {priorities.map(priority => (
@@ -151,7 +150,7 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
             {groups.map((group) => {
                 const status = (editData.statuses || []).find(status => status.groupId === group.id);
                 const statusDescription = status ? status.status.status : 'Not Required';
-                     let cellStyle = {};
+                let cellStyle = {};
                 if (statusDescription === 'Not Required') {
                     cellStyle = { color: 'gray' };
                 }
@@ -180,7 +179,6 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                     ) : null
                 );
             })}
-
         </TableRow>
     );
 };
