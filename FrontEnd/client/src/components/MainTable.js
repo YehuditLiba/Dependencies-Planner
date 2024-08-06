@@ -23,8 +23,6 @@ import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import logo from '../Practicum.png'; // עדכן את הנתיב ללוגו שלך
 import Icon from '@mui/icons-material/AddCircle'; // אם אתה משתמש ב-Material-UI
-
-// import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
 import axios from 'axios';
 import '../designs/TableStyles.scss';
@@ -36,14 +34,12 @@ import { Navigate } from 'react-router-dom';
 import AdminSettings from './AdminSettings';
 import { formatDateTime } from '../utils/utils'; // נייבא את הפונקציה החדשה
 import StatusCell from './StatusCell';
-// או הנתיב הנכון לקובץ שבו הפונקציה מוגדרת
 import DeleteRequest from './DeleteRequest'; // Add this line
 import TuneIcon from '@mui/icons-material/Tune'; // שימוש באייקון Tune
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import { faArrowsAltH } from '@fortawesome/free-solid-svg-icons';
 import { faTimes, faSearch } from '@fortawesome/free-solid-svg-icons';
 import Papa from 'papaparse';
-
 
 
 
@@ -234,18 +230,12 @@ export default function MainTable({ emailRequestor }) {
   };
 
   const handleGroupSelect = (group) => {
-    if (selectedGroup === group.id) {
-      setSelectedGroup(null); // ביטול בחירת הקבוצה אם היא כבר נבחרה
-    } else {
-      setSelectedGroup(group.id); // בחירת הקבוצה
-    }
+    setSelectedGroup(group.id || '');
+    handleCloseMenu('group');
   };
   const handleManagerSelect = (manager) => {
-    if (selectedManager === manager.name) {
-      setSelectedManager(null); // ביטול בחירת המנהל אם הוא כבר נבחר
-    } else {
-      setSelectedManager(manager.name); // בחירת המנהל
-    }
+    setSelectedManager(manager.name || '');
+    handleCloseMenu('manager');
   };
   const handleAffectedGroupSelect = (groupId) => {
     setSelectedAffectedGroups(prev =>
@@ -302,16 +292,16 @@ export default function MainTable({ emailRequestor }) {
   //   }
   // };
 
-    // פונקציה לשליחת שינוי סטטוס לשרת
-    const handleStatusChange = async (affectedGroupId, statusId) => {
-      try {
-          await axios.put('http://localhost:3001/api/updateAffectedGroups/status', {
-              affectedGroupId,
-              statusId
-          });
-      } catch (error) {
-          console.error('Error updating affected group status:', error);
-      }
+  // פונקציה לשליחת שינוי סטטוס לשרת
+  const handleStatusChange = async (affectedGroupId, statusId) => {
+    try {
+      await axios.put('http://localhost:3001/api/updateAffectedGroups/status', {
+        affectedGroupId,
+        statusId
+      });
+    } catch (error) {
+      console.error('Error updating affected group status:', error);
+    }
   };
 
 
@@ -342,8 +332,8 @@ export default function MainTable({ emailRequestor }) {
 
   const handleSave = (updatedRow) => {
     setRows(prevRows =>
-      prevRows.map(row => 
-          row.ID === updatedRow.ID ? updatedRow : row
+      prevRows.map(row =>
+        row.ID === updatedRow.ID ? updatedRow : row
       ));
   };
 
@@ -352,32 +342,32 @@ export default function MainTable({ emailRequestor }) {
     const newRows = [...rows];
     const [draggedRow] = newRows.splice(draggedRowIndex, 1);
     newRows.splice(rowIndex, 0, draggedRow);
-  
+
     // עדכון order_index בהתאם למיקום החדש של השורות
     const updatedRows = newRows.map((row, index) => ({
-        ...row,
-        order_index: index  // מניחים ש-order_index מתחיל מ-0
+      ...row,
+      order_index: index  // מניחים ש-order_index מתחיל מ-0
     }));
-  
+
     // עדכון מצב השורות והנתונים במסד הנתונים
     setRows(updatedRows);
-  
+
     try {
-        await fetch('http://localhost:3001/api/update-order', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(updatedRows),
-        });
+      await fetch('http://localhost:3001/api/update-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedRows),
+      });
     } catch (error) {
-        console.error('עדכון הסדר נכשל:', error);
+      console.error('עדכון הסדר נכשל:', error);
     }
   };
-  
+
   // סידור השורות לפי order_index
   const sortedRows = [...rows].sort((a, b) => a.order_index - b.order_index);
-  
+
 
   const handleExportCSV = () => {
     const csvData = Papa.unparse(rows); // המרת המידע מהטבלה ל-CSV
@@ -392,7 +382,6 @@ export default function MainTable({ emailRequestor }) {
     link.click();
     document.body.removeChild(link);
   };
-
   return (
 
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 4 }}>
@@ -494,7 +483,7 @@ export default function MainTable({ emailRequestor }) {
                 onClick={clearFilters}
                 variant="contained"
               >
-                <FontAwesomeIcon icon={faSearch} className="clear-filters-icon" />
+                <FontAwesomeIcon icon={faTimes} className="clear-filters-icon" />
               </Button>
             </Tooltip>
 
@@ -538,18 +527,13 @@ export default function MainTable({ emailRequestor }) {
           <Table stickyHeader>
             <TableHead>
               <TableRow>
-                {/* <TableCell style={{ minWidth: 0, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}>
-                  Actions
-                </TableCell> */}
                 {columns.map((column) => (
-                  // column.id === 'requestGroup' && !showGroupColumns ? null : (
                   <TableCell
                     key={column.id}
                     style={{ minWidth: column.minWidth, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}
                   >
                     {column.label}
                   </TableCell>
-                  // )
                 ))}
                 {groups.map((group) =>
                   showGroupColumns ? (
@@ -618,20 +602,6 @@ export default function MainTable({ emailRequestor }) {
                     })} */}
                 </React.Fragment>
               ))}
-
-              {/* {rows.map((row) => (
-                <EditableRow
-                  key={row.id}
-                  row={row}
-                  columns={columns}
-                  onSave={handleSave}
-                  email={emailRequestor}
-                  onDelete={handleDeleteRequest}
-                  formatDate={formatDate}
-                  showGroupColumns={showGroupColumns}
-                />
-              ))} */}
-
             </TableBody>
           </Table>
         </TableContainer>

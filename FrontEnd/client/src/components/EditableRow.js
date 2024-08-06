@@ -62,7 +62,11 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                     const response = await axios.put(`http://localhost:3001/api/requests/${editData.ID}/priority`, { priority: priorityMap[editData.priority] });
                     onSave(response.data);
                 } else {
-                    const response = await axios.put(`http://localhost:3001/api/requests/${editData.ID}`, editData); // Updated URL to match the Postman example
+                    const response = await axios.put(`http://localhost:3001/api/requests/${editData.ID}`,{
+                        title: editData.title,
+                        description: editData.description,
+                        comments: editData.comments
+                        } ); // Updated URL to match the Postman example
                     onSave(response.data);
                 }
             } catch (error) {
@@ -121,6 +125,8 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                                     </MenuItem>
                                 ))}
                             </Select>
+                        ) : column.id === 'dateTime' ? (
+                            formatDate(row[column.id])
                         ) : row[column.id]
                     ) : column.id === 'dateTime' ? (
                         formatDate(row[column.id])
@@ -132,6 +138,7 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                 </TableCell>
             ))}
             {groups.map((group) => {
+                console.log(row.statuses.find(status => status.groupId === group.id))
                 const status = row.statuses.find(status => status.groupId === group.id);
                 const statusDescription = status ? status.status.status : 'Not Required';
                 // הגדרת סגנון התא
@@ -144,7 +151,7 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                         key={group.id}
                         style={{ backgroundColor: getStatusBackgroundColor(getGroupStatus(row, group.id)), ...cellStyle }}
                     >
-                        {isEditing ? (
+                        {/* {isEditing ? (
                             <Select
                                 value={statusDescription}
                                 onChange={(e) => setEditData({ ...editData, [group.id]: e.target.value })}
@@ -157,7 +164,8 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                             </Select>
                         ) : (
                             statusDescription
-                        )}
+                        )} */}
+            {statusDescription}
                     </TableCell>
                 );
             })}
