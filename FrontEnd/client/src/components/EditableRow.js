@@ -8,7 +8,7 @@ import DeleteRequest from './DeleteRequest'; // Add this line
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import { priorityMap } from '../utils/utils';
-
+import { quarters } from '../config/quarters';
 
 
 const EditableRow = ({ row, columns, onSave, emailRequestor,
@@ -61,14 +61,17 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                 if (editData.priority !== row.priority) {
                     const response = await axios.put(`http://localhost:3001/api/requests/${editData.ID}/priority`, { priority: priorityMap[editData.priority] });
                     onSave(response.data);
-                } else {
-                    const response = await axios.put(`http://localhost:3001/api/requests/${editData.ID}`, {
-                        title: editData.title,
-                        description: editData.description,
-                        comments: editData.comments
-                    }); // Updated URL to match the Postman example
+                }
+                if (editData.planned !== row.planned) {
+                    const response = await axios.put(`http://localhost:3001/api/requests/${editData.ID}/planned`, { planned: editData.planned });
                     onSave(response.data);
                 }
+                const response = await axios.put(`http://localhost:3001/api/requests/${editData.ID}`, {
+                    title: editData.title,
+                    description: editData.description,
+                    comments: editData.comments
+                }); // Updated URL to match the Postman example
+                onSave(response.data);
             } catch (error) {
                 console.error('Error updating row:', error);
             }
@@ -114,35 +117,52 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
             </TableCell>
             {columns.slice(1).map((column) => (
                 <TableCell key={column.id} style={{ minWidth: column.minWidth }}>
-                    {isEditing ? (
-                        column.id === 'title' || column.id === 'description' || column.id === 'comments' ? (
-                            <TextField
-                                value={editData[column.id] || ''}
-                                onChange={(e) => setEditData({ ...editData, [column.id]: e.target.value })}
-                            />
-                        ) : column.id === 'priority' ? (
-                            <Select
-                                value={editData[column.id] || ''}
-                                onChange={(e) => handleChange(e, column.id)}
-                                // onBlur={handleBlur}
-                                autoFocus
-                            >
-                                {priorities.map(priority => (
-                                    <MenuItem key={priority.id} value={priority.id}>
-                                        {priorityMap[priority.id]}
-                                    </MenuItem>
-                                ))}
-                            </Select>
+                    {isEditing ?
+                        (
+                            column.id === 'title' || column.id === 'description' || column.id === 'comments' ?
+                                (
+                                    <TextField
+                                        value={editData[column.id] || ''}
+                                        onChange={(e) => setEditData({ ...editData, [column.id]: e.target.value })}
+                                    />
+                                ) : column.id === 'priority' ?
+                                    (
+                                        <Select
+                                            value={editData[column.id] || ''}
+                                            onChange={(e) => handleChange(e, column.id)}
+                                            // onBlur={handleBlur}
+                                            autoFocus
+                                        >
+                                            {priorities.map(priority => (
+                                                <MenuItem key={priority.id} value={priority.id}>
+                                                    {priorityMap[priority.id]}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    ) : column.id === 'planned' ?
+                                        (
+                                            <Select
+                                                value={editData[column.id] || ''}
+                                                onChange={(e) => handleChange(e, column.id)}
+                                                // onBlur={handleBlur}
+                                                autoFocus
+                                            >
+                                                {quarters.map((quarter, index) => (
+                                                    <MenuItem key={index} value={quarter}>
+                                                        {quarter}
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        ) : column.id === 'dateTime' ? (
+                                            formatDate(row[column.id])
+                                        ) : row[column.id]
                         ) : column.id === 'dateTime' ? (
                             formatDate(row[column.id])
-                        ) : row[column.id]
-                    ) : column.id === 'dateTime' ? (
-                        formatDate(row[column.id])
-                    ) : column.id === 'priority' ? (
-                        priorityMap[editData[column.id]] || editData[column.id]
-                    ) : (
-                        row[column.id]
-                    )}
+                        ) : column.id === 'priority' ? (
+                            priorityMap[editData[column.id]] || editData[column.id]
+                        ) : (
+                            row[column.id]
+                        )}
                 </TableCell>
             ))}
             {groups.map((group) => {
