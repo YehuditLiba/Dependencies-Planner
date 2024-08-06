@@ -18,4 +18,6 @@ export interface RequestT {
     jiraLink: string;
     emailRequestor: string;
     statuses: { groupId: number; status: Status }[];
+    order_index?: number;
+
 }

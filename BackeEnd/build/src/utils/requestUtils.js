@@ -9,13 +9,28 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRequestsByGroupId = exports.getRequestById = exports.filterRequests = exports.updatePlanned = exports.addRequest = exports.updateFinalDecision = exports.updateRequestById = exports.getRequestByIdForUp = exports.updateAffectedGroupList = exports.updateRequestFields = exports.deleteRequestById = void 0;
+exports.updateRequestOrder = exports.getRequestsByGroupId = exports.getRequestById = exports.fetchAllRequests = exports.filterRequests = exports.updatePlanned = exports.addRequest = exports.updateFinalDecision = exports.updateRequestById = exports.getRequestByIdForUp = exports.updateAffectedGroupList = exports.updateRequestFields = exports.deleteRequestById = void 0;
 const db_1 = require("../config/db");
 // import { createAffectedGroupInDB } from './affectedGroupsUtils';
 // import { deleteAffectedGroupsByRequestId } from './affectedGroupsUtils';
 const affectedGroupsUtils_1 = require("./affectedGroupsUtils");
+const updateRequestOrder = (id, orderIndex) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const query = `
+            UPDATE request
+            SET order_index = $1
+            WHERE ID = $2
+        `;
+        const values = [orderIndex, id];
+        yield db_1.pool.query(query, values);
+    }
+    catch (error) {
+        console.error(`שגיאה בעדכון order_index עבור ID ${id}:`, error);
+        throw new Error('שגיאה בעדכון order_index');
+    }
+});
+exports.updateRequestOrder = updateRequestOrder;
 const getRequestById = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log({ id });
     try {
         const client = yield db_1.pool.connect();
         const sql = 'SELECT * FROM request WHERE id = $1;';
@@ -39,6 +54,7 @@ const getRequestById = (id) => __awaiter(void 0, void 0, void 0, function* () {
             jiraLink: row.jira_link,
             requestorName: row.requestorName,
             emailRequestor: row.emailRequestor,
+            order_index: row.order_index
         };
     }
     catch (err) {
@@ -236,9 +252,9 @@ const addRequest = (request) => __awaiter(void 0, void 0, void 0, function* () {
         request.requestorName,
         request.emailRequestor,
     ];
-    // Start a transaction
-    yield db_1.pool.query('BEGIN');
     try {
+        // Start a transaction
+        yield db_1.pool.query('BEGIN');
         // Insert the request and get the inserted request's ID
         const result = yield db_1.pool.query(query, values);
         const requestId = result.rows[0].id;
@@ -252,12 +268,13 @@ const addRequest = (request) => __awaiter(void 0, void 0, void 0, function* () {
     catch (error) {
         // Rollback the transaction in case of an error
         yield db_1.pool.query('ROLLBACK');
-        throw error;
+        console.error('Error in addRequest:', error);
+        throw new Error('Failed to add request');
     }
 });
 exports.addRequest = addRequest;
 //עידכון רבעון
-const updatePlanned = (ID, planned) => __awaiter(void 0, void 0, void 0, function* () {
+const updatePlanned = (planned, ID) => __awaiter(void 0, void 0, void 0, function* () {
     const query = `
       UPDATE request
       SET planned = $1
@@ -268,7 +285,6 @@ const updatePlanned = (ID, planned) => __awaiter(void 0, void 0, void 0, functio
 });
 exports.updatePlanned = updatePlanned;
 const filterRequests = (requestorName, requestorGroup, affectedGroupList, sortBy, sortDirection, limit, offset) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log('Filtering requests with parameters:', requestorName, requestorGroup, affectedGroupList);
     let sql = `
     WITH affected_groups AS (
         SELECT
@@ -328,16 +344,11 @@ const filterRequests = (requestorName, requestorGroup, affectedGroupList, sortBy
         values.push(limit);
         values.push(offset);
     }
-    console.log('Generated SQL:', sql);
-    console.log('SQL Values:', values);
     let client;
     try {
         client = yield db_1.pool.connect();
         const { rows } = yield client.query(sql, values);
-        console.log('Rows returned from query:', rows.length);
         const totalCount = rows.length > 0 ? parseInt(rows[0].total_count, 10) : 0;
-        console.log('Total count:', totalCount);
-        console.log('Rows:', rows);
         const requests = rows.map((row) => ({
             ID: row.id,
             title: row.title,
@@ -353,6 +364,7 @@ const filterRequests = (requestorName, requestorGroup, affectedGroupList, sortBy
             jiraLink: row.jira_link,
             requestorName: row.requestor_name,
             emailRequestor: row.requestor_email,
+            order_index: row.order_index
         }));
         console.log('Processed Requests:', requests);
         return { totalCount, requests };
@@ -367,3 +379,60 @@ const filterRequests = (requestorName, requestorGroup, affectedGroupList, sortBy
     }
 });
 exports.filterRequests = filterRequests;
+const fetchAllRequests = () => __awaiter(void 0, void 0, void 0, function* () {
+    const sql = `
+    WITH affected_groups AS (
+      SELECT
+        ag.request_id,
+        json_agg(json_build_object(
+          'groupId', ag.group_id,  -- ודא שהעמודה הזו קיימת
+          'status', json_build_object(
+            'id', COALESCE(s.id, 0),
+            'status', COALESCE(s.status, 'Not Required')
+          )
+        )) AS statuses,
+        ARRAY_AGG(ag.group_id) AS affected_group_list  -- ודא שהעמודה הזו קיימת
+      FROM
+        affected_group ag
+      LEFT JOIN
+        status s ON ag.status = s.id
+      GROUP BY
+        ag.request_id
+    )
+    SELECT
+      r.id,
+      r.title,
+      r.request_group,
+      r.description,
+      r.priority,
+      r.final_decision,
+      r.planned,
+      r.comments,
+      r.date_time,
+      COALESCE(ag.affected_group_list, '{}') AS affected_group_list,
+      COALESCE(ag.statuses, '[]'::json) AS statuses,
+      r.jira_link,
+      r.requestor_name,
+      r.requestor_email
+    FROM
+      request r
+    LEFT JOIN
+      affected_groups ag ON r.id = ag.request_id
+    ORDER BY r.id;
+  `;
+    let client;
+    try {
+        client = yield db_1.pool.connect();
+        const { rows } = yield client.query(sql);
+        return rows;
+    }
+    catch (err) {
+        console.error('Error fetching requests:', err);
+        throw err;
+    }
+    finally {
+        if (client)
+            client.release();
+    }
+});
+exports.fetchAllRequests = fetchAllRequests;

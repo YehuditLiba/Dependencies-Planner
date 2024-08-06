@@ -22,6 +22,7 @@ router.post('/groups', GroupCon_1.addGroup);
 router.delete('/groups/:groupId', GroupCon_1.deleteGroup);
 //Requests routings
 // router.get('/Allrequests', getAllRequests);
+router.post('/update-order', requestCon_1.updateOrder);
 router.get('/requests/:id', requestCon_1.getRequestByIdController);
 router.delete('/deleteRequests/:id', requestCon_1.deleteRequest);
 router.put('/requests/:id', requestCon_1.updateRequest);
@@ -32,6 +33,7 @@ router.put('/requests/:ID/planned', requestCon_1.updatePlannedField);
 //router.get('/requestsA', getRequestsWithPagination);
 //filter:
 router.get('/requests', requestCon_1.getAllFilteredRequestsWithPagination);
+router.get('/export-requests', requestCon_1.exportRequestsToCSV);
 // Affected_Groups:
 router.get('/affectedGroups', affectedGroupCon_1.getAllAffectedGroupsController);
 router.put('/updateAffectedGroups/status', affectedGroupCon_1.updateAffectedGroupStatus);

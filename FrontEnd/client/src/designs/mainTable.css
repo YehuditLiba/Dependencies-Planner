@@ -82,7 +82,6 @@
   border: 2px solid #88fb3b;
   /* מסגרת ירוקה במצב ריחוף */
   box-shadow: 0 0 16px rgba(0, 188, 0, 0.5);
-  /* מסגרת זוהרת ירוקה במצב ריחוף */
 }
 
 /* סגנון לאייקון ה-+ */
@@ -134,4 +133,51 @@
   font-size: 24px;
   color: red;
   /* צבע האייקון לאדום */
+}
+
+.table-container {
+  width: 100%;
+  overflow: auto;
+  /* לוודא שהטבלה נמתחת אם יש יותר מדי תכנים */
+}
+
+.table-paper {
+  width: 100%;
+  margin: 0 auto;
+  /* ממרכז את ה-Paper */
+}
+
+.my-table {
+  width: 80%;
+  /* הטבלה תתפרס על 80% מהרוחב של ההורה שלה */
+  margin: 0 auto;
+  /* תמרכז את הטבלה */
+  border-collapse: collapse;
+  /* יבטל רווחים בין התאים */
+}
+/* TableStyles.scss or mainTable.css */
+
+/* עדכון עיצוב של תאי הטבלה */
+.custom-table-cell {
+  padding: 4px 8px;
+  /* הקטנת הרווחים */
+  font-size: 12px;
+  /* הקטנת גודל הגופן */
+}
+
+/* עדכון עיצוב של שורות הטבלה */
+.custom-table-row {
+  height: 32px;
+  /* הקטנת גובה השורות */
+}
+
+/* עדכון עיצוב של קונטיינר הטבלה */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table-paper {
+  width: 100%;
+  overflow-x: auto;
 }

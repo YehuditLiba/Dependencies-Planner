@@ -41,7 +41,7 @@ const DeleteRequest = ({ id, email, onDelete }) => {
       console.log(`Successfully deleted request with ID: ${id}`);
       onDelete(id);
       handleClose();
-      sendMessageToSlack(`Request delete by ${requestorEmail}`)
+      sendMessageToSlack(`Request delete by  ${requestorEmail}`)
     } catch (error) {
       // console.error(`Failed to delete request with ID: ${id}`, error);
       // console.error(`Failed to delete request with requestorEmail: ${email}`, error);

@@ -37,9 +37,9 @@ const AdminSettings = () => {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
+
   const handleGroupChange = async (groupId) => {
     if (editingGroupId === null) return;
 
@@ -52,9 +52,7 @@ const AdminSettings = () => {
     }
 };
 
-
-
-  const handleAddGroup = async () => {
+const handleAddGroup = async () => {
     if (!newGroupName) return;
     try {
       const response = await axios.post('http://localhost:3001/api/groups', { name: newGroupName });
@@ -102,7 +100,7 @@ const AdminSettings = () => {
     } catch (error) {
       console.error('Error adding new group:', error);
     }
-  };
+ };
   const handleProductManagerChange = async (email) => {
     console.log('Sending update for:', email);
     console.log('Data being sent:', {

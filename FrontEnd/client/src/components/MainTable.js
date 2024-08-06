@@ -21,10 +21,9 @@ import Tooltip from '@mui/material/Tooltip';
 import SearchIcon from '@mui/icons-material/Search';
 import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import logo from '../Practicum.png'; // עדכן את הנתיב ללוגו שלך
+//import logo from 'Practicum.png'; // עדכן את הנתיב ללוגו שלך
 import Icon from '@mui/icons-material/AddCircle'; // אם אתה משתמש ב-Material-UI
-
-// import FormControlLabel from '@mui/material/FormControlLabel';
+import { faDownload } from '@fortawesome/free-solid-svg-icons';
 import FormGroup from '@mui/material/FormGroup';
 import axios from 'axios';
 import '../designs/TableStyles.scss';
@@ -37,17 +36,16 @@ import { Navigate } from 'react-router-dom';
 import AdminSettings from './AdminSettings';
 import { formatDateTime } from '../utils/utils'; // נייבא את הפונקציה החדשה
 import StatusCell from './StatusCell';
- // או הנתיב הנכון לקובץ שבו הפונקציה מוגדרת
 import DeleteRequest from './DeleteRequest'; // Add this line
 import TuneIcon from '@mui/icons-material/Tune'; // שימוש באייקון Tune
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import { faArrowsAltH } from '@fortawesome/free-solid-svg-icons';
-
 import { faTimes, faSearch } from '@fortawesome/free-solid-svg-icons';
-
-
+import Papa from 'papaparse';
+import Header from './Header'; // ודא שהייבוא נכון
 
 const columns = [
+  { id: 'actions', label: 'Actions', minWidth: 100 },
   { id: 'title', label: 'Title', minWidth: 100 },
   { id: 'requestorName', label: 'Requestor Name', minWidth: 100 },
   { id: 'requestGroup', label: 'Request Group', minWidth: 100, show: true },
@@ -57,7 +55,9 @@ const columns = [
   { id: 'planned', label: 'Planned', minWidth: 100 },
   { id: 'comments', label: 'Comments', minWidth: 150 },
   { id: 'emailRequestor', label: 'Email Requestor', minWidth: 150 },
-  { id: 'dateTime', label: 'DateTime', minWidth: 100 }
+  { id: 'dateTime', label: 'DateTime', minWidth: 100 },
+  { id: 'jiraLink', label: 'Jira Link', minWidth: 100 }  //  Jira Link
+
 ];
 
 const modalStyle = {
@@ -99,59 +99,42 @@ export default function MainTable({ emailRequestor }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredRows, setFilteredRows] = useState([]);
   const [selectedButton, setSelectedButton] = useState(null);
-
-
-
  const [adminSettingsOpen, setAdminSettingsOpen] = useState(false);
 
-  
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const params = {
-          limit: rowsPerPage === -1 ? undefined : rowsPerPage,
-          offset: rowsPerPage === -1 ? 0 : page * rowsPerPage,
-        };
-          console.log(params);
-        if (selectedGroup) {
-          params.requestorGroup = selectedGroup;
-        }
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const params = {
+            limit: rowsPerPage === -1 ? undefined : rowsPerPage,
+            offset: rowsPerPage === -1 ? 0 : page * rowsPerPage,
+          };
 
-        if (selectedManager) {
-          params.requestorName = selectedManager;
-        }
+          if (selectedGroup) {
+            params.requestorGroup = selectedGroup;
+          }
 
-        if (selectedAffectedGroups.length) {
-          params.affectedGroupList = selectedAffectedGroups.join(',');
-        }
-        console.log(params);
-        console.log('rowsPerPage:', rowsPerPage);
-        console.log('page:', page);
+    if (selectedAffectedGroups.length) {
+      params.affectedGroupList = selectedAffectedGroups.join(',');
+    }
 
-        const response = await axios.get('http://localhost:3001/api/requests', { params });
+    console.log('Params sent to server:', params);
 
-        // הדפס את כל הנתונים שמתקבלים מהשרת כדי לבדוק מה מגיע בפועל
-        console.log('Full response data:', response.data);
+    const response = await axios.get('http://localhost:3001/api/requests', { params });
 
-        if (response.data.requests) {
-          console.log('Fetched rows:', response.data.requests);
+    console.log('Full response data:', response.data);
 
-          setRows(response.data.requests);
-          console.log('Updated rows:', response.data.requests);
-          setTotalRows(response.data.totalCount || response.data.requests.length);
-          console.log('Updated totalRows:', response.data.totalCount || response.data.requests.length);
-
-        } else {
-          console.warn('No requests found in response data');
-        }
-      } catch (error) {
-        console.error("Failed to fetch data", error);
-        alert("Failed to fetch data from server. Please try again later.");
-      }
-    };
-
-
-
+    if (response.data.requests) {
+      console.log('Fetched rows:', response.data.requests);
+      setRows(response.data.requests);
+      setTotalRows(response.data.totalCount || response.data.requests.length);
+    } else {
+      console.warn('No requests found in response data');
+    }
+  } catch (error) {
+    console.error("Failed to fetch data", error);
+    alert("Failed to fetch data from server. Please try again later.");
+  }
+};
     const fetchGroups = async () => {
       try {
         const response = await axios.get('http://localhost:3001/api/groups');
@@ -169,8 +152,6 @@ export default function MainTable({ emailRequestor }) {
         console.error("Failed to fetch product managers", error);
       }
     };
-
-
     const fetchStatuses = async () => {
       try {
         const response = await axios.get('http://localhost:3001/api/status');
@@ -184,21 +165,18 @@ export default function MainTable({ emailRequestor }) {
     fetchGroups();
     fetchManagers();
     fetchStatuses();
-  }, [page, rowsPerPage,selectedGroup, selectedManager, selectedAffectedGroups]);
+  }, [page, rowsPerPage, selectedGroup, selectedManager, selectedAffectedGroups]);
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
-
   const handleChangeRowsPerPage = (event) => {
     const value = event.target.value;
     setRowsPerPage(value === 'all' ? -1 : +value);
     setPage(0);
   };
-
   const handleToggleColumns = () => {
     setShowGroupColumns(prev => !prev);
   };
-
   const handleOpenMenu = (event, type) => {
     switch (type) {
       case 'group':
@@ -231,20 +209,23 @@ export default function MainTable({ emailRequestor }) {
     }
   };
 
+
   const handleGroupSelect = (group) => {
-    if (selectedGroup === group.id) {
-      setSelectedGroup(null); // ביטול בחירת הקבוצה אם היא כבר נבחרה
+    if (group.id === selectedGroup) {
+      // אם הפריט כבר מסומן, ננקה את הבחירה
+      setSelectedGroup('');
     } else {
-      setSelectedGroup(group.id); // בחירת הקבוצה
+      setSelectedGroup(group.id || '');
     }
   };
+
   const handleManagerSelect = (manager) => {
-    if (selectedManager === manager.name) {
-      setSelectedManager(null); // ביטול בחירת המנהל אם הוא כבר נבחר
-    } else {
-      setSelectedManager(manager.name); // בחירת המנהל
-    }
+    setSelectedManager(prev =>
+      prev === manager.name ? '' : manager.name
+    );
   };
+
+
   const handleAffectedGroupSelect = (groupId) => {
     setSelectedAffectedGroups(prev =>
       prev.includes(groupId) ? prev.filter(id => id !== groupId) : [...prev, groupId]
@@ -278,27 +259,54 @@ export default function MainTable({ emailRequestor }) {
     const status = row.statuses.find(status => status.groupId === groupId);
     return status ? status.status_description : 'No Status';
   };
+  const handleExportCSV = () => {
+    const csvData = Papa.unparse(rows); // המרת המידע מהטבלה ל-CSV
 
-  const handleStatusChange = async (rowId, groupId) => {
-    const newStatus = prompt("Enter new status:");
-    if (newStatus) {
-      try {
-        const response = await axios.post('http://localhost:3001/api/updateStatus', {
-          requestId: rowId,
-          groupId: groupId,
-          status: newStatus
-        });
-        // עדכון סטטוסים מקומי אם נדרש
-        setStatuses(prevStatuses => prevStatuses.map(status =>
-          status.request_id === rowId && status.group_id === groupId
-            ? { ...status, status_description: newStatus }
-            : status
-        ));
-      } catch (error) {
-        console.error("Failed to update status", error);
-      }
+    // יצירת אובייקט Blob עם המידע והורדתו
+    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'data.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // const handleStatusChange = async (rowId, groupId) => {
+  //   const newStatus = prompt("Enter new status:");
+  //   if (newStatus) {
+  //     try {
+  //       const response = await axios.post('http://localhost:3001/api/updateStatus', {
+  //         requestId: rowId,
+  //         groupId: groupId,
+  //         status: newStatus
+  //       });
+  //       // עדכון סטטוסים מקומי אם נדרש
+  //       setStatuses(prevStatuses => prevStatuses.map(status =>
+  //         status.request_id === rowId && status.group_id === groupId
+  //           ? { ...status, status_description: newStatus }
+  //           : status
+  //       ));
+  //     } catch (error) {
+  //       console.error("Failed to update status", error);
+  //     }
+  //   }
+  // };
+
+  // פונקציה לשליחת שינוי סטטוס לשרת
+  const handleStatusChange = async (affectedGroupId, statusId) => {
+    try {
+      await axios.put('http://localhost:3001/api/updateAffectedGroups/status', {
+        affectedGroupId,
+        statusId
+      });
+    } catch (error) {
+      console.error('Error updating affected group status:', error);
     }
   };
+
+
   const getStatusBackgroundColor = (status) => {
     switch (status) {
       case 'Completed':
@@ -322,17 +330,52 @@ export default function MainTable({ emailRequestor }) {
 
   if (redirectToAdminSettings) {
     return <Navigate to="/admin-settings" />;
-  } 
+  }
 
- 
+  const handleSave = (updatedRow) => {
+    setRows(prevRows =>
+      prevRows.map(row =>
+        row.ID === updatedRow.ID ? updatedRow : row
+      ));
+  };
+
+  const onDrop = async (e, rowIndex) => {
+    const draggedRowIndex = e.dataTransfer.getData('rowIndex');
+    const newRows = [...rows];
+    const [draggedRow] = newRows.splice(draggedRowIndex, 1);
+    newRows.splice(rowIndex, 0, draggedRow);
+
+    // עדכון order_index בהתאם למיקום החדש של השורות
+    const updatedRows = newRows.map((row, index) => ({
+      ...row,
+      order_index: index  // מניחים ש-order_index מתחיל מ-0
+    }));
+
+    // עדכון מצב השורות והנתונים במסד הנתונים
+    setRows(updatedRows);
+
+    try {
+      await fetch('http://localhost:3001/api/update-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedRows),
+      });
+    } catch (error) {
+      console.error('עדכון הסדר נכשל:', error);
+    }
+  };
+  // סידור השורות לפי order_index
+  const sortedRows = [...rows].sort((a, b) => a.order_index - b.order_index);
   return (
-    
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 4 }}>
-      <Paper sx={{ width: '80%', overflow: 'hidden', marginTop: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, padding: 2 }}>
+    <Box className="table-container">
+      <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 4 }}>
+      <Header /> {/* הוספת ה-Header */}
+      <Box className="table-container">
+          <Paper sx={{ width: '100%', overflow: 'hidden', marginTop: 4 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, padding: 2 }}>
           <div className="filter-buttons-container">
-
-           
             <Tooltip title="Add Request" arrow>
               <Button
                 className="add-request-button"
@@ -342,58 +385,60 @@ export default function MainTable({ emailRequestor }) {
                 <FontAwesomeIcon icon={faPlusCircle} size="2x" className="add-icon" />
               </Button>
             </Tooltip>
-
-            <Tooltip title="Filter by Group" arrow>
-              <Button
-                className="filter-button group-button"
-                variant="contained"
-                onClick={(event) => handleOpenMenu(event, 'group')}
-              >
-                <SearchIcon />
-              </Button>
-            </Tooltip>
-            <Menu
-              anchorEl={anchorElGroup}
-              open={Boolean(anchorElGroup)}
-              onClose={() => handleCloseMenu('group')}
-            >
-              {groups.map((group) => (
-                <MenuItem
-                  key={group.id}
-                  selected={group.id === selectedGroup}
-                  onClick={() => handleGroupSelect(group)}
+                <Tooltip title="Filter by Group" arrow>
+                  <Button
+                    className="filter-button group-button"
+                    variant="contained"
+                    onClick={(event) => handleOpenMenu(event, 'group')}
+                  >
+                    <SearchIcon />
+                  </Button>
+                </Tooltip>
+                <Menu
+                  anchorEl={anchorElGroup}
+                  open={Boolean(anchorElGroup)}
+                  onClose={() => handleCloseMenu('group')}
                 >
-                  <Checkbox checked={group.id === selectedGroup} />
-                  {group.name}
-                </MenuItem>
-              ))}
-            </Menu>
+                  {groups.map((group) => (
+                    <MenuItem
+                      key={group.id}
+                      selected={group.id === selectedGroup}
+                      onClick={(event) => {
+                        event.stopPropagation(); // עצור את האירוע כך שלא יסגור את התפריט
+                        handleGroupSelect(group);
+                      }}
+                    >
+                      <Checkbox checked={group.id === selectedGroup} />
+                      {group.name}
+                    </MenuItem>
+                  ))}
+                </Menu>
 
-            <Tooltip title="Filter by Manager" arrow>
-              <Button
-                className="filter-button manager-button"
-                variant="contained"
-                onClick={(event) => handleOpenMenu(event, 'manager')}
-              >
-                <SearchOutlinedIcon />
-              </Button>
-            </Tooltip>
-            <Menu
-              anchorEl={anchorElManager}
-              open={Boolean(anchorElManager)}
-              onClose={() => handleCloseMenu('manager')}
-            >
-              {managers.map((manager) => (
-                <MenuItem
-                  key={manager.id}
-                  selected={manager.name === selectedManager}
-                  onClick={() => handleManagerSelect(manager)}
+                <Tooltip title="Filter by Manager" arrow>
+                  <Button
+                    className="filter-button manager-button"
+                    variant="contained"
+                    onClick={(event) => handleOpenMenu(event, 'manager')}
+                  >
+                    <SearchOutlinedIcon />
+                  </Button>
+                </Tooltip>
+                <Menu
+                  anchorEl={anchorElManager}
+                  open={Boolean(anchorElManager)}
+                  onClose={() => handleCloseMenu('manager')}
                 >
-                  <Checkbox checked={manager.name === selectedManager} />
-                  {manager.name}
-                </MenuItem>
-              ))}
-            </Menu>
+                  {managers.map((manager) => (
+                    <MenuItem
+                      key={manager.id}
+                      onClick={() => handleManagerSelect(manager)}
+                    >
+                      <Checkbox checked={manager.name === selectedManager} />
+                      {manager.name}
+                    </MenuItem>
+                  ))}
+                </Menu>
+
 
             <Tooltip title="Filter by Affected Groups" arrow>
               <Button
@@ -426,10 +471,10 @@ export default function MainTable({ emailRequestor }) {
                 onClick={clearFilters}
                 variant="contained"
               >
-                <FontAwesomeIcon icon={faSearch} className="clear-filters-icon" />
+                <FontAwesomeIcon icon={faTimes} className="clear-filters-icon" />
               </Button>
             </Tooltip>
-            
+
             <Tooltip title={showGroupColumns ? "Hide Group Columns" : "Show Group Columns"} arrow>
               <Button
                 className="column-toggle-button"
@@ -460,28 +505,37 @@ export default function MainTable({ emailRequestor }) {
                 Admin Settings
               </Button>
             </Box>
+            <Tooltip title="Export to File" arrow>
+              <Button
+                className="export-button"
+                variant="contained"
+                sx={{
+                  borderRadius: '8px', // שינוי לצורת מלבן עם פינות עגולות
+                  padding: '8px 16px', // התאמת גובה ורוחב הכפתור
+                  minWidth: 'auto', // אין צורך ברוחב מינימלי
+                  fontSize: '0.8rem', // התאמת גודל הטקסט
+                  boxShadow: '0 0 10px rgba(0, 255, 0, 0.5)', // מסגרת זוהרת בצבע ירוק
+                }}
+                  onClick = { handleExportCSV }
+              >
+                <FontAwesomeIcon icon={faDownload} className="export-icon" style={{ marginRight: '8px' }} />
+                Export
+              </Button>
+            </Tooltip>
           </div>
-
-
-
+          
         </Box>
-        
         <TableContainer sx={{ maxHeight: 440 }}>
           <Table stickyHeader>
             <TableHead>
-              <TableRow>
-              <TableCell style={{ minWidth: 50, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}>
-                Actions
-              </TableCell>
+                  <TableRow className="custom-table-row">
                 {columns.map((column) => (
-                  column.id === 'requestGroup' && !showGroupColumns ? null : (
-                    <TableCell
-                      key={column.id}
-                      style={{ minWidth: column.minWidth, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}
-                    >
-                      {column.label}
-                    </TableCell>
-                  )
+                  <TableCell
+                    key={column.id}
+                    style={{ minWidth: column.minWidth, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}
+                  >
+                    {column.label}
+                  </TableCell>
                 ))}
                 {groups.map((group) =>
                   showGroupColumns ? (
@@ -496,13 +550,25 @@ export default function MainTable({ emailRequestor }) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row, rowIndex) => (
+              {sortedRows.map((row, rowIndex) => (
                 <React.Fragment key={row.id}>
-                  <TableRow hover role="checkbox" tabIndex={-1}>
-                    <TableCell>
-                      <DeleteRequest id={row.ID} email={emailRequestor} onDelete={handleDeleteRequest} />
-                    </TableCell>
-                    {columns.map((column) => {
+                    <EditableRow
+                    key={row.id}
+                    row={row}
+                    columns={columns}
+                    onSave={handleSave}
+                    email={emailRequestor}
+                    onDelete={handleDeleteRequest}
+                    formatDate={formatDate}
+                    showGroupColumns={showGroupColumns}
+                    groups={groups}
+                    getStatusBackgroundColor={getStatusBackgroundColor}
+                    // getGroupStatus={getGroupStatus}
+                    handleStatusChange={handleStatusChange}
+                    rowIndex={rowIndex}
+                    onDrop={onDrop}
+                  />
+                  {/* {columns.map((column) => {
                       const value = row[column.id];
                       return (
                         column.id === 'requestGroup' && !showGroupColumns ? null : (
@@ -511,8 +577,8 @@ export default function MainTable({ emailRequestor }) {
                           </TableCell>
                         )
                       );
-                    })}
-                    {groups.map((group) => {
+                    })} */}
+                  {/* {groups.map((group) => {
                       const status = row.statuses.find(status => status.groupId === group.id);
                       const statusDescription = status ? status.status.status : 'Not Required';
 
@@ -531,23 +597,10 @@ export default function MainTable({ emailRequestor }) {
                           {statusDescription}
                         </TableCell>
                       ) : null;
-                    })}
-                  </TableRow>
-                  {isEditingRow === rowIndex && (
-                    <EditableRow
-                      row={row}
-                      onSave={(updatedRow) => {
-                        updateRequest(row.id, updatedRow);
-                        setIsEditingRow(null);
-                      }}
-                      onCancel={() => setIsEditingRow(null)}
-                    />
-                  )}
+                    })} */}
                 </React.Fragment>
               ))}
             </TableBody>
-
-
           </Table>
         </TableContainer>
         <TablePagination
@@ -560,6 +613,8 @@ export default function MainTable({ emailRequestor }) {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
+      </Box>
+      </Box>
       <Modal
         open={open}
         onClose={() => setOpen(false)}
@@ -568,7 +623,6 @@ export default function MainTable({ emailRequestor }) {
       >
         <Box sx={modalStyle}>
           <RequestForm onClose={() => setOpen(false)} />
-
         </Box>
       </Modal>
       <Modal
@@ -590,5 +644,4 @@ export default function MainTable({ emailRequestor }) {
       </Modal>
     </Box>
   );
-
 }

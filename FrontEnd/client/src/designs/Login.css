@@ -1,1 +1,141 @@
-/*  */
+/* Login.css */
+html,
+body {
+    height: 100%;
+    margin: 0;
+}
+
+.login-container {
+    display: flex;
+    justify-content: flex-end;
+    /* משנה את היישור לימין */
+    align-items: center;
+    height: 80vh;
+    padding-right: 70px;
+    /* מרווח נוסף לימין */
+}
+
+.login-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    /* רווח בין הטופס לתמונה */
+}
+
+.login-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #ffffff;
+    /* צבע רקע לבן */
+    padding: 2.5rem;
+    /* הגדלת padding */
+    border-radius: 15px;
+    /* פינות עגולות למסגרת */
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
+    /* הצללה */
+    width: 100%;
+    max-width: 400px;
+    /* הגדלת רוחב מקסימלי */
+    /* רוחב מקסימלי גדול יותר */
+    color: #000;
+    /* צבע טקסט בסיסי */
+    border: 2px solid #0481fe;
+    /* מסגרת כחולה */
+}
+
+.login-box h2 {
+    margin: 0 0 20px;
+    color: #4caf50;
+    /* צבע ירוק */
+    text-align: center;
+    font-size: 1.75rem;
+    /* הגדלת גודל הטקסט */
+    /* גודל טקסט גדול יותר */
+}
+
+.login-box .user-box {
+    position: relative;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.login-box .user-box input {
+    width: 100%;
+    padding: 12px 0;
+    /* הגדלת padding */
+    font-size: 18px;
+    /* הגדלת גודל הפונט */
+    color: #000;
+    /* צבע טקסט שחור */
+    margin-bottom: 10px;
+    border: 1px solid #4caf50;
+    /* צבע ירוק */
+    outline: none;
+    background: transparent;
+}
+
+.login-box .user-box label {
+    position: absolute;
+    top: 10px;
+    left: 0;
+    padding: 0 0 10px;
+    font-size: 16px;
+    color: #4caf50;
+    /* צבע ירוק */
+    pointer-events: none;
+    transition: .5s;
+}
+
+.login-box .user-box input:focus~label,
+.login-box .user-box input:valid~label {
+    top: -20px;
+    color: #00bcd4;
+    /* צבע תכלת */
+    font-size: 12px;
+}
+
+.login-box form a {
+    position: relative;
+    display: inline-block;
+    padding: 10px 20px;
+    color: #00bcd4;
+    /* צבע תכלת */
+    font-size: 16px;
+    text-decoration: none;
+    text-transform: uppercase;
+    overflow: hidden;
+    transition: .5s;
+    margin-top: 20px;
+    letter-spacing: 2px;
+}
+
+.image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    margin-right: 50px;
+    /* הגדלת רווח בין התמונה לטופס */
+}
+
+.image-container img {
+    max-width: 500px;
+    /* הגדלת התמונה */
+    height: auto;
+}
+
+/* הוספת הרחבה לקונטיינר להבטחת רווח בין הטופס לתמונה */
+.logo-container {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    /* מיקום הלוגו */
+}
+
+.logo {
+    max-width: 200px;
+    /* גודל הלוגו */
+    height: auto;
+}

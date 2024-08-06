@@ -4,9 +4,21 @@ import { RequestT } from '../types/requestTypes';
 // import { deleteAffectedGroupsByRequestId } from './affectedGroupsUtils';
 import { createAffectedGroupInDB, deleteAffectedGroupsByRequestId } from './affectedGroupsUtils';
 
-
+const updateRequestOrder = async (id: number, orderIndex: number): Promise<void> => {
+    try {
+        const query = `
+            UPDATE request
+            SET order_index = $1
+            WHERE ID = $2
+        `;
+        const values = [orderIndex, id];
+        await pool.query(query, values);
+    } catch (error) {
+        console.error(`שגיאה בעדכון order_index עבור ID ${id}:`, error);
+        throw new Error('שגיאה בעדכון order_index');
+    }
+};
 const getRequestById = async (id: number): Promise<RequestT | null> => {
-    console.log({ id });
     try {
         const client = await pool.connect();
         const sql = 'SELECT * FROM request WHERE id = $1;';
@@ -32,6 +44,7 @@ const getRequestById = async (id: number): Promise<RequestT | null> => {
             jiraLink: row.jira_link,
             requestorName: row.requestorName,
             emailRequestor: row.emailRequestor,
+            order_index: row.order_index
         } as RequestT;
     } catch (err) {
         console.error('Error fetching request by ID:', err);
@@ -207,6 +220,7 @@ export const updateFinalDecision = async (id: number, finalDecision: boolean): P
     }
 };
 
+
 export const addRequest = async (request: RequestT): Promise<void> => {
     const query = `
       INSERT INTO request (title, request_group, description, priority, planned, comments, date_time, affected_group_list, jira_link, requestor_name, requestor_email)
@@ -229,10 +243,10 @@ export const addRequest = async (request: RequestT): Promise<void> => {
         request.emailRequestor,
     ];
     
-    // Start a transaction
-    await pool.query('BEGIN');
-
     try {
+        // Start a transaction
+        await pool.query('BEGIN');
+        
         // Insert the request and get the inserted request's ID
         const result = await pool.query(query, values);
         const requestId = result.rows[0].id;
@@ -247,13 +261,14 @@ export const addRequest = async (request: RequestT): Promise<void> => {
     } catch (error) {
         // Rollback the transaction in case of an error
         await pool.query('ROLLBACK');
-        throw error;
+        console.error('Error in addRequest:', error);
+        throw new Error('Failed to add request');
     }
 };
 
 
 //עידכון רבעון
-export const updatePlanned = async (ID: number, planned: string): Promise<void> => {
+export const updatePlanned = async ( planned: string,ID: number): Promise<void> => {
     const query = `
       UPDATE request
       SET planned = $1
@@ -275,7 +290,6 @@ export const filterRequests = async (
     limit: number,
     offset: number
 ): Promise<{ totalCount: number; requests: RequestT[] }> => {
-    console.log('Filtering requests with parameters:', requestorName, requestorGroup, affectedGroupList);
 
     let sql = `
     WITH affected_groups AS (
@@ -343,19 +357,11 @@ export const filterRequests = async (
         values.push(offset);
     }
 
-    console.log('Generated SQL:', sql);
-    console.log('SQL Values:', values);
-
     let client;
     try {
         client = await pool.connect();
         const { rows } = await client.query(sql, values);
-
-        console.log('Rows returned from query:', rows.length);
-
         const totalCount = rows.length > 0 ? parseInt(rows[0].total_count, 10) : 0;
-        console.log('Total count:', totalCount);
-        console.log('Rows:', rows);
 
         const requests = rows.map((row: any) => ({
             ID: row.id,
@@ -372,6 +378,8 @@ export const filterRequests = async (
             jiraLink: row.jira_link,
             requestorName: row.requestor_name,
             emailRequestor: row.requestor_email,
+            order_index: row.order_index
+
         }));
 
         console.log('Processed Requests:', requests);
@@ -384,9 +392,62 @@ export const filterRequests = async (
         if (client) client.release();
     }
 };
+export const fetchAllRequests = async (): Promise<any[]> => {
+    const sql = `
+    WITH affected_groups AS (
+      SELECT
+        ag.request_id,
+        json_agg(json_build_object(
+          'groupId', ag.group_id,  -- ודא שהעמודה הזו קיימת
+          'status', json_build_object(
+            'id', COALESCE(s.id, 0),
+            'status', COALESCE(s.status, 'Not Required')
+          )
+        )) AS statuses,
+        ARRAY_AGG(ag.group_id) AS affected_group_list  -- ודא שהעמודה הזו קיימת
+      FROM
+        affected_group ag
+      LEFT JOIN
+        status s ON ag.status = s.id
+      GROUP BY
+        ag.request_id
+    )
+    SELECT
+      r.id,
+      r.title,
+      r.request_group,
+      r.description,
+      r.priority,
+      r.final_decision,
+      r.planned,
+      r.comments,
+      r.date_time,
+      COALESCE(ag.affected_group_list, '{}') AS affected_group_list,
+      COALESCE(ag.statuses, '[]'::json) AS statuses,
+      r.jira_link,
+      r.requestor_name,
+      r.requestor_email
+    FROM
+      request r
+    LEFT JOIN
+      affected_groups ag ON r.id = ag.request_id
+    ORDER BY r.id;
+  `;
+
+    let client;
+    try {
+        client = await pool.connect();
+        const { rows } = await client.query(sql);
+        return rows;
+    } catch (err) {
+        console.error('Error fetching requests:', err);
+        throw err;
+    } finally {
+        if (client) client.release();
+    }
+};
 
 
 
 
-
-export { getRequestById, getRequestsByGroupId };
+export { getRequestById, getRequestsByGroupId,updateRequestOrder };
