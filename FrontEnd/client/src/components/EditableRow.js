@@ -1,4 +1,3 @@
-// EditableRow.js
 import React, { useEffect, useState } from 'react';
 import { TableRow, TableCell, IconButton, TextField } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
@@ -8,8 +7,6 @@ import DeleteRequest from './DeleteRequest'; // Add this line
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import { priorityMap } from '../utils/utils';
-
-
 
 const EditableRow = ({ row, columns, onSave, emailRequestor,
     handleDeleteRequest, formatDate, showGroupColumns, groups,
@@ -25,7 +22,6 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
     useEffect(() => {
         setEditData(row);
     }, [row]);
-
 
     useEffect(() => {
         const fetchStatuses = async () => {
@@ -51,7 +47,7 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
 
         fetchStatuses()
         fetchPriorities();
-    }, [])
+    }, []);
 
     const handleToggleEdit = async () => {
         if (isEditing) {
@@ -88,7 +84,6 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
         setEditData({ ...editData, [columnId]: e.target.value });
     };
 
-
     return (
         <TableRow
             hover
@@ -116,7 +111,6 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                             <Select
                                 value={editData[column.id] || ''}
                                 onChange={(e) => handleChange(e, column.id)}
-                                // onBlur={handleBlur}
                                 autoFocus
                             >
                                 {priorities.map(priority => (
@@ -138,7 +132,7 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                 </TableCell>
             ))}
             {groups.map((group) => {
-                console.log(row.statuses.find(status => status.groupId === group.id))
+                console.log(row.statuses.find(status => status.groupId === group.id));
                 const status = row.statuses.find(status => status.groupId === group.id);
                 const statusDescription = status ? status.status.status : 'Not Required';
                 // הגדרת סגנון התא
@@ -151,10 +145,11 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                         key={group.id}
                         style={{ backgroundColor: getStatusBackgroundColor(getGroupStatus(row, group.id)), ...cellStyle }}
                     >
-                        {/* {isEditing ? (
+                        {isEditing ? (
                             <Select
-                                value={statusDescription}
+                                value={editData[group.id] || statusDescription}
                                 onChange={(e) => setEditData({ ...editData, [group.id]: e.target.value })}
+                                disabled={statusDescription === 'Not Required'}
                             >
                                 {statuses.map(status => (
                                     <MenuItem key={status.id} value={status.status}>
@@ -164,8 +159,7 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                             </Select>
                         ) : (
                             statusDescription
-                        )} */}
-            {statusDescription}
+                        )}
                     </TableCell>
                 );
             })}
