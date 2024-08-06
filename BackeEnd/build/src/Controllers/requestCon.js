@@ -263,7 +263,7 @@ const exportRequestsToCSV = (req, res) => __awaiter(void 0, void 0, void 0, func
         console.log(`Writing CSV file to ${absolutePath}`);
         // יצירת קובץ CSV
         const csvWriter = (0, csv_writer_1.createObjectCsvWriter)({
-            path: absolutePath,
+            path: 'absolutePath',
             header: [
                 { id: 'id', title: 'ID' },
                 { id: 'title', title: 'Title' },
