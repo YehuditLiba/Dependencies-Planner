@@ -19,7 +19,13 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.exportRequestsToCSV = exports.getAllFilteredRequestsWithPagination = exports.updatePlannedField = exports.createRequest = exports.updateFinalDecisionController = exports.updateRequestByIdController = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequest = exports.getRequestByIdController = void 0;
+const path_1 = __importDefault(require("path"));
+const csv_writer_1 = require("csv-writer");
 exports.getAllFilteredRequestsWithPagination = exports.updatePlannedField = exports.createRequest = exports.updateFinalDecisionController = exports.updateRequestByIdController = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequest = exports.getRequestByIdController = exports.updateOrder = void 0;
 const requestUtils_1 = require("../Utils/requestUtils");
 //עידכון סדר
@@ -49,6 +55,12 @@ const updateOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.updateOrder = updateOrder;
+
+exports.exportRequestsToCSV = exports.getAllFilteredRequestsWithPagination = exports.updatePlannedField = exports.createRequest = exports.updateFinalDecisionController = exports.updateRequestByIdController = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequest = exports.getRequestByIdController = void 0;
+const path_1 = __importDefault(require("path"));
+const requestUtils_1 = require("../Utils/requestUtils");
+const csv_writer_1 = require("csv-writer");
+
 const getRequestByIdController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = parseInt(req.params.id, 10);
     if (isNaN(id)) {
@@ -255,3 +267,61 @@ const getAllFilteredRequestsWithPagination = (req, res) => __awaiter(void 0, voi
     }
 });
 exports.getAllFilteredRequestsWithPagination = getAllFilteredRequestsWithPagination;
+const exportRequestsToCSV = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // שליפת כל הבקשות
+        const rows = yield (0, requestUtils_1.fetchAllRequests)();
+        // המרת הנתונים לפורמט שמתאים ל-CSV
+        const formattedRows = rows.map(row => ({
+            id: row.id,
+            title: row.title,
+            request_group: row.request_group,
+            description: row.description,
+            priority: row.priority,
+            final_decision: row.final_decision,
+            planned: row.planned,
+            comments: row.comments,
+            date_time: row.date_time,
+            affected_group_list: row.affected_group_list.join(','),
+            statuses: JSON.stringify(row.statuses),
+            jira_link: row.jira_link,
+            requestor_name: row.requestor_name,
+            requestor_email: row.requestor_email
+        }));
+        // יצירת שם קובץ עם תאריך ושעה כדי להבטיח ייחודיות
+        const timestamp = new Date().toISOString().replace(/:/g, '-'); // שינוי תווי ':' ל'-' שיהיה מתאים לשם קובץ
+        const fileName = `requests_${timestamp}.csv`;
+        const absolutePath = path_1.default.resolve(__dirname, fileName);
+        console.log(`Writing CSV file to ${absolutePath}`);
+        // יצירת קובץ CSV
+        const csvWriter = (0, csv_writer_1.createObjectCsvWriter)({
+            path: absolutePath,
+            header: [
+                { id: 'id', title: 'ID' },
+                { id: 'title', title: 'Title' },
+                { id: 'request_group', title: 'Request Group' },
+                { id: 'description', title: 'Description' },
+                { id: 'priority', title: 'Priority' },
+                { id: 'final_decision', title: 'Final Decision' },
+                { id: 'planned', title: 'Planned' },
+                { id: 'comments', title: 'Comments' },
+                { id: 'date_time', title: 'Date Time' },
+                { id: 'affected_group_list', title: 'Affected Group List' },
+                { id: 'statuses', title: 'Statuses' },
+                { id: 'jira_link', title: 'Jira Link' },
+                { id: 'requestor_name', title: 'Requestor Name' },
+                { id: 'requestor_email', title: 'Requestor Email' }
+            ]
+        });
+        // כתיבת הנתונים לקובץ CSV
+        yield csvWriter.writeRecords(formattedRows);
+        console.log(`CSV file written successfully to ${absolutePath}`);
+        // שליחת הקובץ למשתמש להורדה
+        res.download(absolutePath);
+    }
+    catch (error) {
+        console.error('Error exporting requests to CSV:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+exports.exportRequestsToCSV = exportRequestsToCSV;

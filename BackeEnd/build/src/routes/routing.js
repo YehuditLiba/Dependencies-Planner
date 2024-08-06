@@ -34,6 +34,7 @@ router.put('/requests/:ID/planned', requestCon_1.updatePlannedField);
 //router.get('/requestsA', getRequestsWithPagination);
 //filter:
 router.get('/requests', requestCon_1.getAllFilteredRequestsWithPagination);
+router.get('/export-requests', requestCon_1.exportRequestsToCSV);
 // Affected_Groups:
 router.get('/affectedGroups', affectedGroupCon_1.getAllAffectedGroupsController);
 router.put('/updateAffectedGroups/status', affectedGroupCon_1.updateAffectedGroupStatus);

@@ -33,7 +33,6 @@ import '../designs/mainTable.css';
 import RequestForm from './RequestForm';
 import EditableRow from './EditableRow';
 // import AdminSettings from './AdminSettings';
-// import { formatDateTime } from '../utils/utils'; // נייבא את הפונקציה החדשה
 import { Navigate } from 'react-router-dom';
 import AdminSettings from './AdminSettings';
 import { formatDateTime } from '../utils/utils'; // נייבא את הפונקציה החדשה
@@ -43,6 +42,10 @@ import DeleteRequest from './DeleteRequest'; // Add this line
 import TuneIcon from '@mui/icons-material/Tune'; // שימוש באייקון Tune
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import { faArrowsAltH } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faSearch } from '@fortawesome/free-solid-svg-icons';
+import Papa from 'papaparse';
+
+
 
 
 const columns = [
@@ -269,26 +272,40 @@ export default function MainTable({ emailRequestor }) {
     return status ? status.status_description : 'No Status';
   };
 
-  const handleStatusChange = async (rowId, groupId) => {
-    const newStatus = prompt("Enter new status:");
-    if (newStatus) {
+  // const handleStatusChange = async (rowId, groupId) => {
+  //   const newStatus = prompt("Enter new status:");
+  //   if (newStatus) {
+  //     try {
+  //       const response = await axios.post('http://localhost:3001/api/updateStatus', {
+  //         requestId: rowId,
+  //         groupId: groupId,
+  //         status: newStatus
+  //       });
+  //       // עדכון סטטוסים מקומי אם נדרש
+  //       setStatuses(prevStatuses => prevStatuses.map(status =>
+  //         status.request_id === rowId && status.group_id === groupId
+  //           ? { ...status, status_description: newStatus }
+  //           : status
+  //       ));
+  //     } catch (error) {
+  //       console.error("Failed to update status", error);
+  //     }
+  //   }
+  // };
+
+    // פונקציה לשליחת שינוי סטטוס לשרת
+    const handleStatusChange = async (affectedGroupId, statusId) => {
       try {
-        const response = await axios.post('http://localhost:3001/api/updateStatus', {
-          requestId: rowId,
-          groupId: groupId,
-          status: newStatus
-        });
-        // עדכון סטטוסים מקומי אם נדרש
-        setStatuses(prevStatuses => prevStatuses.map(status =>
-          status.request_id === rowId && status.group_id === groupId
-            ? { ...status, status_description: newStatus }
-            : status
-        ));
+          await axios.put('http://localhost:3001/api/updateAffectedGroups/status', {
+              affectedGroupId,
+              statusId
+          });
       } catch (error) {
-        console.error("Failed to update status", error);
+          console.error('Error updating affected group status:', error);
       }
-    }
   };
+
+
   const getStatusBackgroundColor = (status) => {
     switch (status) {
       case 'Completed':
@@ -314,46 +331,58 @@ export default function MainTable({ emailRequestor }) {
     return <Navigate to="/admin-settings" />;
   } 
 
-  const onDragStart = (e, rowIndex) => {
-    e.dataTransfer.setData('rowIndex', rowIndex);
-};
+  const handleSave = (updatedRow) => {
+    setRows(prevRows =>
+      prevRows.map(row => 
+          row.ID === updatedRow.ID ? updatedRow : row
+      ));
+  };
 
-const onDragOver = (e) => {
-    e.preventDefault();
-};
+  const onDrop = async (e, rowIndex) => {
+    const draggedRowIndex = e.dataTransfer.getData('rowIndex');
+    const newRows = [...rows];
+    const [draggedRow] = newRows.splice(draggedRowIndex, 1);
+    newRows.splice(rowIndex, 0, draggedRow);
+  
+    // עדכון order_index בהתאם למיקום החדש של השורות
+    const updatedRows = newRows.map((row, index) => ({
+        ...row,
+        order_index: index  // מניחים ש-order_index מתחיל מ-0
+    }));
+  
+    // עדכון מצב השורות והנתונים במסד הנתונים
+    setRows(updatedRows);
+  
+    try {
+        await fetch('http://localhost:3001/api/update-order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedRows),
+        });
+    } catch (error) {
+        console.error('עדכון הסדר נכשל:', error);
+    }
+  };
+  
+  // סידור השורות לפי order_index
+  const sortedRows = [...rows].sort((a, b) => a.order_index - b.order_index);
+  
 
-const onDrop = async (e, rowIndex) => {
-  const draggedRowIndex = e.dataTransfer.getData('rowIndex');
-  const newRows = [...rows];
-  const [draggedRow] = newRows.splice(draggedRowIndex, 1);
-  newRows.splice(rowIndex, 0, draggedRow);
+  const handleExportCSV = () => {
+    const csvData = Papa.unparse(rows); // המרת המידע מהטבלה ל-CSV
 
-  // עדכון order_index בהתאם למיקום החדש של השורות
-  const updatedRows = newRows.map((row, index) => ({
-      ...row,
-      order_index: index  // מניחים ש-order_index מתחיל מ-0
-  }));
-
-  // עדכון מצב השורות והנתונים במסד הנתונים
-  setRows(updatedRows);
-
-  try {
-      await fetch('http://localhost:3001/api/update-order', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(updatedRows),
-      });
-  } catch (error) {
-      console.error('עדכון הסדר נכשל:', error);
-  }
-};
-
-// סידור השורות לפי order_index
-const sortedRows = [...rows].sort((a, b) => a.order_index - b.order_index);
-
-
+    // יצירת אובייקט Blob עם המידע והורדתו
+    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'data.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
   return (
     
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 4 }}>
@@ -392,6 +421,7 @@ const sortedRows = [...rows].sort((a, b) => a.order_index - b.order_index);
                   selected={group.id === selectedGroup}
                   onClick={() => handleGroupSelect(group)}
                 >
+                   <Checkbox checked={group.id === selectedGroup} />
                   {group.name}
                 </MenuItem>
               ))}
@@ -509,40 +539,71 @@ const sortedRows = [...rows].sort((a, b) => a.order_index - b.order_index);
                         {column.label}
                     </TableCell>
                 ))}
-            </TableRow>
-        </TableHead>
-        <TableBody>
-            {sortedRows.map((row, rowIndex) => (
-                <React.Fragment key={row.id}>
-                    <TableRow
-                        hover
-                        role="checkbox"
-                        tabIndex={-1}
-                        draggable
-                        onDragStart={(e) => onDragStart(e, rowIndex)}
-                        onDragOver={onDragOver}
-                        onDrop={(e) => onDrop(e, rowIndex)}
+                {groups.map((group) =>
+                  showGroupColumns ? (
+                    <TableCell
+                      key={group.id}
+                      style={{ minWidth: 100, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}
                     >
-                        <TableCell>
-                            <DeleteRequest id={row.id} onDelete={() => {}} />
+                      {group.name}
+                    </TableCell>
+                  ) : null
+                )}
+                {/* <TableCell>Actions</TableCell>
+                {columns.slice(1).map((column) => ( // מוודאים שעמודת ה-Actions תוצג קודם
+                  <TableCell key={column.id}>{column.label}</TableCell>
+                ))} */}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {sortedRows.map((row, rowIndex) => (
+                <React.Fragment key={row.id}>
+<EditableRow
+                    key={row.id}
+                    row={row}
+                    columns={columns}
+                    onSave={handleSave}
+                    email={emailRequestor}
+                    onDelete={handleDeleteRequest}
+                    formatDate={formatDate}
+                    showGroupColumns={showGroupColumns}
+                    groups={groups}
+                    getStatusBackgroundColor={getStatusBackgroundColor}
+                    getGroupStatus={getGroupStatus}
+                    handleStatusChange={handleStatusChange}
+                    rowIndex={rowIndex}
+                    onDrop={onDrop}
+                  />
+                  {/* {columns.map((column) => {
+                      const value = row[column.id];
+                      return (
+                        column.id === 'requestGroup' && !showGroupColumns ? null : (
+                          <TableCell key={column.id} style={{ minWidth: column.minWidth }}>
+                            {column.id === 'dateTime' ? formatDate(value) : value}
+                          </TableCell>
+                        )
+                      );
+                    })} */}
+                  {/* {groups.map((group) => {
+                      const status = row.statuses.find(status => status.groupId === group.id);
+                      const statusDescription = status ? status.status.status : 'Not Required';
+
+                      // הגדרת סגנון התא
+                      let cellStyle = {};
+                      if (statusDescription === 'Not Required') {
+                        cellStyle = { color: 'gray' }; // צבע אפור ל-'Not Required'
+                      }
+
+                      return showGroupColumns ? (
+                        <TableCell
+                          key={group.id}
+                          style={{ backgroundColor: getStatusBackgroundColor(getGroupStatus(row, group.id)), ...cellStyle }}
+                          onClick={() => handleStatusChange(row.id, group.id, 'newStatus')}
+                        >
+                          {statusDescription}
                         </TableCell>
-                        {columns.map((column) => (
-                            <TableCell key={column.id} style={{ minWidth: column.minWidth }}>
-                                {row[column.id]}
-                            </TableCell>
-                        ))}
-                    </TableRow>
-                    {isEditingRow === rowIndex && (
-                        <EditableRow
-                            row={row}
-                            onSave={(updatedRow) => {
-                                const updatedRows = sortedRows.map((r, i) => (i === rowIndex ? updatedRow : r));
-                                setRows(updatedRows);
-                                setIsEditingRow(null);
-                            }}
-                            onCancel={() => setIsEditingRow(null)}
-                        />
-                    )}
+                      ) : null;
+                    })} */}
                 </React.Fragment>
             ))}
         </TableBody>

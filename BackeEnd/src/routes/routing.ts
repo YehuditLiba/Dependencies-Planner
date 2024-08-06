@@ -2,7 +2,9 @@ import express from 'express';
 import { getAllGroupsController, editGroupByAdmin, addGroup , deleteGroup} from '../Controllers/GroupCon.';
 import {  getRequestByIdController, updateRequest, 
     deleteRequest, updateRequestByIdController,updateFinalDecisionController ,
-    createRequest, updatePlannedField, getAllFilteredRequestsWithPagination,updateOrder} from '../Controllers/requestCon';
+    createRequest, updatePlannedField, getAllFilteredRequestsWithPagination
+    , exportRequestsToCSV,updateOrder
+} from '../Controllers/requestCon';
 import { getAllProductManagers, getAllRequestsByProductManager, editProductManagerByAdmin,addProductManager, getGroupsByProductManager , deleteProductManager } from '../Controllers/productManagerCon';
 import { getAllStatusController, getAllStatus } from '../Controllers/StatusCon';
 import { getAllPrioritiesController, updatePriorityController } from '../Controllers/PriorityCon';
@@ -33,6 +35,7 @@ router.put('/requests/:ID/planned', updatePlannedField);
 //router.get('/requestsA', getRequestsWithPagination);
 //filter:
 router.get('/requests', getAllFilteredRequestsWithPagination);
+router.get('/export-requests', exportRequestsToCSV);
 
 // Affected_Groups:
 router.get('/affectedGroups', getAllAffectedGroupsController);
