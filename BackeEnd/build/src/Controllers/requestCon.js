@@ -225,7 +225,7 @@ const updatePlannedField = (req, res) => __awaiter(void 0, void 0, void 0, funct
     try {
         const { ID } = req.params;
         const { planned } = req.body;
-        yield (0, requestUtils_1.updatePlanned)(Number(ID), planned);
+        yield (0, requestUtils_1.updatePlanned)(planned, Number(ID));
         res.status(200).json({ message: 'Planned field updated successfully' });
     }
     catch (error) {

@@ -273,7 +273,7 @@ const addRequest = (request) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.addRequest = addRequest;
 //עידכון רבעון
-const updatePlanned = (ID, planned) => __awaiter(void 0, void 0, void 0, function* () {
+const updatePlanned = (planned, ID) => __awaiter(void 0, void 0, void 0, function* () {
     const query = `
       UPDATE request
       SET planned = $1

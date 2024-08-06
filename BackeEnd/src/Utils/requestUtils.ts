@@ -266,7 +266,7 @@ export const addRequest = async (request: RequestT): Promise<void> => {
 
 
 //עידכון רבעון
-export const updatePlanned = async (ID: number, planned: string): Promise<void> => {
+export const updatePlanned = async ( planned: string,ID: number): Promise<void> => {
     const query = `
       UPDATE request
       SET planned = $1

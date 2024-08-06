@@ -7,8 +7,15 @@ import DeleteRequest from './DeleteRequest';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import { priorityMap } from '../utils/utils';
+import { quarters } from '../config/quarters';
 
-const EditableRow = ({ row, columns, onSave, emailRequestor, handleDeleteRequest, formatDate, showGroupColumns, groups, getStatusBackgroundColor, rowIndex, onDrop }) => {
+
+const EditableRow = ({ row, columns, onSave, emailRequestor,
+    handleDeleteRequest, formatDate, showGroupColumns, groups,
+    getStatusBackgroundColor, /*getGroupStatus,*/ handleStatusChange,
+    rowIndex, onDrop
+}) => {
+    console.log("EditableRow row:", row); // הוסף את השורה הזו לבדוק את ה-row המתקבל
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState(row);
     const [statuses, setStatuses] = useState([]);
@@ -45,24 +52,20 @@ const EditableRow = ({ row, columns, onSave, emailRequestor, handleDeleteRequest
 
     const handleToggleEdit = async () => {
         if (isEditing) {
+            console.log('Updated Row Data:', editData); // Debugging Line
             try {
-                const updateData = {
-                    title: editData.title,
-                    description: editData.description,
-                    comments: editData.comments,
-                    priority: editData.priority,
-                    statuses: editData.statuses.map(status => ({
-                        groupId: status.groupId,
-                        status: status.status.id // נשלח את הסטטוס לפי ה-ID שלו
-                    }))
-                };
-    
-                console.log('Sending updateData:', updateData); // לוג כאן
-    
-                const response = await axios.put(`http://localhost:3001/api/requests/${editData.ID}`, updateData);
-                console.log('Received response:', response.data); // לוג כאן
-                onSave(response.data);
-                console.log('Row updated in table:', response.data); // לוג נוסף כאן
+                // אם העדכון הוא עבור priority
+                if (editData.priority !== row.priority) {
+                    const response = await axios.put(`http://localhost:3001/api/requests/${editData.ID}/priority`, { priority: priorityMap[editData.priority] });
+                    onSave(response.data);
+                } else {
+                    const response = await axios.put(`http://localhost:3001/api/requests/${editData.ID}`, {
+                        title: editData.title,
+                        description: editData.description,
+                        comments: editData.comments
+                    }); // Updated URL to match the Postman example
+                    onSave(response.data);
+                }
             } catch (error) {
                 console.error('Error updating row:', error);
             }
@@ -89,7 +92,6 @@ const EditableRow = ({ row, columns, onSave, emailRequestor, handleDeleteRequest
         const status = row.statuses.find(status => status.groupId === groupId);
         return status ? status.status.status : 'Not Required';
     };
-
     const handleStatusChange = (e, groupId) => {
         const updatedStatuses = (editData.statuses || []).map(status =>
             status.groupId === groupId ? { ...status, status: statuses.find(s => s.status === e.target.value) } : status
@@ -125,6 +127,7 @@ const EditableRow = ({ row, columns, onSave, emailRequestor, handleDeleteRequest
                             <Select
                                 value={editData[column.id] || ''}
                                 onChange={(e) => handleChange(e, column.id)}
+                                // onBlur={handleBlur}
                                 autoFocus
                             >
                                 {priorities.map(priority => (
@@ -153,28 +156,31 @@ const EditableRow = ({ row, columns, onSave, emailRequestor, handleDeleteRequest
                     cellStyle = { color: 'gray' };
                 }
                 return (
-                    <TableCell
-                        key={group.id}
-                        style={{ backgroundColor: getStatusBackgroundColor(statusDescription), ...cellStyle }}
-                    >
-                        {isEditing ? (
-                            <Select
-                                value={statusDescription}
-                                onChange={(e) => handleStatusChange(e, group.id)}
-                                disabled={statusDescription === 'Not Required'}
-                            >
-                                {statuses.map(status => (
-                                    <MenuItem key={status.id} value={status.status}>
-                                        {status.status}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        ) : (
-                            statusDescription
-                        )}
-                    </TableCell>
+                    showGroupColumns ? (
+                        <TableCell
+                            key={group.id}
+                            style={{ backgroundColor: getStatusBackgroundColor(statusDescription), ...cellStyle }}
+                        >
+                            {isEditing ? (
+                                <Select
+                                    value={statusDescription}
+                                    onChange={(e) => handleStatusChange(e, group.id)}
+                                    disabled={statusDescription === 'Not Required'}
+                                >
+                                    {statuses.map(status => (
+                                        <MenuItem key={status.id} value={status.status}>
+                                            {status.status}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            ) : (
+                                statusDescription
+                            )}
+                        </TableCell>
+                    ) : null
                 );
             })}
+
         </TableRow>
     );
 };
