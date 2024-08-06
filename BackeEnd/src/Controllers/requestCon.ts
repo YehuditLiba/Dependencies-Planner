@@ -1,15 +1,39 @@
 import { Request, Response } from 'express';
-
+import path from 'path';
 import {
   updateRequestFields ,getRequestById, getRequestByIdForUp, 
 updateAffectedGroupList, deleteRequestById, updateRequestById,updateFinalDecision,
-  addRequest, updatePlanned, filterRequests
+  addRequest, updatePlanned, filterRequests,fetchAllRequests,updateRequestOrder
 } from '../Utils/requestUtils';
 import { RequestT } from '../types/requestTypes';
+import { createObjectCsvWriter } from 'csv-writer';
+//עידכון סדר
+export const updateOrder = async (req: Request, res: Response): Promise<void> => {
+  try {
+      const updatedRows: RequestT[] = req.body;
 
+      // בדוק אם הקלט הוא מערך
+      if (!Array.isArray(updatedRows)) {
+          res.status(400).json({ message: 'פורמט קלט לא תקין' });
+          return;
+      }
 
+      // עיבוד כל שורה ועדכון ה-order_index במסד הנתונים
+      for (const row of updatedRows) {
+          if (row.ID && row.order_index !== undefined) {
+              await updateRequestOrder(row.ID, row.order_index);
+          } else {
+              res.status(400).json({ message: 'חסר ID או order_index באחת השורות' });
+              return;
+          }
+      }
 
-
+      res.status(200).json({ message: 'הסדר עודכן בהצלחה' });
+  } catch (error) {
+      console.error('שגיאה בעדכון הסדר:', error);
+      res.status(500).json({ message: 'שגיאה בעדכון הסדר' });
+  }
+};
 export const getRequestByIdController = async (req: Request, res: Response): Promise<void> => {
   const id = parseInt(req.params.id, 10);
   if (isNaN(id)) {
@@ -180,14 +204,10 @@ export const createRequest = async (req: CustomRequest<RequestT>, res: Response)
   }
 };
 
-
-
-
 //עדכון רבעון
 interface CustomRequest<T> extends Request {
   body: T;
 }
-
 interface UpdatePlannedBody {
   planned: string;
 }
@@ -203,10 +223,7 @@ export const updatePlannedField = async (req: CustomRequest<UpdatePlannedBody>, 
     res.status(500).json({ message: 'Failed to update planned field' });
   }
 };
-
 export const getAllFilteredRequestsWithPagination = async (req: Request, res: Response): Promise<void> => {
-  console.log('Controller function called');
-
   const limit = parseInt(req.query.limit as string) || 0;
   const offset = parseInt(req.query.offset as string) || 0;
 
@@ -219,7 +236,6 @@ export const getAllFilteredRequestsWithPagination = async (req: Request, res: Re
     const requestorGroup = req.query.requestorGroup as string | undefined;
     const affectedGroupList = req.query.affectedGroupList as string | undefined;
 
-    console.log('Query parameters:', { requestorName, requestorGroup, affectedGroupList, sortBy, sortDirection, limit, offset });
 
     const { totalCount, requests } = await filterRequests(
       requestorName,
@@ -239,6 +255,69 @@ export const getAllFilteredRequestsWithPagination = async (req: Request, res: Re
     });
   } catch (error) {
     console.error('Error fetching filtered requests with pagination:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+export const exportRequestsToCSV = async (req: Request, res: Response): Promise<void> => {
+  try {
+    // שליפת כל הבקשות
+    const rows = await fetchAllRequests();
+
+    // המרת הנתונים לפורמט שמתאים ל-CSV
+    const formattedRows = rows.map(row => ({
+      id: row.id,
+      title: row.title,
+      request_group: row.request_group,
+      description: row.description,
+      priority: row.priority,
+      final_decision: row.final_decision,
+      planned: row.planned,
+      comments: row.comments,
+      date_time: row.date_time,
+      affected_group_list: row.affected_group_list.join(','), // המרת המערך לשרשרת
+      statuses: JSON.stringify(row.statuses), // המרת JSON לשרשרת טקסט
+      jira_link: row.jira_link,
+      requestor_name: row.requestor_name,
+      requestor_email: row.requestor_email
+    }));
+    
+    // יצירת שם קובץ עם תאריך ושעה כדי להבטיח ייחודיות
+    const timestamp = new Date().toISOString().replace(/:/g, '-'); // שינוי תווי ':' ל'-' שיהיה מתאים לשם קובץ
+    const fileName = `requests_${timestamp}.csv`;
+    const absolutePath = path.resolve(__dirname, fileName);
+
+    console.log(`Writing CSV file to ${absolutePath}`);
+
+    // יצירת קובץ CSV
+    const csvWriter = createObjectCsvWriter({
+      path: 'absolutePath',
+      header: [
+        { id: 'id', title: 'ID' },
+        { id: 'title', title: 'Title' },
+        { id: 'request_group', title: 'Request Group' },
+        { id: 'description', title: 'Description' },
+        { id: 'priority', title: 'Priority' },
+        { id: 'final_decision', title: 'Final Decision' },
+        { id: 'planned', title: 'Planned' },
+        { id: 'comments', title: 'Comments' },
+        { id: 'date_time', title: 'Date Time' },
+        { id: 'affected_group_list', title: 'Affected Group List' },
+        { id: 'statuses', title: 'Statuses' },
+        { id: 'jira_link', title: 'Jira Link' },
+        { id: 'requestor_name', title: 'Requestor Name' },
+        { id: 'requestor_email', title: 'Requestor Email' }
+      ]
+    });
+
+    // כתיבת הנתונים לקובץ CSV
+    await csvWriter.writeRecords(formattedRows);
+    console.log(`CSV file written successfully to ${absolutePath}`);
+
+    // שליחת הקובץ למשתמש להורדה
+    res.download(absolutePath);
+
+  } catch (error) {
+    console.error('Error exporting requests to CSV:', error);
     res.status(500).send('Internal Server Error');
   }
 };

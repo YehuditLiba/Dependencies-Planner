@@ -19,9 +19,41 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllFilteredRequestsWithPagination = exports.updatePlannedField = exports.createRequest = exports.updateFinalDecisionController = exports.updateRequestByIdController = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequest = exports.getRequestByIdController = void 0;
+exports.exportRequestsToCSV = exports.getAllFilteredRequestsWithPagination = exports.updatePlannedField = exports.createRequest = exports.updateFinalDecisionController = exports.updateRequestByIdController = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequest = exports.getRequestByIdController = exports.updateOrder = void 0;
+const path_1 = __importDefault(require("path"));
 const requestUtils_1 = require("../Utils/requestUtils");
+const csv_writer_1 = require("csv-writer");
+//עידכון סדר
+const updateOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const updatedRows = req.body;
+        // בדוק אם הקלט הוא מערך
+        if (!Array.isArray(updatedRows)) {
+            res.status(400).json({ message: 'פורמט קלט לא תקין' });
+            return;
+        }
+        // עיבוד כל שורה ועדכון ה-order_index במסד הנתונים
+        for (const row of updatedRows) {
+            if (row.ID && row.order_index !== undefined) {
+                yield (0, requestUtils_1.updateRequestOrder)(row.ID, row.order_index);
+            }
+            else {
+                res.status(400).json({ message: 'חסר ID או order_index באחת השורות' });
+                return;
+            }
+        }
+        res.status(200).json({ message: 'הסדר עודכן בהצלחה' });
+    }
+    catch (error) {
+        console.error('שגיאה בעדכון הסדר:', error);
+        res.status(500).json({ message: 'שגיאה בעדכון הסדר' });
+    }
+});
+exports.updateOrder = updateOrder;
 const getRequestByIdController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = parseInt(req.params.id, 10);
     if (isNaN(id)) {
@@ -203,7 +235,6 @@ const updatePlannedField = (req, res) => __awaiter(void 0, void 0, void 0, funct
 });
 exports.updatePlannedField = updatePlannedField;
 const getAllFilteredRequestsWithPagination = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log('Controller function called');
     const limit = parseInt(req.query.limit) || 0;
     const offset = parseInt(req.query.offset) || 0;
     // קבלת פרמטרי המיון מתוך הבקשה, אם קיימים
@@ -213,7 +244,6 @@ const getAllFilteredRequestsWithPagination = (req, res) => __awaiter(void 0, voi
         const requestorName = req.query.requestorName;
         const requestorGroup = req.query.requestorGroup;
         const affectedGroupList = req.query.affectedGroupList;
-        console.log('Query parameters:', { requestorName, requestorGroup, affectedGroupList, sortBy, sortDirection, limit, offset });
         const { totalCount, requests } = yield (0, requestUtils_1.filterRequests)(requestorName, requestorGroup, affectedGroupList, sortBy, // הוסף את פרמטר המיון לפי עמודה
         sortDirection, // הוסף את פרמטר כיוון המיון
         limit, offset);
@@ -230,3 +260,61 @@ const getAllFilteredRequestsWithPagination = (req, res) => __awaiter(void 0, voi
     }
 });
 exports.getAllFilteredRequestsWithPagination = getAllFilteredRequestsWithPagination;
+const exportRequestsToCSV = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // שליפת כל הבקשות
+        const rows = yield (0, requestUtils_1.fetchAllRequests)();
+        // המרת הנתונים לפורמט שמתאים ל-CSV
+        const formattedRows = rows.map(row => ({
+            id: row.id,
+            title: row.title,
+            request_group: row.request_group,
+            description: row.description,
+            priority: row.priority,
+            final_decision: row.final_decision,
+            planned: row.planned,
+            comments: row.comments,
+            date_time: row.date_time,
+            affected_group_list: row.affected_group_list.join(','),
+            statuses: JSON.stringify(row.statuses),
+            jira_link: row.jira_link,
+            requestor_name: row.requestor_name,
+            requestor_email: row.requestor_email
+        }));
+        // יצירת שם קובץ עם תאריך ושעה כדי להבטיח ייחודיות
+        const timestamp = new Date().toISOString().replace(/:/g, '-'); // שינוי תווי ':' ל'-' שיהיה מתאים לשם קובץ
+        const fileName = `requests_${timestamp}.csv`;
+        const absolutePath = path_1.default.resolve(__dirname, fileName);
+        console.log(`Writing CSV file to ${absolutePath}`);
+        // יצירת קובץ CSV
+        const csvWriter = (0, csv_writer_1.createObjectCsvWriter)({
+            path: 'absolutePath',
+            header: [
+                { id: 'id', title: 'ID' },
+                { id: 'title', title: 'Title' },
+                { id: 'request_group', title: 'Request Group' },
+                { id: 'description', title: 'Description' },
+                { id: 'priority', title: 'Priority' },
+                { id: 'final_decision', title: 'Final Decision' },
+                { id: 'planned', title: 'Planned' },
+                { id: 'comments', title: 'Comments' },
+                { id: 'date_time', title: 'Date Time' },
+                { id: 'affected_group_list', title: 'Affected Group List' },
+                { id: 'statuses', title: 'Statuses' },
+                { id: 'jira_link', title: 'Jira Link' },
+                { id: 'requestor_name', title: 'Requestor Name' },
+                { id: 'requestor_email', title: 'Requestor Email' }
+            ]
+        });
+        // כתיבת הנתונים לקובץ CSV
+        yield csvWriter.writeRecords(formattedRows);
+        console.log(`CSV file written successfully to ${absolutePath}`);
+        // שליחת הקובץ למשתמש להורדה
+        res.download(absolutePath);
+    }
+    catch (error) {
+        console.error('Error exporting requests to CSV:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+exports.exportRequestsToCSV = exportRequestsToCSV;
