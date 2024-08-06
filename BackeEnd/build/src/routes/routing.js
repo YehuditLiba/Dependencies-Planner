@@ -23,6 +23,7 @@ router.post('/groups', GroupCon_1.addGroup);
 router.delete('/groups/:groupId', GroupCon_1.deleteGroup);
 //Requests routings
 // router.get('/Allrequests', getAllRequests);
+router.post('/update-order', requestCon_1.updateOrder);
 router.get('/requests/:id', requestCon_1.getRequestByIdController);
 router.delete('/deleteRequests/:id', requestCon_1.deleteRequest);
 router.put('/requests/:id', requestCon_1.updateRequest);

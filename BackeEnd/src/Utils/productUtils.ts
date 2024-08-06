@@ -11,11 +11,8 @@ const getProductManagers = async (): Promise<ProductManager[]> => {
             FROM product_manager pm
             LEFT JOIN product_manager_group pmg ON pm.email = pmg.product_manager_email
             GROUP BY pm.email, pm.name;
-        `;
-        console.log('Running SQL:', sql);
-        const { rows } = await client.query(sql);
+        `;        const { rows } = await client.query(sql);
         client.release();
-        console.log('Fetched Product Managers:', rows);
         return rows.map((row: any) => ({
             email: row.email,
             name: row.name,

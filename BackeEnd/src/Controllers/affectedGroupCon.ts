@@ -46,7 +46,7 @@ export const updateAffectedGroupStatus = async (req: Request, res: Response) => 
 //delete
 export const deleteAffectedGroups = async (req: Request, res: Response) => {
     const { requestId } = req.params;
-console.log(requestId);
+//console.log(requestId);
     if (!requestId) {
         return res.status(400).json({ message: 'Missing requestId' });
     }

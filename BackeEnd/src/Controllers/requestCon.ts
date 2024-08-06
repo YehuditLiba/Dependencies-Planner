@@ -2,12 +2,38 @@ import { Request, Response } from 'express';
 import path from 'path';
 import {
   updateRequestFields ,getRequestById, getRequestByIdForUp, 
-  updateAffectedGroupList, deleteRequestById, updateRequestById, updateFinalDecision, fetchAllRequests,
-  addRequest, updatePlanned, filterRequests
+updateAffectedGroupList, deleteRequestById, updateRequestById,updateFinalDecision,
+  addRequest, updatePlanned, filterRequests,fetchAllRequests,updateRequestOrder
 } from '../Utils/requestUtils';
 import { RequestT } from '../types/requestTypes';
 import { createObjectCsvWriter } from 'csv-writer';
+//עידכון סדר
+export const updateOrder = async (req: Request, res: Response): Promise<void> => {
+  try {
+      const updatedRows: RequestT[] = req.body;
 
+      // בדוק אם הקלט הוא מערך
+      if (!Array.isArray(updatedRows)) {
+          res.status(400).json({ message: 'פורמט קלט לא תקין' });
+          return;
+      }
+
+      // עיבוד כל שורה ועדכון ה-order_index במסד הנתונים
+      for (const row of updatedRows) {
+          if (row.ID && row.order_index !== undefined) {
+              await updateRequestOrder(row.ID, row.order_index);
+          } else {
+              res.status(400).json({ message: 'חסר ID או order_index באחת השורות' });
+              return;
+          }
+      }
+
+      res.status(200).json({ message: 'הסדר עודכן בהצלחה' });
+  } catch (error) {
+      console.error('שגיאה בעדכון הסדר:', error);
+      res.status(500).json({ message: 'שגיאה בעדכון הסדר' });
+  }
+};
 export const getRequestByIdController = async (req: Request, res: Response): Promise<void> => {
   const id = parseInt(req.params.id, 10);
   if (isNaN(id)) {
@@ -198,8 +224,6 @@ export const updatePlannedField = async (req: CustomRequest<UpdatePlannedBody>, 
   }
 };
 export const getAllFilteredRequestsWithPagination = async (req: Request, res: Response): Promise<void> => {
-  console.log('Controller function called');
-
   const limit = parseInt(req.query.limit as string) || 0;
   const offset = parseInt(req.query.offset as string) || 0;
 
@@ -212,7 +236,6 @@ export const getAllFilteredRequestsWithPagination = async (req: Request, res: Re
     const requestorGroup = req.query.requestorGroup as string | undefined;
     const affectedGroupList = req.query.affectedGroupList as string | undefined;
 
-    console.log('Query parameters:', { requestorName, requestorGroup, affectedGroupList, sortBy, sortDirection, limit, offset });
 
     const { totalCount, requests } = await filterRequests(
       requestorName,
