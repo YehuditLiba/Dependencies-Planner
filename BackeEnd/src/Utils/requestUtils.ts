@@ -220,6 +220,7 @@ export const updateFinalDecision = async (id: number, finalDecision: boolean): P
     }
 };
 
+
 export const addRequest = async (request: RequestT): Promise<void> => {
     const query = `
       INSERT INTO request (title, request_group, description, priority, planned, comments, date_time, affected_group_list, jira_link, requestor_name, requestor_email)
@@ -242,10 +243,10 @@ export const addRequest = async (request: RequestT): Promise<void> => {
         request.emailRequestor,
     ];
     
-    // Start a transaction
-    await pool.query('BEGIN');
-
     try {
+        // Start a transaction
+        await pool.query('BEGIN');
+        
         // Insert the request and get the inserted request's ID
         const result = await pool.query(query, values);
         const requestId = result.rows[0].id;
@@ -260,7 +261,8 @@ export const addRequest = async (request: RequestT): Promise<void> => {
     } catch (error) {
         // Rollback the transaction in case of an error
         await pool.query('ROLLBACK');
-        throw error;
+        console.error('Error in addRequest:', error);
+        throw new Error('Failed to add request');
     }
 };
 

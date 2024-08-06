@@ -252,9 +252,9 @@ const addRequest = (request) => __awaiter(void 0, void 0, void 0, function* () {
         request.requestorName,
         request.emailRequestor,
     ];
-    // Start a transaction
-    yield db_1.pool.query('BEGIN');
     try {
+        // Start a transaction
+        yield db_1.pool.query('BEGIN');
         // Insert the request and get the inserted request's ID
         const result = yield db_1.pool.query(query, values);
         const requestId = result.rows[0].id;
@@ -268,7 +268,8 @@ const addRequest = (request) => __awaiter(void 0, void 0, void 0, function* () {
     catch (error) {
         // Rollback the transaction in case of an error
         yield db_1.pool.query('ROLLBACK');
-        throw error;
+        console.error('Error in addRequest:', error);
+        throw new Error('Failed to add request');
     }
 });
 exports.addRequest = addRequest;

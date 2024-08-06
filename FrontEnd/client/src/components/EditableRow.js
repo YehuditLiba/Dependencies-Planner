@@ -14,7 +14,6 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
     getStatusBackgroundColor,
     rowIndex, onDrop
 }) => {
-    console.log("EditableRow row:", row); // שורת בדיקה
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState(row);
     const [statuses, setStatuses] = useState([]);
@@ -29,7 +28,6 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
             try {
                 const response = await axios.get('http://localhost:3001/api/status');
                 setStatuses(response.data);
-                console.log('Fetched statuses:', response.data); // שורת בדיקה
             } catch (error) {
                 console.error('Failed to fetch statuses', error);
             }
@@ -39,7 +37,6 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
             try {
                 const response = await axios.get('http://localhost:3001/api/priority');
                 setPriorities(response.data);
-                console.log('Fetched priorities:', response.data); // שורת בדיקה
             } catch (err) {
                 console.error('Error fetching priorities:', err);
             }

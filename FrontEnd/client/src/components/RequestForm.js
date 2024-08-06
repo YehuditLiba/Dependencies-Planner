@@ -1,8 +1,9 @@
-import React, { useState, useEffect , useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Chip, TextField, Select, MenuItem, FormControl, InputLabel, Button, Box } from '@mui/material';
 import axios from 'axios';
 import { quarters } from '../config/quarters';
 import { sendMessageToSlack } from './sendMessageToSlack';
+
 export default function RequestForm({ onClose }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -18,7 +19,7 @@ export default function RequestForm({ onClose }) {
   const [allPriority, setAllPriority] = useState([]);
   const [email, setEmail] = useState('');
 
-  const isSubmitting = useRef(false); // מנגנון למניעת קריאות כפולות
+  const isSubmitting = useRef(false);
 
   useEffect(() => {
     const fetchGroups = async () => {
@@ -38,6 +39,7 @@ export default function RequestForm({ onClose }) {
         console.error('Failed to fetch PMs', error);
       }
     };
+
     const fetchPriority = async () => {
       try {
         const response = await axios.get('http://localhost:3001/api/priority');
@@ -49,9 +51,8 @@ export default function RequestForm({ onClose }) {
 
     fetchPm();
     fetchGroups();
-   fetchPriority();
+    fetchPriority();
 
-    // שליפת המייל מ־localStorage
     const userEmail = localStorage.getItem('userEmail');
     if (userEmail) {
       setEmail(userEmail);
@@ -60,14 +61,16 @@ export default function RequestForm({ onClose }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log("Current Email:", email); // זה יציג את הערך של email בקונסול
+
+    if (isSubmitting.current) return;
+    isSubmitting.current = true;
 
     try {
-      await axios.post('http://localhost:3001/api/requests/createRequest', {
+      const response = await axios.post('http://localhost:3001/api/requests/createRequest', {
         title,
         description,
         requestorName,
-        emailRequestor: email, // שליחת המייל המתעדכן
+        emailRequestor: email,
         priority,
         comments,
         affectedGroupList,
@@ -75,6 +78,8 @@ export default function RequestForm({ onClose }) {
         planned,
         jiraLink
       });
+
+      console.log('Response:', response.data);
       setTitle('');
       setDescription('');
       setRequestorName('');
@@ -84,20 +89,21 @@ export default function RequestForm({ onClose }) {
       setRequestGroup('');
       setPlanned('');
       setJiraLink('');
+
       alert('Request added successfully!');
       onClose();
-      sendMessageToSlack(`${email} Added a new request`)
+      sendMessageToSlack(`${email} Added a new request`);
     } catch (error) {
       console.error('Failed to add request', error);
       alert('Failed to add request');
+    } finally {
+      isSubmitting.current = false;
     }
   };
 
   const handleGroupChange = (event) => {
     const value = event.target.value;
-    setAffectedGroupList(
-      typeof value === 'string' ? value.split(',') : value
-    );
+    setAffectedGroupList(typeof value === 'string' ? value.split(',') : value);
   };
 
   return (
@@ -107,7 +113,7 @@ export default function RequestForm({ onClose }) {
       autoComplete="off"
       onSubmit={handleSubmit}
       className="form"
-      sx={{ maxHeight: '80vh', overflowY: 'auto' }} // סגנון CSS לפופאפ לגלילה
+      sx={{ maxHeight: '80vh', overflowY: 'auto' }}
     >
       <h2>Request Form</h2>
       <TextField
@@ -147,19 +153,19 @@ export default function RequestForm({ onClose }) {
         label="Email Requestor"
         fullWidth
         margin="normal"
-        value={email} // הצגת המייל הנוכחי
-        disabled // השדה מנוטרל כדי שלא יוכל להתעדכן
+        value={email}
+        disabled
       />
       <FormControl fullWidth margin="normal">
-        <InputLabel id="priority-label">priority</InputLabel>
+        <InputLabel id="priority-label">Priority</InputLabel>
         <Select
           labelId="priority-label"
           id="priority"
           value={priority}
           onChange={(e) => setPriority(e.target.value)}
         >
-          {allPriority.map(allPriority => (
-            <MenuItem key={allPriority.id} value={allPriority.id}>{allPriority.priority}</MenuItem>
+          {allPriority.map(p => (
+            <MenuItem key={p.id} value={p.id}>{p.priority}</MenuItem>
           ))}
         </Select>
       </FormControl>
@@ -202,12 +208,11 @@ export default function RequestForm({ onClose }) {
           id="requestGroup"
           value={requestGroup}
           onChange={(e) => setRequestGroup(e.target.value)}
-          className="request-group-select" // Class name for styling
         >
           {groups.map(group => (
             <MenuItem key={group.id} value={group.name}>
-            {group.name}
-          </MenuItem>
+              {group.name}
+            </MenuItem>
           ))}
         </Select>
       </FormControl>
@@ -235,7 +240,7 @@ export default function RequestForm({ onClose }) {
         onChange={(e) => setJiraLink(e.target.value)}
       />
       <Box mt={2}>
-        <Button variant="contained" type="submit" className="button">
+        <Button variant="contained" type="submit">
           Submit
         </Button>
       </Box>
