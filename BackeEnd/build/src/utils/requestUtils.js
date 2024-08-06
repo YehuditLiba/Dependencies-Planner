@@ -9,11 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRequestsByGroupId = exports.getRequestById = exports.fetchAllRequests = exports.filterRequests = exports.updatePlanned = exports.addRequest = exports.updateFinalDecision = exports.updateRequestById = exports.getRequestByIdForUp = exports.updateAffectedGroupList = exports.updateRequestFields = exports.deleteRequestById = void 0;
-
-exports.updateRequestOrder = exports.getRequestsByGroupId = exports.getRequestById = exports.filterRequests = exports.updatePlanned = exports.addRequest = exports.updateFinalDecision = exports.updateRequestById = exports.getRequestByIdForUp = exports.updateAffectedGroupList = exports.updateRequestFields = exports.deleteRequestById = void 0;
-
-exports.getRequestsByGroupId = exports.getRequestById = exports.filterRequests = exports.updatePlanned = exports.addRequest = exports.updateFinalDecision = exports.updateRequestById = exports.getRequestByIdForUp = exports.updateAffectedGroupList = exports.updateRequestFields = exports.deleteRequestById = void 0;
+exports.updateRequestOrder = exports.getRequestsByGroupId = exports.getRequestById = exports.fetchAllRequests = exports.filterRequests = exports.updatePlanned = exports.addRequest = exports.updateFinalDecision = exports.updateRequestById = exports.getRequestByIdForUp = exports.updateAffectedGroupList = exports.updateRequestFields = exports.deleteRequestById = void 0;
 const db_1 = require("../config/db");
 // import { createAffectedGroupInDB } from './affectedGroupsUtils';
 // import { deleteAffectedGroupsByRequestId } from './affectedGroupsUtils';

@@ -23,11 +23,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.exportRequestsToCSV = exports.getAllFilteredRequestsWithPagination = exports.updatePlannedField = exports.createRequest = exports.updateFinalDecisionController = exports.updateRequestByIdController = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequest = exports.getRequestByIdController = void 0;
+exports.exportRequestsToCSV = exports.getAllFilteredRequestsWithPagination = exports.updatePlannedField = exports.createRequest = exports.updateFinalDecisionController = exports.updateRequestByIdController = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequest = exports.getRequestByIdController = exports.updateOrder = void 0;
 const path_1 = __importDefault(require("path"));
-const csv_writer_1 = require("csv-writer");
-exports.getAllFilteredRequestsWithPagination = exports.updatePlannedField = exports.createRequest = exports.updateFinalDecisionController = exports.updateRequestByIdController = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequest = exports.getRequestByIdController = exports.updateOrder = void 0;
 const requestUtils_1 = require("../Utils/requestUtils");
+const csv_writer_1 = require("csv-writer");
 //עידכון סדר
 const updateOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -55,12 +54,6 @@ const updateOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.updateOrder = updateOrder;
-
-exports.exportRequestsToCSV = exports.getAllFilteredRequestsWithPagination = exports.updatePlannedField = exports.createRequest = exports.updateFinalDecisionController = exports.updateRequestByIdController = exports.updateAffectedGroups = exports.updateRequest = exports.deleteRequest = exports.getRequestByIdController = void 0;
-const path_1 = __importDefault(require("path"));
-const requestUtils_1 = require("../Utils/requestUtils");
-const csv_writer_1 = require("csv-writer");
-
 const getRequestByIdController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = parseInt(req.params.id, 10);
     if (isNaN(id)) {
@@ -295,7 +288,7 @@ const exportRequestsToCSV = (req, res) => __awaiter(void 0, void 0, void 0, func
         console.log(`Writing CSV file to ${absolutePath}`);
         // יצירת קובץ CSV
         const csvWriter = (0, csv_writer_1.createObjectCsvWriter)({
-            path: absolutePath,
+            path: 'absolutePath',
             header: [
                 { id: 'id', title: 'ID' },
                 { id: 'title', title: 'Title' },

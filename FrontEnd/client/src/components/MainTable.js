@@ -21,11 +21,8 @@ import Tooltip from '@mui/material/Tooltip';
 import SearchIcon from '@mui/icons-material/Search';
 import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes } from '@fortawesome/free-solid-svg-icons'; // אייקון של איקס
 import logo from '../Practicum.png'; // עדכן את הנתיב ללוגו שלך
 import Icon from '@mui/icons-material/AddCircle'; // אם אתה משתמש ב-Material-UI
-
-// import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
 import axios from 'axios';
 import '../designs/TableStyles.scss';
@@ -37,7 +34,6 @@ import { Navigate } from 'react-router-dom';
 import AdminSettings from './AdminSettings';
 import { formatDateTime } from '../utils/utils'; // נייבא את הפונקציה החדשה
 import StatusCell from './StatusCell';
- // או הנתיב הנכון לקובץ שבו הפונקציה מוגדרת
 import DeleteRequest from './DeleteRequest'; // Add this line
 import TuneIcon from '@mui/icons-material/Tune'; // שימוש באייקון Tune
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
@@ -528,9 +524,8 @@ export default function MainTable({ emailRequestor }) {
     <Table stickyHeader>
         <TableHead>
             <TableRow>
-                <TableCell style={{ minWidth: 50, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}>
-                    Actions
-                </TableCell>
+                <TableCell style={{ minWidth: 50, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}>    
+                </TableCell>         
                 {columns.map((column) => (
                     <TableCell
                         key={column.id}
