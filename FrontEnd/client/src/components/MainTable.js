@@ -535,10 +535,6 @@ export default function MainTable({ emailRequestor }) {
                     </TableCell>
                   ) : null
                 )}
-                {/* <TableCell>Actions</TableCell>
-                {columns.slice(1).map((column) => ( // מוודאים שעמודת ה-Actions תוצג קודם
-                  <TableCell key={column.id}>{column.label}</TableCell>
-                ))} */}
               </TableRow>
             </TableHead>
             <TableBody>

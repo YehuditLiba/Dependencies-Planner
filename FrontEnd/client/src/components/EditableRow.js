@@ -95,7 +95,7 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
         const status = row.statuses.find(status => status.groupId === groupId);
         return status ? status.status.status : 'Not Required';
     };
-    
+
 
     return (
         <TableRow
@@ -145,68 +145,38 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                     )}
                 </TableCell>
             ))}
-            {/* {groups.map((group) => {
-                // console.log(editData.statuses.find(status => status.groupId === group.id))
-                // const status = editData.statuses.find(status => status.groupId === group.id);
-                const status = (row.statuses || []).find(status => status.groupId === group.id);
-                const statusDescription = status ? status.status.status : 'Not Required';
+            {groups.map((group) => {
+                const status = row.statuses ? row.statuses.find(status => status.groupId === group.id) : null;
+                const statusDescription = getGroupStatus(row, group.id);
                 // הגדרת סגנון התא
                 let cellStyle = {};
                 if (statusDescription === 'Not Required') {
                     cellStyle = { color: 'gray' }; // צבע אפור ל-'Not Required'
                 }
                 return (
-                    <TableCell
-                        key={group.id}
-                        style={{ backgroundColor: getStatusBackgroundColor(getGroupStatus(row, group.id)), ...cellStyle }}
-                    >
-                        {/* {isEditing ? (
-                            <Select
-                                value={statusDescription}
-                                onChange={(e) => setEditData({ ...editData, [group.id]: e.target.value })}
-                            >
-                                {statuses.map(status => (
-                                    <MenuItem key={status.id} value={status.status}>
-                                        {status.status}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        ) : (
-                            statusDescription
-                        )} */}{/*}
-                        {statusDescription}
-                    </TableCell>
+                    showGroupColumns ? (
+                        <TableCell
+                            key={group.id}
+                            style={{ backgroundColor: getStatusBackgroundColor(statusDescription), ...cellStyle }}
+                        >
+                            {isEditing ? (
+                                <Select
+                                    value={statusDescription}
+                                    onChange={(e) => setEditData({ ...editData, [group.id]: e.target.value })}
+                                >
+                                    {statuses.map(status => (
+                                        <MenuItem key={status.id} value={status.status}>
+                                            {status.status}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            ) : (
+                                statusDescription
+                            )}
+                        </TableCell>
+                    ) : null
                 );
-            })} */}
-            {groups.map((group) => {
-    const statusDescription = getGroupStatus(row, group.id);
-    // הגדרת סגנון התא
-    let cellStyle = {};
-    if (statusDescription === 'Not Required') {
-        cellStyle = { color: 'gray' }; // צבע אפור ל-'Not Required'
-    }
-    return (
-        <TableCell
-            key={group.id}
-            style={{ backgroundColor: getStatusBackgroundColor(statusDescription), ...cellStyle }}
-        >
-            {isEditing ? (
-                <Select
-                    value={statusDescription}
-                    onChange={(e) => setEditData({ ...editData, [group.id]: e.target.value })}
-                >
-                    {statuses.map(status => (
-                        <MenuItem key={status.id} value={status.status}>
-                            {status.status}
-                        </MenuItem>
-                    ))}
-                </Select>
-            ) : (
-                statusDescription
-            )}
-        </TableCell>
-    );
-})}
+            })}
 
         </TableRow>
     );
