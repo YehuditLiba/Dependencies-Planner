@@ -13,7 +13,7 @@ import { priorityMap } from '../utils/utils';
 
 const EditableRow = ({ row, columns, onSave, emailRequestor,
     handleDeleteRequest, formatDate, showGroupColumns, groups,
-    getStatusBackgroundColor, getGroupStatus, handleStatusChange,
+    getStatusBackgroundColor, /*getGroupStatus,*/ handleStatusChange,
     rowIndex, onDrop
 }) => {
     console.log("EditableRow row:", row); // הוסף את השורה הזו לבדוק את ה-row המתקבל
@@ -62,11 +62,11 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                     const response = await axios.put(`http://localhost:3001/api/requests/${editData.ID}/priority`, { priority: priorityMap[editData.priority] });
                     onSave(response.data);
                 } else {
-                    const response = await axios.put(`http://localhost:3001/api/requests/${editData.ID}`,{
+                    const response = await axios.put(`http://localhost:3001/api/requests/${editData.ID}`, {
                         title: editData.title,
                         description: editData.description,
                         comments: editData.comments
-                        } ); // Updated URL to match the Postman example
+                    }); // Updated URL to match the Postman example
                     onSave(response.data);
                 }
             } catch (error) {
@@ -88,6 +88,14 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
         setEditData({ ...editData, [columnId]: e.target.value });
     };
 
+    const getGroupStatus = (row, groupId) => {
+        if (!row.statuses) {
+            return 'Not Required'; // או כל ערך אחר שיתאים למקרה שבו אין סטטוסים.
+        }
+        const status = row.statuses.find(status => status.groupId === groupId);
+        return status ? status.status.status : 'Not Required';
+    };
+    
 
     return (
         <TableRow
@@ -137,9 +145,10 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                     )}
                 </TableCell>
             ))}
-            {groups.map((group) => {
-                console.log(row.statuses.find(status => status.groupId === group.id))
-                const status = row.statuses.find(status => status.groupId === group.id);
+            {/* {groups.map((group) => {
+                // console.log(editData.statuses.find(status => status.groupId === group.id))
+                // const status = editData.statuses.find(status => status.groupId === group.id);
+                const status = (row.statuses || []).find(status => status.groupId === group.id);
                 const statusDescription = status ? status.status.status : 'Not Required';
                 // הגדרת סגנון התא
                 let cellStyle = {};
@@ -164,11 +173,41 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                             </Select>
                         ) : (
                             statusDescription
-                        )} */}
-            {statusDescription}
+                        )} */}{/*}
+                        {statusDescription}
                     </TableCell>
                 );
-            })}
+            })} */}
+            {groups.map((group) => {
+    const statusDescription = getGroupStatus(row, group.id);
+    // הגדרת סגנון התא
+    let cellStyle = {};
+    if (statusDescription === 'Not Required') {
+        cellStyle = { color: 'gray' }; // צבע אפור ל-'Not Required'
+    }
+    return (
+        <TableCell
+            key={group.id}
+            style={{ backgroundColor: getStatusBackgroundColor(statusDescription), ...cellStyle }}
+        >
+            {isEditing ? (
+                <Select
+                    value={statusDescription}
+                    onChange={(e) => setEditData({ ...editData, [group.id]: e.target.value })}
+                >
+                    {statuses.map(status => (
+                        <MenuItem key={status.id} value={status.status}>
+                            {status.status}
+                        </MenuItem>
+                    ))}
+                </Select>
+            ) : (
+                statusDescription
+            )}
+        </TableCell>
+    );
+})}
+
         </TableRow>
     );
 };
