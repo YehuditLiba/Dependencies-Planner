@@ -21,8 +21,9 @@ import Tooltip from '@mui/material/Tooltip';
 import SearchIcon from '@mui/icons-material/Search';
 import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import logo from '../Practicum.png'; // עדכן את הנתיב ללוגו שלך
+//import logo from 'Practicum.png'; // עדכן את הנתיב ללוגו שלך
 import Icon from '@mui/icons-material/AddCircle'; // אם אתה משתמש ב-Material-UI
+import { faDownload } from '@fortawesome/free-solid-svg-icons';
 import FormGroup from '@mui/material/FormGroup';
 import axios from 'axios';
 import '../designs/TableStyles.scss';
@@ -40,9 +41,7 @@ import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import { faArrowsAltH } from '@fortawesome/free-solid-svg-icons';
 import { faTimes, faSearch } from '@fortawesome/free-solid-svg-icons';
 import Papa from 'papaparse';
-
-
-
+import Header from './Header'; // ודא שהייבוא נכון
 
 const columns = [
   { id: 'actions', label: 'Actions', minWidth: 100 },
@@ -98,58 +97,42 @@ export default function MainTable({ emailRequestor }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredRows, setFilteredRows] = useState([]);
   const [selectedButton, setSelectedButton] = useState(null);
+ const [adminSettingsOpen, setAdminSettingsOpen] = useState(false);
 
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const params = {
+            limit: rowsPerPage === -1 ? undefined : rowsPerPage,
+            offset: rowsPerPage === -1 ? 0 : page * rowsPerPage,
+          };
 
+          if (selectedGroup) {
+            params.requestorGroup = selectedGroup;
+          }
 
-  const [adminSettingsOpen, setAdminSettingsOpen] = useState(false);
+    if (selectedAffectedGroups.length) {
+      params.affectedGroupList = selectedAffectedGroups.join(',');
+    }
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const params = {
-          limit: rowsPerPage === -1 ? undefined : rowsPerPage,
-          offset: rowsPerPage === -1 ? 0 : page * rowsPerPage,
-        };
-        console.log(params);
-        if (selectedGroup) {
-          params.requestorGroup = selectedGroup;
-        }
+    console.log('Params sent to server:', params);
 
-        if (selectedManager) {
-          params.requestorName = selectedManager;
-        }
+    const response = await axios.get('http://localhost:3001/api/requests', { params });
 
-        if (selectedAffectedGroups.length) {
-          params.affectedGroupList = selectedAffectedGroups.join(',');
-        }
-        console.log(params);
-        console.log('rowsPerPage:', rowsPerPage);
-        console.log('page:', page);
+    console.log('Full response data:', response.data);
 
-        const response = await axios.get('http://localhost:3001/api/requests', { params });
-
-        // הדפס את כל הנתונים שמתקבלים מהשרת כדי לבדוק מה מגיע בפועל
-        console.log('Full response data:', response.data);
-
-        if (response.data.requests) {
-          console.log('Fetched rows:', response.data.requests);
-
-          setRows(response.data.requests);
-          console.log('Updated rows:', response.data.requests);
-          setTotalRows(response.data.totalCount || response.data.requests.length);
-          console.log('Updated totalRows:', response.data.totalCount || response.data.requests.length);
-
-        } else {
-          console.warn('No requests found in response data');
-        }
-      } catch (error) {
-        console.error("Failed to fetch data", error);
-        alert("Failed to fetch data from server. Please try again later.");
-      }
-    };
-
-
-
+    if (response.data.requests) {
+      console.log('Fetched rows:', response.data.requests);
+      setRows(response.data.requests);
+      setTotalRows(response.data.totalCount || response.data.requests.length);
+    } else {
+      console.warn('No requests found in response data');
+    }
+  } catch (error) {
+    console.error("Failed to fetch data", error);
+    alert("Failed to fetch data from server. Please try again later.");
+  }
+};
     const fetchGroups = async () => {
       try {
         const response = await axios.get('http://localhost:3001/api/groups');
@@ -167,8 +150,6 @@ export default function MainTable({ emailRequestor }) {
         console.error("Failed to fetch product managers", error);
       }
     };
-
-
     const fetchStatuses = async () => {
       try {
         const response = await axios.get('http://localhost:3001/api/status');
@@ -186,17 +167,14 @@ export default function MainTable({ emailRequestor }) {
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
-
   const handleChangeRowsPerPage = (event) => {
     const value = event.target.value;
     setRowsPerPage(value === 'all' ? -1 : +value);
     setPage(0);
   };
-
   const handleToggleColumns = () => {
     setShowGroupColumns(prev => !prev);
   };
-
   const handleOpenMenu = (event, type) => {
     switch (type) {
       case 'group':
@@ -269,6 +247,19 @@ export default function MainTable({ emailRequestor }) {
     // נניח שיש לך מבנה של סטטוסים ב- row, תוודא שהנתיב נכון לסטטוס של הקבוצה
     const status = row.statuses.find(status => status.groupId === groupId);
     return status ? status.status_description : 'No Status';
+  };
+  const handleExportCSV = () => {
+    const csvData = Papa.unparse(rows); // המרת המידע מהטבלה ל-CSV
+
+    // יצירת אובייקט Blob עם המידע והורדתו
+    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'data.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   // const handleStatusChange = async (rowId, groupId) => {
@@ -364,32 +355,18 @@ export default function MainTable({ emailRequestor }) {
       console.error('עדכון הסדר נכשל:', error);
     }
   };
-
   // סידור השורות לפי order_index
   const sortedRows = [...rows].sort((a, b) => a.order_index - b.order_index);
+  
 
 
-  const handleExportCSV = () => {
-    const csvData = Papa.unparse(rows); // המרת המידע מהטבלה ל-CSV
-
-    // יצירת אובייקט Blob עם המידע והורדתו
-    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', 'data.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
   return (
-
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 4 }}>
+      <Header /> {/* הוספת ה-Header */}
+      <Box className="table-container">
       <Paper sx={{ width: '80%', overflow: 'hidden', marginTop: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, padding: 2 }}>
           <div className="filter-buttons-container">
-
-
             <Tooltip title="Add Request" arrow>
               <Button
                 className="add-request-button"
@@ -399,7 +376,6 @@ export default function MainTable({ emailRequestor }) {
                 <FontAwesomeIcon icon={faPlusCircle} size="2x" className="add-icon" />
               </Button>
             </Tooltip>
-
             <Tooltip title="Filter by Group" arrow>
               <Button
                 className="filter-button group-button"
@@ -517,12 +493,26 @@ export default function MainTable({ emailRequestor }) {
                 Admin Settings
               </Button>
             </Box>
+            <Tooltip title="Export to File" arrow>
+              <Button
+                className="export-button"
+                variant="contained"
+                sx={{
+                  borderRadius: '8px', // שינוי לצורת מלבן עם פינות עגולות
+                  padding: '8px 16px', // התאמת גובה ורוחב הכפתור
+                  minWidth: 'auto', // אין צורך ברוחב מינימלי
+                  fontSize: '0.8rem', // התאמת גודל הטקסט
+                  boxShadow: '0 0 10px rgba(0, 255, 0, 0.5)', // מסגרת זוהרת בצבע ירוק
+                }}
+                  onClick = { handleExportCSV }
+              >
+                <FontAwesomeIcon icon={faDownload} className="export-icon" style={{ marginRight: '8px' }} />
+                Export
+              </Button>
+            </Tooltip>
           </div>
-
-
-
+          
         </Box>
-
         <TableContainer sx={{ maxHeight: 440 }}>
           <Table stickyHeader>
             <TableHead>
@@ -554,7 +544,7 @@ export default function MainTable({ emailRequestor }) {
             <TableBody>
               {sortedRows.map((row, rowIndex) => (
                 <React.Fragment key={row.id}>
-                  <EditableRow
+                    <EditableRow
                     key={row.id}
                     row={row}
                     columns={columns}
@@ -615,6 +605,7 @@ export default function MainTable({ emailRequestor }) {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
+      </Box>
       <Modal
         open={open}
         onClose={() => setOpen(false)}
@@ -623,7 +614,6 @@ export default function MainTable({ emailRequestor }) {
       >
         <Box sx={modalStyle}>
           <RequestForm onClose={() => setOpen(false)} />
-
         </Box>
       </Modal>
       <Modal
@@ -645,5 +635,4 @@ export default function MainTable({ emailRequestor }) {
       </Modal>
     </Box>
   );
-
 }
