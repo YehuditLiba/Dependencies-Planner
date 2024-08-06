@@ -364,7 +364,7 @@ export default function MainTable({ emailRequestor }) {
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 4 }}>
       <Header /> {/* הוספת ה-Header */}
       <Box className="table-container">
-      <Paper sx={{ width: '80%', overflow: 'hidden', marginTop: 4 }}>
+      <Paper sx={{ width: '100%', overflow: 'hidden', marginTop: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, padding: 2 }}>
           <div className="filter-buttons-container">
             <Tooltip title="Add Request" arrow>
