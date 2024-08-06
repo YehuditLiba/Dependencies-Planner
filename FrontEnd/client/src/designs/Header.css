@@ -1,0 +1,45 @@
+/* Header.css */
+.header {
+    display: flex;
+    justify-content: center;
+    /* למרכז את התוכן האופקי */
+    align-items: center;
+    /* למרכז את התוכן האנכי */
+    position: relative;
+    /* חיוני למיקום הלוגו בפינה */
+    padding: 20px;
+    /* רווח פנימי */
+    background-color: transparent;
+    /* אין צבע רקע לסרגל */
+}
+
+.title {
+    font-size: 2rem;
+    /* גודל טקסט גדול יותר */
+    font-weight: bold;
+    /* טקסט מודגש */
+    color: rgb(6, 175, 6);
+    /* צבע טקסט ירוק */
+    text-align: center;
+    /* מיקוד הטקסט למרכז */
+    margin: 0;
+    /* ביטול רווחים מיותרים */
+}
+
+.logo-container {
+    position: absolute;
+    /* מיקום מוחלט */
+    top: 0;
+    /* למקם את הלוגו בחלק העליון */
+    right: 0;
+    /* למקם את הלוגו בחלק הימני */
+    margin: 10px;
+    /* רווח מהקצוות */
+}
+
+.logo {
+    width: 100px;
+    /* גודל הלוגו */
+    height: auto;
+    /* שמירה על יחס ההיבטים */
+}
