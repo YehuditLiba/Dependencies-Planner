@@ -6,7 +6,7 @@ import axios from 'axios';
 import DeleteRequest from './DeleteRequest';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import { priorityMap, finalDecissionMap } from '../utils/utils';
+import { priorityMap, finalDecisionMap } from '../utils/utils';
 import { quarters } from '../config/quarters';
 
 const EditableRow = ({ row, columns, onSave, emailRequestor,
@@ -50,21 +50,23 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
         if (isEditing) {
             console.log('Updated Row Data:', editData); // שורת בדיקה
             try {
-                // אם העדכון הוא עבור priority
                 if (editData.priority !== row.priority) {
                     const response = await axios.put(`http://localhost:3001/api/requests/${editData.ID}/priority`, { priority: priorityMap[editData.priority] });
+                    onSave(response.data);
+                }
+                if (editData.finalDecision !== row.finalDecision) {
+                    const response = await axios.put(`http://localhost:3001/api/requests/updateFinalDecision/${editData.ID}`, { finalDecision: editData.finalDecision });
                     onSave(response.data);
                 }
                 if (editData.planned !== row.planned) {
                     const response = await axios.put(`http://localhost:3001/api/requests/${editData.ID}/planned`, { planned: editData.planned });
                     onSave(response.data);
                 }
-                //else {
                 const response = await axios.put(`http://localhost:3001/api/requests/${editData.ID}`, {
                     title: editData.title,
                     description: editData.description,
                     comments: editData.comments
-                }); // Updated URL to match the Postman example
+                });
                 onSave(response.data);
                 //}
             } catch (error) {
@@ -100,6 +102,12 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
         );
         setEditData({ ...editData, statuses: updatedStatuses });
         console.log('Updated statuses:', updatedStatuses); // שורת בדיקה
+    };
+
+    const getBackgroundColor = (value) => {
+        if (value === 'true') return 'lightgreen';
+        if (value === 'false') return 'lightcoral';
+        return 'inherit';
     };
 
     return (
@@ -152,18 +160,42 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                                         </MenuItem>
                                     ))}
                                 </Select>
-                            ) : column.id === 'dateTime' ? (
-                                formatDate(row[column.id])
-                            ) : column.id === 'finalDecision' ? (
-                                finalDecissionMap[editData[column.id]] || editData[column.id]
-                            ) : (
-                                row[column.id]
-                            )
-                            ) : column.id === 'dateTime' ? (
-                                formatDate(row[column.id])
-                            ) : column.id === 'priority' ? (
-                                priorityMap[editData[column.id]] || editData[column.id]
-                            ) : (
+                            ) : column.id === 'finalDecision' ?
+                                (
+                                    <Select
+                                        value={editData[column.id] !== undefined ? String(editData[column.id]) : ''}
+                                        onChange={(e) => handleChange(e, column.id)}
+                                        // onBlur={handleBlur}
+                                        autoFocus
+                                    >
+                                        {Object.entries(finalDecisionMap).map(([key, finalDecision]) => (
+                                            <MenuItem
+                                                key={key}
+                                                value={key}
+                                            >
+                                                {finalDecision}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                ) : column.id === 'dateTime' ? (
+                                    formatDate(row[column.id])
+                                ) : column.id === 'finalDecision' ? (
+                                    finalDecisionMap[editData[column.id]] || editData[column.id]
+                                ) : (
+                                    row[column.id]
+                                )
+                    ) : column.id === 'dateTime' ? (
+                        formatDate(row[column.id])
+                    ) : column.id === 'priority' ? (
+                        priorityMap[editData[column.id]] || editData[column.id]
+                    ) : column.id === 'finalDecision' ? (
+                            <span style={{
+                                backgroundColor: editData[column.id] === true ? 'lightgreen' : editData[column.id] === false? 'lightcoral' :null,
+                                padding: '0 4px' // מעט padding כדי שהרקע יראה טוב יותר
+                            }}>
+                                {finalDecisionMap[editData[column.id]] || editData[column.id]}
+                                {/* (style={backgroundColor: editData[column.id] === 'true' ? 'lightgreen' : 'lightcoral'})*/}</span>
+                    ) : (
                         row[column.id]
                     )}
                 </TableCell>
