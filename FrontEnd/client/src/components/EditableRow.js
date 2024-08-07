@@ -189,12 +189,12 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                     ) : column.id === 'priority' ? (
                         priorityMap[editData[column.id]] || editData[column.id]
                     ) : column.id === 'finalDecision' ? (
-                            <span style={{
-                                backgroundColor: editData[column.id] === true ? 'lightgreen' : editData[column.id] === false? 'lightcoral' :null,
-                                padding: '0 4px' // מעט padding כדי שהרקע יראה טוב יותר
-                            }}>
-                                {finalDecisionMap[editData[column.id]] || editData[column.id]}
-                                {/* (style={backgroundColor: editData[column.id] === 'true' ? 'lightgreen' : 'lightcoral'})*/}</span>
+                        <span style={{
+                            backgroundColor: editData[column.id] === true ? 'lightgreen' : editData[column.id] === false ? 'lightcoral' : null,
+                            padding: '0 4px' // מעט padding כדי שהרקע יראה טוב יותר
+                        }}>
+                            {finalDecisionMap[editData[column.id]] || editData[column.id]}
+                        </span>
                     ) : (
                         row[column.id]
                     )}
@@ -211,7 +211,7 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                     showGroupColumns ? (
                         <TableCell
                             key={group.id}
-                            style={{ backgroundColor: getStatusBackgroundColor(statusDescription), ...cellStyle }}
+                            // style={{ backgroundColor: getStatusBackgroundColor(statusDescription), ...cellStyle }}
                         >
                             {isEditing ? (
                                 <Select
@@ -226,7 +226,13 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                                     ))}
                                 </Select>
                             ) : (
-                                statusDescription
+                                <span style={{
+                                    backgroundColor:getStatusBackgroundColor(statusDescription), ...cellStyle,
+                                    padding: '0 4px' // מעט padding כדי שהרקע יראה טוב יותר
+                                }}>
+                                    {statusDescription}
+                                </span>
+                                // 
                             )}
                         </TableCell>
                     ) : null

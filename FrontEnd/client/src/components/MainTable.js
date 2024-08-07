@@ -99,42 +99,42 @@ export default function MainTable({ emailRequestor }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredRows, setFilteredRows] = useState([]);
   const [selectedButton, setSelectedButton] = useState(null);
- const [adminSettingsOpen, setAdminSettingsOpen] = useState(false);
+  const [adminSettingsOpen, setAdminSettingsOpen] = useState(false);
 
-    useEffect(() => {
-      const fetchData = async () => {
-        try {
-          const params = {
-            limit: rowsPerPage === -1 ? undefined : rowsPerPage,
-            offset: rowsPerPage === -1 ? 0 : page * rowsPerPage,
-          };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const params = {
+          limit: rowsPerPage === -1 ? undefined : rowsPerPage,
+          offset: rowsPerPage === -1 ? 0 : page * rowsPerPage,
+        };
 
-          if (selectedGroup) {
-            params.requestorGroup = selectedGroup;
-          }
+        if (selectedGroup) {
+          params.requestorGroup = selectedGroup;
+        }
 
-    if (selectedAffectedGroups.length) {
-      params.affectedGroupList = selectedAffectedGroups.join(',');
-    }
+        if (selectedAffectedGroups.length) {
+          params.affectedGroupList = selectedAffectedGroups.join(',');
+        }
 
-    console.log('Params sent to server:', params);
+        console.log('Params sent to server:', params);
 
-    const response = await axios.get('http://localhost:3001/api/requests', { params });
+        const response = await axios.get('http://localhost:3001/api/requests', { params });
 
-    console.log('Full response data:', response.data);
+        console.log('Full response data:', response.data);
 
-    if (response.data.requests) {
-      console.log('Fetched rows:', response.data.requests);
-      setRows(response.data.requests);
-      setTotalRows(response.data.totalCount || response.data.requests.length);
-    } else {
-      console.warn('No requests found in response data');
-    }
-  } catch (error) {
-    console.error("Failed to fetch data", error);
-    alert("Failed to fetch data from server. Please try again later.");
-  }
-};
+        if (response.data.requests) {
+          console.log('Fetched rows:', response.data.requests);
+          setRows(response.data.requests);
+          setTotalRows(response.data.totalCount || response.data.requests.length);
+        } else {
+          console.warn('No requests found in response data');
+        }
+      } catch (error) {
+        console.error("Failed to fetch data", error);
+        alert("Failed to fetch data from server. Please try again later.");
+      }
+    };
     const fetchGroups = async () => {
       try {
         const response = await axios.get('http://localhost:3001/api/groups');
@@ -309,14 +309,30 @@ export default function MainTable({ emailRequestor }) {
 
   const getStatusBackgroundColor = (status) => {
     switch (status) {
-      case 'Completed':
-        return 'lightgreen';
+      // case 'Completed':
+      //   return 'lightgreen';
       case 'Pending Response':
         return 'lightyellow';
       case 'Not Required':
         return 'lightgray';
+      case 'in Q(S)':
+        return 'lightgreen';
+      case 'in Q(M)':
+        return 'lightgreen';
+      case 'in Q(L)':
+        return 'lightgreen';
+      case 'in Q(XL)':
+        return 'lightgreen';
+      case 'not in Q(S)':
+        return 'lightcoral';
+      case 'not in Q(M)':
+        return 'lightcoral';
+      case 'not in Q(L)':
+        return 'lightcoral';
+      case 'not in Q(XL)':
+        return 'lightcoral';
       default:
-        return 'white';
+        return null;
     }
   };
   const updateRequest = async (id, updatedFields) => {
@@ -371,20 +387,20 @@ export default function MainTable({ emailRequestor }) {
   return (
     <Box className="table-container">
       <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 4 }}>
-      <Header /> {/* הוספת ה-Header */}
-      <Box className="table-container">
+        <Header /> {/* הוספת ה-Header */}
+        <Box className="table-container">
           <Paper sx={{ width: '100%', overflow: 'hidden', marginTop: 4 }}>
             <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, padding: 2 }}>
-          <div className="filter-buttons-container">
-            <Tooltip title="Add Request" arrow>
-              <Button
-                className="add-request-button"
-                onClick={() => setOpen(true)}
-                variant="contained"
-              >
-                <FontAwesomeIcon icon={faPlusCircle} size="2x" className="add-icon" />
-              </Button>
-            </Tooltip>
+              <div className="filter-buttons-container">
+                <Tooltip title="Add Request" arrow>
+                  <Button
+                    className="add-request-button"
+                    onClick={() => setOpen(true)}
+                    variant="contained"
+                  >
+                    <FontAwesomeIcon icon={faPlusCircle} size="2x" className="add-icon" />
+                  </Button>
+                </Tooltip>
                 <Tooltip title="Filter by Group" arrow>
                   <Button
                     className="filter-button group-button"
@@ -440,135 +456,135 @@ export default function MainTable({ emailRequestor }) {
                 </Menu>
 
 
-            <Tooltip title="Filter by Affected Groups" arrow>
-              <Button
-                className="filter-button affected-group-button"
-                variant="contained"
-                onClick={(event) => handleOpenMenu(event, 'affectedGroup')}
-              >
-                <SearchOutlinedIcon />
-              </Button>
-            </Tooltip>
-            <Menu
-              anchorEl={anchorElAffectedGroup}
-              open={Boolean(anchorElAffectedGroup)}
-              onClose={() => handleCloseMenu('affectedGroup')}
-            >
-              {groups.map((group) => (
-                <MenuItem
-                  key={group.id}
-                  onClick={() => handleAffectedGroupSelect(group.id)}
-                >
-                  <Checkbox checked={selectedAffectedGroups.includes(group.id)} />
-                  {group.name}
-                </MenuItem>
-              ))}
-              <MenuItem onClick={applyFilter}>Apply</MenuItem>
-            </Menu>
-            <Tooltip title="Clear Filters" arrow>
-              <Button
-                className="clear-filters-button"
-                onClick={clearFilters}
-                variant="contained"
-              >
-                <FontAwesomeIcon icon={faTimes} className="clear-filters-icon" />
-              </Button>
-            </Tooltip>
-
-            <Tooltip title={showGroupColumns ? "Hide Group Columns" : "Show Group Columns"} arrow>
-              <Button
-                className="column-toggle-button"
-                onClick={handleToggleColumns}
-                variant="contained"
-              >
-                <FontAwesomeIcon icon={faArrowsAltH} className="column-toggle-icon" />
-              </Button>
-            </Tooltip>
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'flex-end', // למקם את התוכן לימין
-              }}
-            >
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => setRedirectToAdminSettings(true)}
-                sx={{
-                  borderRadius: '8px', // שינוי לצורת מלבן עם פינות עגולות
-                  padding: '8px 16px', // התאמת גובה ורוחב הכפתור
-                  minWidth: 'auto', // אין צורך ברוחב מינימלי
-                  fontSize: '0.8rem', // התאמת גודל הטקסט
-                  boxShadow: '0 0 10px rgba(0, 255, 0, 0.5)', // מסגרת זוהרת בצבע ירוק
-                }}
-              >
-                Admin Settings
-              </Button>
-            </Box>
-            <Tooltip title="Export to File" arrow>
-              <Button
-                className="export-button"
-                variant="contained"
-                sx={{
-                  borderRadius: '8px', // שינוי לצורת מלבן עם פינות עגולות
-                  padding: '8px 16px', // התאמת גובה ורוחב הכפתור
-                  minWidth: 'auto', // אין צורך ברוחב מינימלי
-                  fontSize: '0.8rem', // התאמת גודל הטקסט
-                  boxShadow: '0 0 10px rgba(0, 255, 0, 0.5)', // מסגרת זוהרת בצבע ירוק
-                }}
-                  onClick = { handleExportCSV }
-              >
-                <FontAwesomeIcon icon={faDownload} className="export-icon" style={{ marginRight: '8px' }} />
-                Export
-              </Button>
-            </Tooltip>
-          </div>
-          
-        </Box>
-        <TableContainer sx={{ maxHeight: 440 }}>
-          <Table stickyHeader>
-            <TableHead>
-                  <TableRow className="custom-table-row">
-                {columns.map((column) => (
-                  <TableCell
-                    key={column.id}
-                    style={{ minWidth: column.minWidth, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}
+                <Tooltip title="Filter by Affected Groups" arrow>
+                  <Button
+                    className="filter-button affected-group-button"
+                    variant="contained"
+                    onClick={(event) => handleOpenMenu(event, 'affectedGroup')}
                   >
-                    {column.label}
-                  </TableCell>
-                ))}
-                {groups.map((group) =>
-                  showGroupColumns ? (
-                    <TableCell
+                    <SearchOutlinedIcon />
+                  </Button>
+                </Tooltip>
+                <Menu
+                  anchorEl={anchorElAffectedGroup}
+                  open={Boolean(anchorElAffectedGroup)}
+                  onClose={() => handleCloseMenu('affectedGroup')}
+                >
+                  {groups.map((group) => (
+                    <MenuItem
                       key={group.id}
-                      style={{ minWidth: 100, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}
+                      onClick={() => handleAffectedGroupSelect(group.id)}
                     >
+                      <Checkbox checked={selectedAffectedGroups.includes(group.id)} />
                       {group.name}
-                    </TableCell>
-                  ) : null
-                )}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {sortedRows.map((row, rowIndex) => (
-                <React.Fragment key={row.id}>
-                    <EditableRow
-                    key={row.id}
-                    row={row}
-                    columns={columns}
-                    onSave={handleSave}
-                    email={emailRequestor}
-                    onDelete={handleDeleteRequest}
-                    formatDate={formatDate}
-                    showGroupColumns={showGroupColumns}
-                    groups={groups}
-                    getStatusBackgroundColor={getStatusBackgroundColor}
-                    // getGroupStatus={getGroupStatus}
-                    handleStatusChange={handleStatusChange}
-                    rowIndex={rowIndex}
-                    onDrop={onDrop}
-                  />
-                  {/* {columns.map((column) => {
+                    </MenuItem>
+                  ))}
+                  <MenuItem onClick={applyFilter}>Apply</MenuItem>
+                </Menu>
+                <Tooltip title="Clear Filters" arrow>
+                  <Button
+                    className="clear-filters-button"
+                    onClick={clearFilters}
+                    variant="contained"
+                  >
+                    <FontAwesomeIcon icon={faTimes} className="clear-filters-icon" />
+                  </Button>
+                </Tooltip>
+
+                <Tooltip title={showGroupColumns ? "Hide Group Columns" : "Show Group Columns"} arrow>
+                  <Button
+                    className="column-toggle-button"
+                    onClick={handleToggleColumns}
+                    variant="contained"
+                  >
+                    <FontAwesomeIcon icon={faArrowsAltH} className="column-toggle-icon" />
+                  </Button>
+                </Tooltip>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'flex-end', // למקם את התוכן לימין
+                  }}
+                >
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => setRedirectToAdminSettings(true)}
+                    sx={{
+                      borderRadius: '8px', // שינוי לצורת מלבן עם פינות עגולות
+                      padding: '8px 16px', // התאמת גובה ורוחב הכפתור
+                      minWidth: 'auto', // אין צורך ברוחב מינימלי
+                      fontSize: '0.8rem', // התאמת גודל הטקסט
+                      boxShadow: '0 0 10px rgba(0, 255, 0, 0.5)', // מסגרת זוהרת בצבע ירוק
+                    }}
+                  >
+                    Admin Settings
+                  </Button>
+                </Box>
+                <Tooltip title="Export to File" arrow>
+                  <Button
+                    className="export-button"
+                    variant="contained"
+                    sx={{
+                      borderRadius: '8px', // שינוי לצורת מלבן עם פינות עגולות
+                      padding: '8px 16px', // התאמת גובה ורוחב הכפתור
+                      minWidth: 'auto', // אין צורך ברוחב מינימלי
+                      fontSize: '0.8rem', // התאמת גודל הטקסט
+                      boxShadow: '0 0 10px rgba(0, 255, 0, 0.5)', // מסגרת זוהרת בצבע ירוק
+                    }}
+                    onClick={handleExportCSV}
+                  >
+                    <FontAwesomeIcon icon={faDownload} className="export-icon" style={{ marginRight: '8px' }} />
+                    Export
+                  </Button>
+                </Tooltip>
+              </div>
+
+            </Box>
+            <TableContainer sx={{ maxHeight: 440 }}>
+              <Table stickyHeader>
+                <TableHead>
+                  <TableRow className="custom-table-row">
+                    {columns.map((column) => (
+                      <TableCell
+                        key={column.id}
+                        style={{ minWidth: column.minWidth, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}
+                      >
+                        {column.label}
+                      </TableCell>
+                    ))}
+                    {groups.map((group) =>
+                      showGroupColumns ? (
+                        <TableCell
+                          key={group.id}
+                          style={{ minWidth: 100, backgroundColor: '#d0e4f5', fontWeight: 'bold' }}
+                        >
+                          {group.name}
+                        </TableCell>
+                      ) : null
+                    )}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {sortedRows.map((row, rowIndex) => (
+                    <React.Fragment key={row.id}>
+                      <EditableRow
+                        key={row.id}
+                        row={row}
+                        columns={columns}
+                        onSave={handleSave}
+                        email={emailRequestor}
+                        onDelete={handleDeleteRequest}
+                        formatDate={formatDate}
+                        showGroupColumns={showGroupColumns}
+                        groups={groups}
+                        getStatusBackgroundColor={getStatusBackgroundColor}
+                        // getGroupStatus={getGroupStatus}
+                        handleStatusChange={handleStatusChange}
+                        rowIndex={rowIndex}
+                        onDrop={onDrop}
+                      />
+                      {/* {columns.map((column) => {
                       const value = row[column.id];
                       return (
                         column.id === 'requestGroup' && !showGroupColumns ? null : (
@@ -578,7 +594,7 @@ export default function MainTable({ emailRequestor }) {
                         )
                       );
                     })} */}
-                  {/* {groups.map((group) => {
+                      {/* {groups.map((group) => {
                       const status = row.statuses.find(status => status.groupId === group.id);
                       const statusDescription = status ? status.status.status : 'Not Required';
 
@@ -598,22 +614,22 @@ export default function MainTable({ emailRequestor }) {
                         </TableCell>
                       ) : null;
                     })} */}
-                </React.Fragment>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[4, 8, 12, { label: 'All', value: -1 }]}
-          component="div"
-          count={totalRows}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </Paper>
-      </Box>
+                    </React.Fragment>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <TablePagination
+              rowsPerPageOptions={[4, 8, 12, { label: 'All', value: -1 }]}
+              component="div"
+              count={totalRows}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </Paper>
+        </Box>
       </Box>
       <Modal
         open={open}
