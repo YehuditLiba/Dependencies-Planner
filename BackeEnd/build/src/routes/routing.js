@@ -55,6 +55,7 @@ router.delete('/productManagers/:email', productManagerCon_1.deleteProductManage
 //status routings
 router.get('/status', StatusCon_1.getAllStatusController);
 router.get('/Getstatus', StatusCon_1.getAllStatus);
+router.put('/update-status', StatusCon_1.updateRequestStatus);
 //priority routings
 router.get('/priority', PriorityCon_1.getAllPrioritiesController);
 router.put('/requests/:ID/priority', PriorityCon_1.updatePriorityController);

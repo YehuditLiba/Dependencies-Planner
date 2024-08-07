@@ -6,7 +6,7 @@ import axios from 'axios';
 import DeleteRequest from './DeleteRequest';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import { priorityMap } from '../utils/utils';
+import { priorityMap, finalDecissionMap } from '../utils/utils';
 import { quarters } from '../config/quarters';
 
 const EditableRow = ({ row, columns, onSave, emailRequestor,
@@ -58,7 +58,7 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                 if (editData.planned !== row.planned) {
                     const response = await axios.put(`http://localhost:3001/api/requests/${editData.ID}/planned`, { planned: editData.planned });
                     onSave(response.data);
-                } 
+                }
                 //else {
                 const response = await axios.put(`http://localhost:3001/api/requests/${editData.ID}`, {
                     title: editData.title,
@@ -66,7 +66,7 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                     comments: editData.comments
                 }); // Updated URL to match the Postman example
                 onSave(response.data);
-            //}
+                //}
             } catch (error) {
                 console.error('Error updating row:', error);
             }
@@ -129,6 +129,7 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                             <Select
                                 value={editData[column.id] || ''}
                                 onChange={(e) => handleChange(e, column.id)}
+                                // onBlur={handleBlur}
                                 autoFocus
                             >
                                 {priorities.map(priority => (
@@ -137,14 +138,32 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
                                     </MenuItem>
                                 ))}
                             </Select>
-                        ) : column.id === 'dateTime' ? (
-                            formatDate(row[column.id])
-                        ) : row[column.id]
-                    ) : column.id === 'dateTime' ? (
-                        formatDate(row[column.id])
-                    ) : column.id === 'priority' ? (
-                        priorityMap[editData[column.id]] || editData[column.id]
-                    ) : (
+                        ) : column.id === 'planned' ?
+                            (
+                                <Select
+                                    value={editData[column.id] || ''}
+                                    onChange={(e) => handleChange(e, column.id)}
+                                    // onBlur={handleBlur}
+                                    autoFocus
+                                >
+                                    {quarters.map((quarter, index) => (
+                                        <MenuItem key={index} value={quarter}>
+                                            {quarter}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            ) : column.id === 'dateTime' ? (
+                                formatDate(row[column.id])
+                            ) : column.id === 'finalDecision' ? (
+                                finalDecissionMap[editData[column.id]] || editData[column.id]
+                            ) : (
+                                row[column.id]
+                            )
+                            ) : column.id === 'dateTime' ? (
+                                formatDate(row[column.id])
+                            ) : column.id === 'priority' ? (
+                                priorityMap[editData[column.id]] || editData[column.id]
+                            ) : (
                         row[column.id]
                     )}
                 </TableCell>
