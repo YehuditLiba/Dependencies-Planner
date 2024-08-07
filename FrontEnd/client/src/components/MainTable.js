@@ -108,25 +108,35 @@ export default function MainTable({ emailRequestor }) {
           limit: rowsPerPage === -1 ? undefined : rowsPerPage,
           offset: rowsPerPage === -1 ? 0 : page * rowsPerPage,
         };
-
+        console.log(params);
         if (selectedGroup) {
           params.requestorGroup = selectedGroup;
+        }
+
+        if (selectedManager) {
+          params.requestorName = selectedManager;
         }
 
         if (selectedAffectedGroups.length) {
           params.affectedGroupList = selectedAffectedGroups.join(',');
         }
-
-        console.log('Params sent to server:', params);
+        console.log(params);
+        console.log('rowsPerPage:', rowsPerPage);
+        console.log('page:', page);
 
         const response = await axios.get('http://localhost:3001/api/requests', { params });
 
+        // הדפס את כל הנתונים שמתקבלים מהשרת כדי לבדוק מה מגיע בפועל
         console.log('Full response data:', response.data);
 
         if (response.data.requests) {
           console.log('Fetched rows:', response.data.requests);
+
           setRows(response.data.requests);
+          console.log('Updated rows:', response.data.requests);
           setTotalRows(response.data.totalCount || response.data.requests.length);
+          console.log('Updated totalRows:', response.data.totalCount || response.data.requests.length);
+
         } else {
           console.warn('No requests found in response data');
         }
@@ -135,6 +145,9 @@ export default function MainTable({ emailRequestor }) {
         alert("Failed to fetch data from server. Please try again later.");
       }
     };
+
+
+
     const fetchGroups = async () => {
       try {
         const response = await axios.get('http://localhost:3001/api/groups');
@@ -152,6 +165,8 @@ export default function MainTable({ emailRequestor }) {
         console.error("Failed to fetch product managers", error);
       }
     };
+
+
     const fetchStatuses = async () => {
       try {
         const response = await axios.get('http://localhost:3001/api/status');
@@ -160,7 +175,7 @@ export default function MainTable({ emailRequestor }) {
       } catch (error) {
         console.error('Failed to fetch statuses', error);
       }
-    };
+    }; 
     fetchData();
     fetchGroups();
     fetchManagers();
@@ -211,18 +226,19 @@ export default function MainTable({ emailRequestor }) {
 
 
   const handleGroupSelect = (group) => {
-    if (group.id === selectedGroup) {
-      // אם הפריט כבר מסומן, ננקה את הבחירה
-      setSelectedGroup('');
+    if (selectedGroup === group.id) {
+      setSelectedGroup(null); // ביטול בחירת הקבוצה אם היא כבר נבחרה
     } else {
-      setSelectedGroup(group.id || '');
+      setSelectedGroup(group.id); // בחירת הקבוצה
     }
   };
 
   const handleManagerSelect = (manager) => {
-    setSelectedManager(prev =>
-      prev === manager.name ? '' : manager.name
-    );
+    if (selectedManager === manager.name) {
+      setSelectedManager(null); // ביטול בחירת המנהל אם הוא כבר נבחר
+    } else {
+      setSelectedManager(manager.name); // בחירת המנהל
+    }
   };
 
 
@@ -419,10 +435,7 @@ export default function MainTable({ emailRequestor }) {
                     <MenuItem
                       key={group.id}
                       selected={group.id === selectedGroup}
-                      onClick={(event) => {
-                        event.stopPropagation(); // עצור את האירוע כך שלא יסגור את התפריט
-                        handleGroupSelect(group);
-                      }}
+                      onClick={() => handleGroupSelect(group)}
                     >
                       <Checkbox checked={group.id === selectedGroup} />
                       {group.name}
@@ -447,6 +460,7 @@ export default function MainTable({ emailRequestor }) {
                   {managers.map((manager) => (
                     <MenuItem
                       key={manager.id}
+                      selected={manager.name === selectedManager}
                       onClick={() => handleManagerSelect(manager)}
                     >
                       <Checkbox checked={manager.name === selectedManager} />
