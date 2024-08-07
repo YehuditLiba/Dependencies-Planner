@@ -117,7 +117,7 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
             case 'High':
                 return '#FFDAB9';
             case 'Medium':
-                return 'lightgoldenrodyellowlemonchiffon';
+                return 'lemonchiffon';
             case 'Low':
                 return '#E0FFE0';
             default:

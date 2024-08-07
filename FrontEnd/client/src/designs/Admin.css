@@ -1,5 +1,5 @@
 Header.css
-.header {
+.headerA {
     display: flex;
     justify-content: center;
     /* למרכז את התוכן האופקי */
@@ -13,7 +13,7 @@ Header.css
     /* אין צבע רקע לסרגל */
 }
 
-.title {
+.titleA {
     font-size: 2rem;
     /* גודל טקסט גדול יותר */
     font-weight: bold;
@@ -26,18 +26,18 @@ Header.css
     /* ביטול רווחים מיותרים */
 }
 
-.logo-container {
+.logo-containerA {
     position: absolute;
     /* מיקום מוחלט */
     top: 0;
     /* למקם את הלוגו בחלק העליון */
-    left: 0;
+    right: 0;
     /* למקם את הלוגו בחלק הימני */
     margin: 100px;
     /* רווח מהקצוות */
 }
 
-.logo {
+.logoA {
     width: 100px;
     /* גודל הלוגו */
     height: auto;
