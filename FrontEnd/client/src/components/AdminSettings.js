@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, TextField, MenuItem, Select, InputLabel, FormControl,Checkbox, ListItemText } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-
+import AdminDesign from './AdminDesign';
 const AdminSettings = () => {
   const [groups, setGroups] = useState([]);
   const [productManagers, setProductManagers] = useState([]);
@@ -146,6 +146,7 @@ const handleAddGroup = async () => {
   
   return (
     <div>
+      <AdminDesign />
       <Button
         variant="contained"
         color="primary"
