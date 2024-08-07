@@ -51,4 +51,20 @@ export const getAllStatuses = async (): Promise<Status[]> => {
         throw err;
     }
 };
+export const updateRequestStatusInDB = async (requestId: number, groupId: number, status: string): Promise<any> => {
+    try {
+        const result = await pool.query(
+            'UPDATE affected_group SET status = $1 WHERE request_id = $2 AND group_id = $3 RETURNING *',
+            [status, requestId, groupId]
+        );
 
+        if (result.rows.length === 0) {
+            throw new Error('Request or group not found');
+        }
+
+        return result.rows[0];
+    } catch (err) {
+        console.error('Error in updateRequestStatusInDB:', err);
+        throw err;
+    }
+};

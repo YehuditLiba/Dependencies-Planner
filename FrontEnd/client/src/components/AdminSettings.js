@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, TextField, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, TextField, MenuItem, Select, InputLabel, FormControl,Checkbox, ListItemText } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-
+import AdminDesign from './AdminDesign';
 const AdminSettings = () => {
   const [groups, setGroups] = useState([]);
   const [productManagers, setProductManagers] = useState([]);
@@ -18,61 +18,27 @@ const AdminSettings = () => {
   const [newProductManagerName, setNewProductManagerName] = useState('');
   const [newProductManagerEmail, setNewProductManagerEmail] = useState('');
   const [newProductManagerGroupId, setNewProductManagerGroupId] = useState('');
+  
   const navigate = useNavigate();
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     setLoading(true);
-  //     try {
-  //       const groupsResponse = await axios.get('http://localhost:3001/api/groups');
-  //       const productManagersResponse = await axios.get('http://localhost:3001/api/productManagers');
-  //       console.log('Fetched Groups:', groupsResponse.data); 
-  //       console.log('Fetched Product Managers:', productManagersResponse.data);
-  //       setGroups(groupsResponse.data);
-  //       setProductManagers(productManagersResponse.data);
-  //     } catch (error) {
-  //       console.error('Error fetching data:', error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, []);
-
   useEffect(() => {
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const [groupsResponse, productManagersResponse, allProductManagerGroupsResponse] = await Promise.all([
-        axios.get('http://localhost:3001/api/groups'),
-        axios.get('http://localhost:3001/api/productManagers'),
-        axios.get('http://localhost:3001/api/all-product-manager-groups')
-      ]);
-      // console.log('Fetched Groups:', groupsResponse.data); 
-      // console.log('Fetched Product Managers:', productManagersResponse.data);
-      // console.log('Fetched All Product Manager Groups:', allProductManagerGroupsResponse.data);
-      
-      setGroups(groupsResponse.data);
-      setProductManagers(productManagersResponse.data);
-
-      // מיזוג קבוצות מנהלי המוצר עם המידע שהתקבל
-      const updatedProductManagers = productManagersResponse.data.map(pm => {
-        const groupData = allProductManagerGroupsResponse.data.find(group => group.email === pm.email);
-        return { ...pm, group_ids: groupData ? groupData.group_ids : [] };
-      });
-      setProductManagers(updatedProductManagers);
-
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchData();
-}, []);
-
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const groupsResponse = await axios.get('http://localhost:3001/api/groups');
+        const productManagersResponse = await axios.get('http://localhost:3001/api/productManagers');
+        console.log('Fetched Groups:', groupsResponse.data); 
+        console.log('Fetched Product Managers:', productManagersResponse.data);
+        setGroups(groupsResponse.data);
+        setProductManagers(productManagersResponse.data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const handleGroupChange = async (groupId) => {
     if (editingGroupId === null) return;
@@ -86,69 +52,82 @@ const AdminSettings = () => {
     }
 };
 
-const handleProductManagerChange = async (email) => {
-  try {
-      await axios.post('http://localhost:3001/api/product-manager-group', {
-          product_manager_email: email,
-          group_id: editingProductManagerGroupId
-      });
-      setProductManagers(productManagers.map(pm =>
-          pm.email === email
-              ? { ...pm, group_ids: [editingProductManagerGroupId] }
-              : pm
-      ));
-      setEditingProductManagerEmail('');
-  } catch (error) {
-      console.error('Error updating product manager group:', error);
-  }
-};
-  
-  const handleAddGroup = async () => {
+const handleAddGroup = async () => {
     if (!newGroupName) return;
-    
     try {
       const response = await axios.post('http://localhost:3001/api/groups', { name: newGroupName });
       const newGroup = response.data;
-  
       let updatedProductManagers = [...productManagers];
-  
-      if (selectedProductManager) {
-        await axios.post('http://localhost:3001/api/product-manager-group', {
-          product_manager_email: selectedProductManager,
-          group_id: newGroup.id
-        });
-        updatedProductManagers = updatedProductManagers.map(pm =>
-          pm.email === selectedProductManager
-            ? { ...pm, group_ids: newGroup.id }
-            : pm
-        );
-      }
-  
       if (newProductManagerEmail) {
-        const newPMResponse = await axios.post('http://localhost:3001/api/productManagers', {
-          name: newProductManagerName,
-          email: newProductManagerEmail,
-          group_ids: newGroup.id
-        });
-        console.log('New product manager added:', newPMResponse.data);
-        updatedProductManagers.push(newPMResponse.data);
+        if (selectedProductManager) {
+          // אם מנהל המוצר קיים, עדכן אותו
+          const pmToUpdate = updatedProductManagers.find(pm => pm.email === selectedProductManager);
+          const updatedGroupIds = [...pmToUpdate.group_ids, newGroup.id];
+          
+          await axios.put(`http://localhost:3001/api/editProductManagers/${selectedProductManager}`, {
+            name: pmToUpdate.name,
+            email: pmToUpdate.email,
+            group_ids: updatedGroupIds
+          });
+          // עדכן את הרשימה של מנהלי המוצר
+          updatedProductManagers = updatedProductManagers.map(pm =>
+            pm.email === selectedProductManager
+              ? { ...pm, group_ids: updatedGroupIds }
+              : pm
+          );
+        } 
+        else {
+          // אם מנהל המוצר לא קיים, הוסף אותו
+          const newPMResponse = await axios.post('http://localhost:3001/api/addProductManagers', {
+            name: newProductManagerName,
+            email: newProductManagerEmail,
+            group_ids: [newGroup.id]
+          });
+          console.log('New product manager added:', newPMResponse.data);
+          updatedProductManagers.push(newPMResponse.data);
+        }
       }
-  
+      
+      // עדכן את הקבוצות ואת הרשימה של מנהלי המוצר
       setGroups([...groups, { name: newGroupName, id: newGroup.id }]);
       setProductManagers(updatedProductManagers);
       setNewGroupName('');
       setNewProductManagerName('');
       setNewProductManagerEmail('');
+      setNewProductManagerGroupId([]);
       setSelectedProductManager('');
       setAddingGroup(false);
     } catch (error) {
       console.error('Error adding new group:', error);
     }
+ };
+  const handleProductManagerChange = async (email) => {
+    console.log('Sending update for:', email);
+    console.log('Data being sent:', {
+      name: editingProductManagerName,
+      group_ids: [editingProductManagerGroupId] // שולחים רק את ה-ID של הקבוצה החדשה
+    });
+    try {
+      await axios.put(`http://localhost:3001/api/editProductManagers/${email}`, {
+        name: editingProductManagerName,
+        group_ids: [editingProductManagerGroupId] // שולחים רק את ה-ID של הקבוצה החדשה
+      });
+      console.log('Update successful');
+      setProductManagers(productManagers.map(pm =>
+        pm.email === email
+          ? { ...pm, name: editingProductManagerName, group_ids: [...pm.group_ids, editingProductManagerGroupId] }
+          : pm
+      ));
+      setEditingProductManagerEmail('');
+    } catch (error) {
+      console.error('Error updating product manager:', error);
+    }
   };
-
+  
   const handleDeleteGroup = async (groupId) => {
     try {
       await axios.delete(`http://localhost:3001/api/groups/${groupId}`);
+      alert("are you sure you want to delet?");
       setGroups(groups.filter(group => group.id !== groupId));
     } catch (error) {
       console.error('Error deleting group:', error);
@@ -157,7 +136,7 @@ const handleProductManagerChange = async (email) => {
   const handleDeleteProductManager = async (email) => {
     try {
       await axios.delete(`http://localhost:3001/api/productManagers/${email}`);
-      // עדכן את הסטייט של מנהלי המוצר על מנת להסיר את המנהל שנמחק
+      alert("are you sure you want to delet?");
       setProductManagers(productManagers.filter(pm => pm.email !== email));
     } catch (error) {
       console.error('Error deleting product manager:', error);
@@ -167,6 +146,7 @@ const handleProductManagerChange = async (email) => {
   
   return (
     <div>
+      <AdminDesign />
       <Button
         variant="contained"
         color="primary"
@@ -212,12 +192,6 @@ const handleProductManagerChange = async (email) => {
                 onChange={(e) => setNewProductManagerEmail(e.target.value)}
                 label="New Product Manager Email"
               />
-              <TextField
-                value={newProductManagerGroupId}
-                onChange={(e) => setNewProductManagerGroupId(Number(e.target.value))}
-                label="Group ID"
-                type="number"
-                />
               <Button onClick={handleAddGroup}>Save</Button>
               <Button onClick={() => setAddingGroup(false)}>Cancel</Button>
             </div>
@@ -239,7 +213,7 @@ const handleProductManagerChange = async (email) => {
                         <TextField
                           value={editingGroupName}
                           onChange={(e) => setEditingGroupName(e.target.value)}
-                          autoFocus
+                          label="Group Name"
                         />
                         <Button onClick={() => handleGroupChange(group.id)}>Save</Button>
                         <Button onClick={() => setEditingGroupId(null)}>Cancel</Button>
@@ -266,8 +240,8 @@ const handleProductManagerChange = async (email) => {
                   </TableCell>
                     <TableCell>
                       {productManagers
-                        // .filter((pm) => pm.group_ids === group.id)
-                        .filter((pm) => Array.isArray(pm.group_ids) && pm.group_ids.includes(group.id))
+                        .filter(pm => pm.group_ids.includes(group.id))
+                        // .filter((pm) => Array.isArray(pm.group_ids) && pm.group_ids.includes(group.id))
                         .map((pm) => (
                           <div key={`pm-${pm.email}`}>
                             {editingProductManagerEmail === pm.email ? (
@@ -283,25 +257,49 @@ const handleProductManagerChange = async (email) => {
                                   onChange={(e) => setEditingProductManagerEmail(e.target.value)}
                                   label="Email"
                                 />
-                                <TextField
-                                  value={editingProductManagerGroupId}
-                                  onChange={(e) => setEditingProductManagerGroupId(Number(e.target.value))}
-                                  label="Group ID"
-                                  type="number"
-                                />
-                                <Button onClick={() => handleProductManagerChange(editingProductManagerEmail)}>Save</Button>
+                                <FormControl fullWidth margin="normal">
+                              <InputLabel>Group IDs</InputLabel>
+                              <Select
+                                multiple
+                                value={editingProductManagerGroupId}
+                                onChange={(e) => setEditingProductManagerGroupId(e.target.value)}
+                                renderValue={(selected) => (
+                                  <div>
+                                    {selected.map((value) => (
+                                      <span key={value}>{groups.find(group => group.id === value)?.name}</span>
+                                    ))}
+                                  </div>
+                                )}
+                              >
+                                {groups.map((group) => (
+                                  <MenuItem key={group.id} value={group.id}>
+                                  <Checkbox checked={editingProductManagerGroupId.includes(group.id)} />
+                                  <ListItemText primary={group.name} />
+                                </MenuItem>
+                                ))}
+                              </Select>
+                            </FormControl>
+                                <Button onClick={() => handleProductManagerChange(pm.email)}>Save</Button>
                                 <Button onClick={() => setEditingProductManagerEmail('')}>Cancel</Button>
                               </div>
                             ) : (
                               <div>
-                                {pm.name}
-                                <Button onClick={() => {
-                                  console.log('Setting Product Manager Email:', pm.email);
-                                  setEditingProductManagerEmail(pm.email);
-                                  setEditingProductManagerName(pm.name);
-                                  // setEditingProductManagerGroupId(pm.group_ids || []);
-                                }}>Edit</Button>
-                                <Button onClick={() => handleDeleteProductManager(pm.email)} color="error">Delete</Button>
+                                <span>{pm.name} ({pm.email})</span>
+                                <Button
+                                  onClick={() => {
+                                    setEditingProductManagerEmail(pm.email);
+                                    setEditingProductManagerName(pm.name);
+                                    setEditingProductManagerGroupId(pm.group_ids);
+                                  }}
+                                >
+                                  Edit
+                                </Button>
+                                <Button
+                                  onClick={() => handleDeleteProductManager(pm.email)}
+                                  color="error"
+                                >
+                                  Delete
+                                </Button>
                               </div>
                             )}
                           </div>
