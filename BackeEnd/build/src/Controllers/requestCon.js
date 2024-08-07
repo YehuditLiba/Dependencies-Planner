@@ -77,29 +77,18 @@ exports.getRequestByIdController = getRequestByIdController;
 const deleteRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const { requestorEmail } = req.body;
+    console.log('REQUEST ID:', id);
+    console.log('REQUESTOR EMAIL:', requestorEmail);
+    console.log('FULL REQUEST BODY:', req.body); // הוספת לוג נוסף לבדיקה
     if (!id || !requestorEmail) {
-        return res.status(400).json({ message: 'Missing requestId or requestorEmail' });
         return res.status(400).json({ message: 'Missing requestId or requestorEmail' });
     }
     try {
         yield (0, requestUtils_1.deleteRequestById)(Number(id), requestorEmail);
         res.status(200).json({ message: `Request with ID ${id} and its affected groups deleted successfully` });
-        yield (0, requestUtils_1.deleteRequestById)(Number(id), requestorEmail);
-        res.status(200).json({ message: `Request with ID ${id} and its affected groups deleted successfully` });
     }
     catch (error) {
-        if (error instanceof Error && error.message.includes('Unauthorized')) {
-            return res.status(403).json({ message: error.message });
-        }
         let errorMessage = 'Unknown error';
-        if (error instanceof Error) {
-            errorMessage = error.message;
-        }
-        console.error('Error deleting request:', errorMessage);
-        res.status(500).json({ message: errorMessage });
-        if (error instanceof Error && error.message.includes('Unauthorized')) {
-            return res.status(403).json({ message: error.message });
-        }
         if (error instanceof Error) {
             errorMessage = error.message;
         }
@@ -284,7 +273,7 @@ const exportRequestsToCSV = (req, res) => __awaiter(void 0, void 0, void 0, func
         const timestamp = new Date().toISOString().replace(/:/g, '-'); // שינוי תווי ':' ל'-' שיהיה מתאים לשם קובץ
         const fileName = `requests_${timestamp}.csv`;
         const absolutePath = path_1.default.resolve(__dirname, fileName);
-        console.log(`Writing CSV file to ${absolutePath}`);
+        //console.log(`Writing CSV file to ${absolutePath}`);
         // יצירת קובץ CSV
         const csvWriter = (0, csv_writer_1.createObjectCsvWriter)({
             path: 'absolutePath',
@@ -307,7 +296,7 @@ const exportRequestsToCSV = (req, res) => __awaiter(void 0, void 0, void 0, func
         });
         // כתיבת הנתונים לקובץ CSV
         yield csvWriter.writeRecords(formattedRows);
-        console.log(`CSV file written successfully to ${absolutePath}`);
+        //console.log(`CSV file written successfully to ${absolutePath}`);
         // שליחת הקובץ למשתמש להורדה
         res.download(absolutePath);
     }

@@ -1,5 +1,3 @@
-
-
 import { pool } from '../config/db';
 import { AffectedGroup } from '../types/affectedGroupsTypes';
 
@@ -56,13 +54,31 @@ export const createAffectedGroupInDB = async (requestId: number, groupId: number
 };
 //delete
 export const deleteAffectedGroupsByRequestId = async (requestId: number): Promise<void> => {
-    const query = `
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+  
+      console.log('Deleting affected groups for request ID:', requestId);
+  
+      const deleteAffectedGroupsQuery = `
         DELETE FROM affected_group
-        WHERE request_id = $1
-    `;
-
-    await pool.query(query, [requestId]);
-};
+        WHERE request_id = $1;
+      `;
+      const deleteResult = await client.query(deleteAffectedGroupsQuery, [requestId]);
+      console.log('Affected groups deleted, rows affected:', deleteResult.rowCount);
+  
+      await client.query('COMMIT');
+      console.log('Affected groups deletion completed successfully');
+    } catch (error) {
+      console.error('Error during affected groups deletion:', error);
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  };
+  
+  
 export const getAllRequestsWithStatusesFromDB = async () => {
     const client = await pool.connect();
     try {

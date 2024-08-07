@@ -57,31 +57,19 @@ export const getRequestByIdController = async (req: Request, res: Response): Pro
 export const deleteRequest = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { requestorEmail } = req.body;
-
+  console.log('REQUEST ID:', id);
+  console.log('REQUESTOR EMAIL:', requestorEmail);
+  console.log('FULL REQUEST BODY:', req.body);  // הוספת לוג נוסף לבדיקה
 
   if (!id || !requestorEmail) {
-    return res.status(400).json({ message: 'Missing requestId or requestorEmail' });
     return res.status(400).json({ message: 'Missing requestId or requestorEmail' });
   }
 
   try {
     await deleteRequestById(Number(id), requestorEmail);
     res.status(200).json({ message: `Request with ID ${id} and its affected groups deleted successfully` });
-    await deleteRequestById(Number(id), requestorEmail);
-    res.status(200).json({ message: `Request with ID ${id} and its affected groups deleted successfully` });
   } catch (error: unknown) {
-    if (error instanceof Error && error.message.includes('Unauthorized')) {
-      return res.status(403).json({ message: error.message });
-    }
     let errorMessage = 'Unknown error';
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    }
-    console.error('Error deleting request:', errorMessage);
-    res.status(500).json({ message: errorMessage });
-    if (error instanceof Error && error.message.includes('Unauthorized')) {
-      return res.status(403).json({ message: error.message });
-    }
     if (error instanceof Error) {
       errorMessage = error.message;
     }
@@ -89,6 +77,7 @@ export const deleteRequest = async (req: Request, res: Response) => {
     res.status(500).json({ message: errorMessage });
   }
 };
+
 //עדכון שדות בקשה
 export const updateRequest = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -285,7 +274,7 @@ export const exportRequestsToCSV = async (req: Request, res: Response): Promise<
     const fileName = `requests_${timestamp}.csv`;
     const absolutePath = path.resolve(__dirname, fileName);
 
-    console.log(`Writing CSV file to ${absolutePath}`);
+    //console.log(`Writing CSV file to ${absolutePath}`);
 
     // יצירת קובץ CSV
     const csvWriter = createObjectCsvWriter({
@@ -310,7 +299,7 @@ export const exportRequestsToCSV = async (req: Request, res: Response): Promise<
 
     // כתיבת הנתונים לקובץ CSV
     await csvWriter.writeRecords(formattedRows);
-    console.log(`CSV file written successfully to ${absolutePath}`);
+    //console.log(`CSV file written successfully to ${absolutePath}`);
 
     // שליחת הקובץ למשתמש להורדה
     res.download(absolutePath);

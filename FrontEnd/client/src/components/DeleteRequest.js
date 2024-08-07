@@ -1,12 +1,8 @@
 import React, { useState } from 'react';
-import IconButton from '@mui/material/IconButton';
-import DeleteIcon from '@mui/icons-material/Delete';
-import Modal from '@mui/material/Modal';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
 import axios from 'axios';
-import { sendMessageToSlack } from './sendMessageToSlack';
+import { IconButton, Modal, Box, Typography, Button } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+
 const modalStyle = {
   position: 'absolute',
   top: '50%',
@@ -23,7 +19,8 @@ const DeleteRequest = ({ id, email, onDelete }) => {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
-  const requestorEmail=email;
+  console.log("עעעעעעעעעעעע"+email)
+
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
@@ -32,26 +29,21 @@ const DeleteRequest = ({ id, email, onDelete }) => {
   };
 
   const handleDelete = async () => {
+    console.log("ייייייייייייייייייייייי"+email)
     setIsDeleting(true);
     try {
-      console.log(`Attempting to delete request with ID: ${id}`);
-      console.log(`Attempting to delete request with requestorEmail: ${requestorEmail}`);
-      await axios.delete(`http://localhost:3001/api/deleteRequests/${id}`,  {
-        data: { requestorEmail: email } });
-      console.log(`Successfully deleted request with ID: ${id}`);
+      await axios.delete(`http://localhost:3001/api/deleteRequests/${id}`, {
+        data: { requestorEmail: email }
+      });
       onDelete(id);
       handleClose();
-      sendMessageToSlack(`Request delete by  ${requestorEmail}`)
     } catch (error) {
-      // console.error(`Failed to delete request with ID: ${id}`, error);
-      // console.error(`Failed to delete request with requestorEmail: ${email}`, error);
       if (error.response && error.response.status === 403) {
-        setError('You do not have permission to delete this request.');//לא יודעת למה אבל אם אין הרשאה וחוזר שגיאת 403 זה לא נכנס לפה
+        setError('You do not have permission to delete this request.');
       } else {
-        setError('You do not have permission to delete this request.');//אז אם הבקשה נכשלת זה ירשום שגיאת חוסר הרשאה
+        setError('An error occurred while deleting the request.');
       }
-        setIsDeleting(false);
-
+      setIsDeleting(false);
     }
   };
 

@@ -72,6 +72,7 @@ const modalStyle = {
 };
 
 export default function MainTable({ emailRequestor }) {
+  console.log(emailRequestor)
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(8);
   const [rows, setRows] = useState([]);
@@ -190,6 +191,7 @@ export default function MainTable({ emailRequestor }) {
         break;
     }
   };
+  console.log("the email"+emailRequestor)
 
   const handleCloseMenu = (type) => {
     switch (type) {
@@ -555,7 +557,7 @@ export default function MainTable({ emailRequestor }) {
                     row={row}
                     columns={columns}
                     onSave={handleSave}
-                    email={emailRequestor}
+                    emailRequestor={emailRequestor}
                     onDelete={handleDeleteRequest}
                     formatDate={formatDate}
                     showGroupColumns={showGroupColumns}

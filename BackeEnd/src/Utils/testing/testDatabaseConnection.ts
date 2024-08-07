@@ -7,8 +7,8 @@ const testDatabaseConnection = () => {
         if (err) {
             console.error('Error connecting to first PostgreSQL database:', err);
         } else {
-            console.log('Connected to first PostgreSQL database at:', process.env.DB_HOST);
-            console.log('First database current time:', res.rows[0].now);
+            // console.log('Connected to first PostgreSQL database at:', process.env.DB_HOST);
+            // console.log('First database current time:', res.rows[0].now);
         }
     });
 
@@ -17,8 +17,8 @@ const testDatabaseConnection = () => {
         if (err) {
             console.error('Error connecting to second PostgreSQL database:', err);
         } else {
-            console.log('Connected to second PostgreSQL database at:', process.env.DB_HOST_G);
-            console.log('Second database current time:', res.rows[0].now);
+            // console.log('Connected to second PostgreSQL database at:', process.env.DB_HOST_G);
+            // console.log('Second database current time:', res.rows[0].now);
         }
     });
 };

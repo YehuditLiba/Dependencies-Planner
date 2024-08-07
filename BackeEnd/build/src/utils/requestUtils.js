@@ -98,6 +98,7 @@ const deleteRequestById = (requestId, requestorEmail) => __awaiter(void 0, void 
     const client = yield db_1.pool.connect();
     try {
         yield client.query('BEGIN');
+        console.log('Starting deletion process for request ID:', requestId);
         // בדיקת הרשאה
         const checkRequestorQuery = `
         SELECT COUNT(*) FROM request
@@ -105,20 +106,25 @@ const deleteRequestById = (requestId, requestorEmail) => __awaiter(void 0, void 
       `;
         const { rows } = yield client.query(checkRequestorQuery, [requestId, requestorEmail]);
         const requestorExists = parseInt(rows[0].count, 10) > 0;
+        console.log('Requestor exists:', requestorExists);
         if (!requestorExists) {
             throw new Error('Unauthorized: Only the requestor can delete this request');
         }
-        // Delete affected groups first
+        console.log('Deleting affected groups');
         yield (0, affectedGroupsUtils_1.deleteAffectedGroupsByRequestId)(requestId);
-        // Delete the request
+        console.log('Affected groups deleted');
+        console.log('Deleting request');
         const deleteRequestQuery = `
-            DELETE FROM request
-            WHERE id = $1;
-        `;
-        yield client.query(deleteRequestQuery, [requestId]);
+        DELETE FROM request
+        WHERE id = $1;
+      `;
+        const deleteResult = yield client.query(deleteRequestQuery, [requestId]);
+        console.log('Request deleted, rows affected:', deleteResult.rowCount);
         yield client.query('COMMIT');
+        console.log('Deletion process completed successfully');
     }
     catch (error) {
+        console.error('Error during deletion:', error);
         yield client.query('ROLLBACK');
         throw error;
     }
@@ -366,7 +372,7 @@ const filterRequests = (requestorName, requestorGroup, affectedGroupList, sortBy
             emailRequestor: row.requestor_email,
             order_index: row.order_index
         }));
-        console.log('Processed Requests:', requests);
+        //  console.log('Processed Requests:', requests);
         return { totalCount, requests };
     }
     catch (err) {

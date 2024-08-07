@@ -2,7 +2,7 @@
 import { Request, Response } from 'express';
 import { getProductManagers, getRequestsByProductManager,updateProductManagerByEmail, addProductManagerToDb, deleteProductManagerByEmail } from '../Utils/productUtils';
 import { ProductManager } from '../types/productManagerTypes';
-import { getGroupsForProductManager } from '../Utils/productManagerGroupUtils';
+//import { getGroupsForProductManager } from '../Utils/productManagerGroupUtils';
 
 const getAllProductManagers = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -75,16 +75,16 @@ export const editProductManagerByAdmin = (req: Request, res: Response) => {
         res.status(500).json({ error: 'Failed to add product manager' });
     }
 };
-const getGroupsByProductManager = async (req: Request, res: Response): Promise<void> => {
-    const email = req.params.email;
-    try {
-        const groups = await getGroupsForProductManager(email);
-        res.json(groups);
-    } catch (err) {
-        console.error('Error in getGroupsByProductManager:', err);
-        res.status(500).json({ error: 'Failed to fetch groups for product manager' });
-    }
-};
+// const getGroupsByProductManager = async (req: Request, res: Response): Promise<void> => {
+//     const email = req.params.email;
+//     try {
+//         const groups = await getGroupsForProductManager(email);
+//         res.json(groups);
+//     } catch (err) {
+//         console.error('Error in getGroupsByProductManager:', err);
+//         res.status(500).json({ error: 'Failed to fetch groups for product manager' });
+//     }
+// };
 
 export const deleteProductManager = async (req: Request, res: Response): Promise<void> => {
     const email = req.params.email;
@@ -101,4 +101,4 @@ export const deleteProductManager = async (req: Request, res: Response): Promise
 
 
   
-export { getAllProductManagers, getAllRequestsByProductManager, addProductManager , getGroupsByProductManager};
+export { getAllProductManagers, getAllRequestsByProductManager, addProductManager };

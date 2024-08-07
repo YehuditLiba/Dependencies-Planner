@@ -6,13 +6,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const GroupCon_1 = require("../Controllers/GroupCon.");
 const requestCon_1 = require("../Controllers/requestCon");
-const productManagerCon_1 = require("../Controllers/productManagerCon");
+const productManagerCon_1 = require("../Controllers/productManagerCon"); //, getAllRequestsByProductManager, editProductManagerByAdmin, deleteProductManager,getAllProductManagers,
 const StatusCon_1 = require("../Controllers/StatusCon");
 const PriorityCon_1 = require("../Controllers/PriorityCon");
 // import { getAllTSize } from '../Controllers/T_SizeCon';
 // import { getAllDecisionsController } from '../Controllers/final_decisionCon';
 const affectedGroupCon_1 = require("../Controllers/affectedGroupCon");
-const productManagerGroupCon_1 = require("../Controllers/productManagerGroupCon");
+//import {addProductManagerToGroupHandler,getProductManagerGroupsHandler , getAllProductManagerGroupsHandler} from '../Controllers/productManagerGroupCon';
 const slackCon_1 = require("../Controllers/slackCon");
 const router = express_1.default.Router();
 router.post('/send-message', slackCon_1.sendMessageToSlack);
@@ -43,16 +43,16 @@ router.delete('/affectedGroups/:requestId', affectedGroupCon_1.deleteAffectedGro
 // נתיב לקבלת כל הבקשות עם הסטטוסים שלהן
 router.get('/requestsWithStatuses', affectedGroupCon_1.getAllRequestsWithStatusesController);
 //routings ProductManager
-router.get('/productManagers', productManagerCon_1.getAllProductManagers);
-router.get('/requests/:groupId', productManagerCon_1.getAllRequestsByProductManager);
-router.put('/editProductManagers/:email', productManagerCon_1.editProductManagerByAdmin);
+//router.get('/productManagers', getAllProductManagers);
+//router.get('/requests/:groupId', getAllRequestsByProductManager);
+//router.put('/editProductManagers/:email', editProductManagerByAdmin);
 router.post('/addProductManagers', productManagerCon_1.addProductManager);
-router.get('/product-managers/:email/groups', productManagerCon_1.getGroupsByProductManager);
-router.delete('/productManagers/:email', productManagerCon_1.deleteProductManager);
+//router.get('/product-managers/:email/groups', getGroupsByProductManager);
+//router.delete('/productManagers/:email', deleteProductManager);
 //routings ProductManagerGroups 
-router.post('/product-manager-group', productManagerGroupCon_1.addProductManagerToGroupHandler);
-router.get('/product-manager-group/:email', productManagerGroupCon_1.getProductManagerGroupsHandler);
-router.get('/all-product-manager-groups', productManagerGroupCon_1.getAllProductManagerGroupsHandler);
+// router.post('/product-manager-group', addProductManagerToGroupHandler);
+// router.get('/product-manager-group/:email', getProductManagerGroupsHandler);
+// router.get('/all-product-manager-groups', getAllProductManagerGroupsHandler); 
 //status routings
 router.get('/status', StatusCon_1.getAllStatusController);
 router.get('/Getstatus', StatusCon_1.getAllStatus);

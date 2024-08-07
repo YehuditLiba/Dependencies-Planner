@@ -18,12 +18,13 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
     const [editData, setEditData] = useState(row);
     const [statuses, setStatuses] = useState([]);
     const [priorities, setPriorities] = useState([]);
-
     useEffect(() => {
         setEditData(row);
     }, [row]);
 
     useEffect(() => {
+        console.log("EditableRow"+emailRequestor)
+
         const fetchStatuses = async () => {
             try {
                 const response = await axios.get('http://localhost:3001/api/status');
@@ -112,7 +113,7 @@ const EditableRow = ({ row, columns, onSave, emailRequestor,
             onDragOver={onDragOver}
             onDrop={(e) => onDrop(e, rowIndex)}>
             <TableCell>
-                <DeleteRequest id={row.ID} emailRequestor={emailRequestor} onDelete={handleDeleteRequest} />
+                <DeleteRequest id={row.ID} email={emailRequestor} onDelete={handleDeleteRequest} />
                 <IconButton onClick={handleToggleEdit}>
                     {isEditing ? <SaveIcon /> : <EditIcon />}
                 </IconButton>

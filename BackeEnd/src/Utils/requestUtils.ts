@@ -87,6 +87,8 @@ export const deleteRequestById = async (requestId: number, requestorEmail: strin
     try {
       await client.query('BEGIN');
   
+      console.log('Starting deletion process for request ID:', requestId);
+  
       // בדיקת הרשאה
       const checkRequestorQuery = `
         SELECT COUNT(*) FROM request
@@ -95,22 +97,28 @@ export const deleteRequestById = async (requestId: number, requestorEmail: strin
       const { rows } = await client.query(checkRequestorQuery, [requestId, requestorEmail]);
       const requestorExists = parseInt(rows[0].count, 10) > 0;
   
+      console.log('Requestor exists:', requestorExists);
+  
       if (!requestorExists) {
         throw new Error('Unauthorized: Only the requestor can delete this request');
       }
-
-        // Delete affected groups first
-        await deleteAffectedGroupsByRequestId(requestId);
-
-        // Delete the request
-        const deleteRequestQuery = `
-            DELETE FROM request
-            WHERE id = $1;
-        `;
-        await client.query(deleteRequestQuery, [requestId]);
-
-        await client.query('COMMIT');
+  
+      console.log('Deleting affected groups');
+      await deleteAffectedGroupsByRequestId(requestId);
+      console.log('Affected groups deleted');
+  
+      console.log('Deleting request');
+      const deleteRequestQuery = `
+        DELETE FROM request
+        WHERE id = $1;
+      `;
+      const deleteResult = await client.query(deleteRequestQuery, [requestId]);
+      console.log('Request deleted, rows affected:', deleteResult.rowCount);
+  
+      await client.query('COMMIT');
+      console.log('Deletion process completed successfully');
     } catch (error) {
+      console.error('Error during deletion:', error);
       await client.query('ROLLBACK');
       throw error;
     } finally {
@@ -382,7 +390,7 @@ export const filterRequests = async (
 
         }));
 
-        console.log('Processed Requests:', requests);
+      //  console.log('Processed Requests:', requests);
 
         return { totalCount, requests };
     } catch (err) {
