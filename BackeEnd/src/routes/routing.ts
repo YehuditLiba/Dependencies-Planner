@@ -6,7 +6,7 @@ import {  getRequestByIdController, updateRequest,
     , exportRequestsToCSV,updateOrder
 } from '../Controllers/requestCon';
 import { getAllProductManagers, getAllRequestsByProductManager, editProductManagerByAdmin,addProductManager, getGroupsByProductManager , deleteProductManager } from '../Controllers/productManagerCon';
-import { getAllStatusController, getAllStatus } from '../Controllers/StatusCon';
+import { getAllStatusController, getAllStatus, updateRequestStatus } from '../Controllers/StatusCon';
 import { getAllPrioritiesController, updatePriorityController } from '../Controllers/PriorityCon';
 // import { getAllTSize } from '../Controllers/T_SizeCon';
 // import { getAllDecisionsController } from '../Controllers/final_decisionCon';
@@ -60,6 +60,7 @@ router.get('/all-product-manager-groups', getAllProductManagerGroupsHandler);
 //status routings
 router.get('/status', getAllStatusController);
 router.get('/Getstatus', getAllStatus);
+router.put('/update-status', updateRequestStatus);
 
 
 //priority routings
