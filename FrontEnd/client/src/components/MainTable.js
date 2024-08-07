@@ -332,21 +332,21 @@ export default function MainTable({ emailRequestor }) {
       case 'Not Required':
         return 'lightgray';
       case 'in Q(S)':
-        return 'lightgreen';
+        return '#E0FFE0';
       case 'in Q(M)':
-        return 'lightgreen';
+        return '#E0FFE0';
       case 'in Q(L)':
-        return 'lightgreen';
+        return '#E0FFE0';
       case 'in Q(XL)':
-        return 'lightgreen';
+        return '#E0FFE0';
       case 'not in Q(S)':
-        return 'lightcoral';
+        return '#FFCCCB';
       case 'not in Q(M)':
-        return 'lightcoral';
+        return '#FFCCCB';
       case 'not in Q(L)':
-        return 'lightcoral';
+        return '#FFCCCB';
       case 'not in Q(XL)':
-        return 'lightcoral';
+        return '#FFCCCB';
       default:
         return null;
     }
