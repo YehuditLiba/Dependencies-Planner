@@ -3,7 +3,7 @@ import { getAllGroupsController, editGroupByAdmin, addGroup , deleteGroup} from 
 import {  getRequestByIdController, updateRequest, 
     deleteRequest, updateRequestByIdController,updateFinalDecisionController , createRequest, updatePlannedField, getAllFilteredRequestsWithPagination
     , exportRequestsToCSV,updateOrder
-} from '../Controllers/requestCon'; import { getAllProductManagers, getAllRequestsByProductManager, editProductManagerByAdmin, addProductManager, getGroupsByProductManager, deleteProductManager } from '../Controllers/productManagerCon';
+} from '../Controllers/requestCon'; import { getAllProductManagers, getAllRequestsByProductManager, editProductManagerByAdmin, addProductManager, deleteProductManager } from '../Controllers/productManagerCon';
 import { getAllStatusController, getAllStatus, updateRequestStatus } from '../Controllers/StatusCon';
 import { getAllPrioritiesController, updatePriorityController } from '../Controllers/PriorityCon';
 // import { getAllTSize } from '../Controllers/T_SizeCon';
