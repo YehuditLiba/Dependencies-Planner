@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { IconButton, Modal, Box, Typography, Button } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-
+import { sendMessageToSlack } from './sendMessageToSlack';
 const modalStyle = {
   position: 'absolute',
   top: '50%',
@@ -36,6 +36,8 @@ const DeleteRequest = ({ id, email, onDelete }) => {
       console.log("Successfully deleted request with ID: " + id);
       onDelete(id); // כאן קורה הקריאה לפונקציה handleDeleteRequest
       handleClose();
+      sendMessageToSlack(`request deleted by ${email} `);
+
     } catch (error) {
       if (error.response && error.response.status === 403) {
         setError('You do not have permission to delete this request.');
