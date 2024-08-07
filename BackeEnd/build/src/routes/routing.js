@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const GroupCon_1 = require("../Controllers/GroupCon.");
 const requestCon_1 = require("../Controllers/requestCon");
-const productManagerCon_1 = require("../Controllers/productManagerCon"); //, getAllRequestsByProductManager, editProductManagerByAdmin, deleteProductManager,getAllProductManagers,
+const productManagerCon_1 = require("../Controllers/productManagerCon");
 const StatusCon_1 = require("../Controllers/StatusCon");
 const PriorityCon_1 = require("../Controllers/PriorityCon");
 // import { getAllTSize } from '../Controllers/T_SizeCon';
@@ -43,12 +43,11 @@ router.delete('/affectedGroups/:requestId', affectedGroupCon_1.deleteAffectedGro
 // נתיב לקבלת כל הבקשות עם הסטטוסים שלהן
 router.get('/requestsWithStatuses', affectedGroupCon_1.getAllRequestsWithStatusesController);
 //routings ProductManager
-//router.get('/productManagers', getAllProductManagers);
-//router.get('/requests/:groupId', getAllRequestsByProductManager);
-//router.put('/editProductManagers/:email', editProductManagerByAdmin);
+router.get('/productManagers', productManagerCon_1.getAllProductManagers);
+router.get('/requests/:groupId', productManagerCon_1.getAllRequestsByProductManager);
+router.put('/editProductManagers/:email', productManagerCon_1.editProductManagerByAdmin);
 router.post('/addProductManagers', productManagerCon_1.addProductManager);
 router.delete('/productManagers/:email', productManagerCon_1.deleteProductManager);
-
 //routings ProductManagerGroups 
 // router.post('/product-manager-group', addProductManagerToGroupHandler);
 // router.get('/product-manager-group/:email', getProductManagerGroupsHandler);

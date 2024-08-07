@@ -101,41 +101,40 @@ export default function MainTable({ emailRequestor }) {
   const [filteredRows, setFilteredRows] = useState([]);
   const [selectedButton, setSelectedButton] = useState(null);
  const [adminSettingsOpen, setAdminSettingsOpen] = useState(false);
+ const fetchData = async () => {
+  try {
+    const params = {
+      limit: rowsPerPage === -1 ? undefined : rowsPerPage,
+      offset: rowsPerPage === -1 ? 0 : page * rowsPerPage,
+    };
 
-    useEffect(() => {
-      const fetchData = async () => {
-        try {
-          const params = {
-            limit: rowsPerPage === -1 ? undefined : rowsPerPage,
-            offset: rowsPerPage === -1 ? 0 : page * rowsPerPage,
-          };
-
-          if (selectedGroup) {
-            params.requestorGroup = selectedGroup;
-          }
-
-    if (selectedAffectedGroups.length) {
-      params.affectedGroupList = selectedAffectedGroups.join(',');
+    if (selectedGroup) {
+      params.requestorGroup = selectedGroup;
     }
 
-    console.log('Params sent to server:', params);
+if (selectedAffectedGroups.length) {
+params.affectedGroupList = selectedAffectedGroups.join(',');
+}
 
-    const response = await axios.get('http://localhost:3001/api/requests', { params });
+console.log('Params sent to server:', params);
 
-    console.log('Full response data:', response.data);
+const response = await axios.get('http://localhost:3001/api/requests', { params });
 
-    if (response.data.requests) {
-      console.log('Fetched rows:', response.data.requests);
-      setRows(response.data.requests);
-      setTotalRows(response.data.totalCount || response.data.requests.length);
-    } else {
-      console.warn('No requests found in response data');
-    }
-  } catch (error) {
-    console.error("Failed to fetch data", error);
-    alert("Failed to fetch data from server. Please try again later.");
-  }
+console.log('Full response data:', response.data);
+
+if (response.data.requests) {
+console.log('Fetched rows:', response.data.requests);
+setRows(response.data.requests);
+setTotalRows(response.data.totalCount || response.data.requests.length);
+} else {
+console.warn('No requests found in response data');
+}
+} catch (error) {
+console.error("Failed to fetch data", error);
+alert("Failed to fetch data from server. Please try again later.");
+}
 };
+    useEffect(() => {
     const fetchGroups = async () => {
       try {
         const response = await axios.get('http://localhost:3001/api/groups');
@@ -233,10 +232,12 @@ export default function MainTable({ emailRequestor }) {
       prev.includes(groupId) ? prev.filter(id => id !== groupId) : [...prev, groupId]
     );
   };
+  /////////////////////////////////////////////////////
   const handleDeleteRequest = (ID) => {
     console.log(`Removing row with ID: ${ID} from the table`);
     setRows(prevRows => prevRows.filter(row => row.ID !== ID));
   };
+  
   const applyFilter = () => {
     handleCloseMenu('affectedGroup');
   };
@@ -339,6 +340,9 @@ export default function MainTable({ emailRequestor }) {
       prevRows.map(row =>
         row.ID === updatedRow.ID ? updatedRow : row
       ));
+  };
+  const handleChange = () => {
+    fetchData(); // רפרוש הנתונים
   };
 
   const onDrop = async (e, rowIndex) => {
@@ -560,7 +564,7 @@ export default function MainTable({ emailRequestor }) {
                     columns={columns}
                     onSave={handleSave}
                     emailRequestor={emailRequestor}
-                    onDelete={handleDeleteRequest}
+                    handleDeleteRequest={handleDeleteRequest} 
                     formatDate={formatDate}
                     showGroupColumns={showGroupColumns}
                     groups={groups}
@@ -624,7 +628,7 @@ export default function MainTable({ emailRequestor }) {
         aria-describedby="modal-description"
       >
         <Box sx={modalStyle}>
-          <RequestForm onClose={() => setOpen(false)} />
+          <RequestForm onClick={handleChange()} onClose={() => setOpen(false)} />
         </Box>
       </Modal>
       <Modal

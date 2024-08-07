@@ -19,7 +19,6 @@ const DeleteRequest = ({ id, email, onDelete }) => {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
-  console.log("עעעעעעעעעעעע"+email)
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -29,13 +28,13 @@ const DeleteRequest = ({ id, email, onDelete }) => {
   };
 
   const handleDelete = async () => {
-    console.log("ייייייייייייייייייייייי"+email)
     setIsDeleting(true);
     try {
       await axios.delete(`http://localhost:3001/api/deleteRequests/${id}`, {
         data: { requestorEmail: email }
       });
-      onDelete(id);
+      console.log("Successfully deleted request with ID: " + id);
+      onDelete(id); // כאן קורה הקריאה לפונקציה handleDeleteRequest
       handleClose();
     } catch (error) {
       if (error.response && error.response.status === 403) {
