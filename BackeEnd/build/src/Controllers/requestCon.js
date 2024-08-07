@@ -212,7 +212,6 @@ const createRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             statuses: req.body.statuses // כולל את הסטטוסים
         };
         yield (0, requestUtils_1.addRequest)(request); // להוסיף את הבקשה
-        yield (0, requestUtils_1.addRequest)(request); // להוסיף את הבקשה
         res.status(201).json({ message: 'Request added successfully' });
     }
     catch (error) {

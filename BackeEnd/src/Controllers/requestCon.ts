@@ -196,7 +196,6 @@ export const createRequest = async (req: CustomRequest<RequestT>, res: Response)
     };
 
     await addRequest(request); // להוסיף את הבקשה
-    await addRequest(request); // להוסיף את הבקשה
     res.status(201).json({ message: 'Request added successfully' });
   } catch (error) {
     console.error(error);
