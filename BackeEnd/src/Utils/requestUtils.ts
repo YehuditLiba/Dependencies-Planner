@@ -88,8 +88,6 @@ export const deleteRequestById = async (requestId: number, requestorEmail: strin
       await client.query('BEGIN');
   
       console.log('Starting deletion process for request ID:', requestId);
-  
-      // בדיקת הרשאה
       const checkRequestorQuery = `
         SELECT COUNT(*) FROM request
         WHERE id = $1 AND requestor_email = $2;
@@ -102,11 +100,9 @@ export const deleteRequestById = async (requestId: number, requestorEmail: strin
       if (!requestorExists) {
         throw new Error('Unauthorized: Only the requestor can delete this request');
       }
-  
       console.log('Deleting affected groups');
       await deleteAffectedGroupsByRequestId(requestId);
       console.log('Affected groups deleted');
-  
       console.log('Deleting request');
       const deleteRequestQuery = `
         DELETE FROM request
@@ -231,7 +227,8 @@ export const updateFinalDecision = async (id: number, finalDecision: boolean): P
 
 export const addRequest = async (request: RequestT): Promise<void> => {
     const query = `
-      INSERT INTO request (title, request_group, description, priority, planned, comments, date_time, affected_group_list, jira_link, requestor_name, requestor_email)
+      INSERT INTO request (title, request_group, description, priority, planned,
+      comments, date_time, affected_group_list, jira_link, requestor_name, requestor_email)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id
     `;
     const today = new Date();
@@ -252,22 +249,14 @@ export const addRequest = async (request: RequestT): Promise<void> => {
     ];
     
     try {
-        // Start a transaction
         await pool.query('BEGIN');
-        
-        // Insert the request and get the inserted request's ID
         const result = await pool.query(query, values);
         const requestId = result.rows[0].id;
-
-        // Insert each affected group with status 1
         for (const groupId of request.affectedGroupList) {
             await createAffectedGroupInDB(requestId, groupId, 1);
         }
-
-        // Commit the transaction
         await pool.query('COMMIT');
     } catch (error) {
-        // Rollback the transaction in case of an error
         await pool.query('ROLLBACK');
         console.error('Error in addRequest:', error);
         throw new Error('Failed to add request');

@@ -99,7 +99,6 @@ const deleteRequestById = (requestId, requestorEmail) => __awaiter(void 0, void 
     try {
         yield client.query('BEGIN');
         console.log('Starting deletion process for request ID:', requestId);
-        // בדיקת הרשאה
         const checkRequestorQuery = `
         SELECT COUNT(*) FROM request
         WHERE id = $1 AND requestor_email = $2;
@@ -240,7 +239,8 @@ const updateFinalDecision = (id, finalDecision) => __awaiter(void 0, void 0, voi
 exports.updateFinalDecision = updateFinalDecision;
 const addRequest = (request) => __awaiter(void 0, void 0, void 0, function* () {
     const query = `
-      INSERT INTO request (title, request_group, description, priority, planned, comments, date_time, affected_group_list, jira_link, requestor_name, requestor_email)
+      INSERT INTO request (title, request_group, description, priority, planned,
+      comments, date_time, affected_group_list, jira_link, requestor_name, requestor_email)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id
     `;
     const today = new Date();
@@ -259,20 +259,15 @@ const addRequest = (request) => __awaiter(void 0, void 0, void 0, function* () {
         request.emailRequestor,
     ];
     try {
-        // Start a transaction
         yield db_1.pool.query('BEGIN');
-        // Insert the request and get the inserted request's ID
         const result = yield db_1.pool.query(query, values);
         const requestId = result.rows[0].id;
-        // Insert each affected group with status 1
         for (const groupId of request.affectedGroupList) {
             yield (0, affectedGroupsUtils_1.createAffectedGroupInDB)(requestId, groupId, 1);
         }
-        // Commit the transaction
         yield db_1.pool.query('COMMIT');
     }
     catch (error) {
-        // Rollback the transaction in case of an error
         yield db_1.pool.query('ROLLBACK');
         console.error('Error in addRequest:', error);
         throw new Error('Failed to add request');

@@ -37,7 +37,7 @@ router.get('/requests', requestCon_1.getAllFilteredRequestsWithPagination);
 router.get('/export-requests', requestCon_1.exportRequestsToCSV);
 // Affected_Groups:
 router.get('/affectedGroups', affectedGroupCon_1.getAllAffectedGroupsController);
-router.put('/updateAffectedGroups/status', affectedGroupCon_1.updateAffectedGroupStatus);
+router.put('/updateAffeDctedGroups/status', affectedGroupCon_1.updateAffectedGroupStatus);
 router.post('/createAffectedGroup', affectedGroupCon_1.createAffectedGroup);
 router.delete('/affectedGroups/:requestId', affectedGroupCon_1.deleteAffectedGroups);
 // נתיב לקבלת כל הבקשות עם הסטטוסים שלהן

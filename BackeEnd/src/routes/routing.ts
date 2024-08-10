@@ -37,7 +37,7 @@ router.get('/export-requests', exportRequestsToCSV);
 
 // Affected_Groups:
 router.get('/affectedGroups', getAllAffectedGroupsController);
-router.put('/updateAffectedGroups/status', updateAffectedGroupStatus);
+router.put('/updateAffeDctedGroups/status', updateAffectedGroupStatus);
 router.post('/createAffectedGroup', createAffectedGroup);
 router.delete('/affectedGroups/:requestId', deleteAffectedGroups);
 // נתיב לקבלת כל הבקשות עם הסטטוסים שלהן

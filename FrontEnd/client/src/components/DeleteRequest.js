@@ -14,7 +14,6 @@ const modalStyle = {
   boxShadow: 24,
   p: 4,
 };
-
 const DeleteRequest = ({ id, email, onDelete }) => {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState('');
@@ -42,7 +41,7 @@ const DeleteRequest = ({ id, email, onDelete }) => {
       if (error.response && error.response.status === 403) {
         setError('You do not have permission to delete this request.');
       } else {
-        setError('An error occurred while deleting the request.');
+        setError('You do not have permission to delete this request.');
       }
       setIsDeleting(false);
     }

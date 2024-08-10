@@ -7,18 +7,15 @@ updateAffectedGroupList, deleteRequestById, updateRequestById,updateFinalDecisio
 } from '../Utils/requestUtils';
 import { RequestT } from '../types/requestTypes';
 import { createObjectCsvWriter } from 'csv-writer';
+
 //עידכון סדר
 export const updateOrder = async (req: Request, res: Response): Promise<void> => {
   try {
       const updatedRows: RequestT[] = req.body;
-
-      // בדוק אם הקלט הוא מערך
       if (!Array.isArray(updatedRows)) {
           res.status(400).json({ message: 'פורמט קלט לא תקין' });
           return;
       }
-
-      // עיבוד כל שורה ועדכון ה-order_index במסד הנתונים
       for (const row of updatedRows) {
           if (row.ID && row.order_index !== undefined) {
               await updateRequestOrder(row.ID, row.order_index);
@@ -27,13 +24,13 @@ export const updateOrder = async (req: Request, res: Response): Promise<void> =>
               return;
           }
       }
-
       res.status(200).json({ message: 'הסדר עודכן בהצלחה' });
   } catch (error) {
       console.error('שגיאה בעדכון הסדר:', error);
       res.status(500).json({ message: 'שגיאה בעדכון הסדר' });
   }
 };
+
 export const getRequestByIdController = async (req: Request, res: Response): Promise<void> => {
   const id = parseInt(req.params.id, 10);
   if (isNaN(id)) {
@@ -59,12 +56,10 @@ export const deleteRequest = async (req: Request, res: Response) => {
   const { requestorEmail } = req.body;
   console.log('REQUEST ID:', id);
   console.log('REQUESTOR EMAIL:', requestorEmail);
-  console.log('FULL REQUEST BODY:', req.body);  // הוספת לוג נוסף לבדיקה
-
+  console.log('FULL REQUEST BODY:', req.body); 
   if (!id || !requestorEmail) {
     return res.status(400).json({ message: 'Missing requestId or requestorEmail' });
   }
-
   try {
     await deleteRequestById(Number(id), requestorEmail);
     res.status(200).json({ message: `Request with ID ${id} and its affected groups deleted successfully` });

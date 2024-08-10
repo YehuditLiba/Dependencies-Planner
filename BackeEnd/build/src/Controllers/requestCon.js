@@ -31,12 +31,10 @@ const csv_writer_1 = require("csv-writer");
 const updateOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const updatedRows = req.body;
-        // בדוק אם הקלט הוא מערך
         if (!Array.isArray(updatedRows)) {
             res.status(400).json({ message: 'פורמט קלט לא תקין' });
             return;
         }
-        // עיבוד כל שורה ועדכון ה-order_index במסד הנתונים
         for (const row of updatedRows) {
             if (row.ID && row.order_index !== undefined) {
                 yield (0, requestUtils_1.updateRequestOrder)(row.ID, row.order_index);
@@ -79,7 +77,7 @@ const deleteRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     const { requestorEmail } = req.body;
     console.log('REQUEST ID:', id);
     console.log('REQUESTOR EMAIL:', requestorEmail);
-    console.log('FULL REQUEST BODY:', req.body); // הוספת לוג נוסף לבדיקה
+    console.log('FULL REQUEST BODY:', req.body);
     if (!id || !requestorEmail) {
         return res.status(400).json({ message: 'Missing requestId or requestorEmail' });
     }

@@ -232,7 +232,6 @@ alert("Failed to fetch data from server. Please try again later.");
       prev.includes(groupId) ? prev.filter(id => id !== groupId) : [...prev, groupId]
     );
   };
-  /////////////////////////////////////////////////////
   const handleDeleteRequest = (ID) => {
     console.log(`Removing row with ID: ${ID} from the table`);
     setRows(prevRows => prevRows.filter(row => row.ID !== ID));
@@ -350,16 +349,11 @@ alert("Failed to fetch data from server. Please try again later.");
     const newRows = [...rows];
     const [draggedRow] = newRows.splice(draggedRowIndex, 1);
     newRows.splice(rowIndex, 0, draggedRow);
-
-    // עדכון order_index בהתאם למיקום החדש של השורות
     const updatedRows = newRows.map((row, index) => ({
       ...row,
-      order_index: index  // מניחים ש-order_index מתחיל מ-0
+      order_index: index
     }));
-
-    // עדכון מצב השורות והנתונים במסד הנתונים
     setRows(updatedRows);
-
     try {
       await fetch('http://localhost:3001/api/update-order', {
         method: 'POST',
@@ -372,7 +366,6 @@ alert("Failed to fetch data from server. Please try again later.");
       console.error('עדכון הסדר נכשל:', error);
     }
   };
-  // סידור השורות לפי order_index
   const sortedRows = [...rows].sort((a, b) => a.order_index - b.order_index);
   return (
     <Box className="table-container">
