@@ -342,7 +342,7 @@ alert("Failed to fetch data from server. Please try again later.");
       ));
   };
   const handleChange = () => {
-    fetchData(); // רפרוש הנתונים
+    //fetchData(); // רפרוש הנתונים
   };
 
   const onDrop = async (e, rowIndex) => {
