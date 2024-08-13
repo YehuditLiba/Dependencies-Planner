@@ -18,7 +18,7 @@ export const formatDateTime = (value) => {
     4: 'Low'
   };
   
-  export const finalDecissionMap = {
+  export const finalDecisionMap = {
     true: 'in Q',
     false: 'not in Q'
   }

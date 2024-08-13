@@ -3,12 +3,12 @@ import '../designs/Admin.css' ;
 
 const AdminDesign = () => {
     return (
-        <header className="header">
-            <div className="title">
+        <header className="headerA">
+            <div className="titleA">
                 Dependencies Planner PRD
             </div>
-            <div className="logo-container">
-                <img src="Practicum.png" alt="Company Logo" className="logo" />
+            <div className="logo-containerA">
+                <img src="Practicum.png" alt="Company Logo" className="logoA" />
             </div>
         </header>
     );

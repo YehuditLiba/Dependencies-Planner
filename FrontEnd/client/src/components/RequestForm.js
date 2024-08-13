@@ -90,12 +90,12 @@ export default function RequestForm({ onClose }) {
       setPlanned('');
       setJiraLink('');
 
-      alert('Request added successfully!');
+      // alert('Request added successfully!');
       onClose();
       sendMessageToSlack(`${email} Added a new request`);
     } catch (error) {
       console.error('Failed to add request', error);
-      alert('Failed to add request');
+      // alert('Failed to add request');
     } finally {
       isSubmitting.current = false;
     }
