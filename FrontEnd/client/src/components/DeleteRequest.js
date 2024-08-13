@@ -15,11 +15,10 @@ const modalStyle = {
   p: 4,
 };
 
-const DeleteRequest = ({ id, email, onDelete }) => {
+const DeleteRequest = ({ id, email, handleDeleteRequest }) => {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
-
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
@@ -29,12 +28,14 @@ const DeleteRequest = ({ id, email, onDelete }) => {
 
   const handleDelete = async () => {
     setIsDeleting(true);
+    console.log(email)
+
     try {
       await axios.delete(`http://localhost:3001/api/deleteRequests/${id}`, {
         data: { requestorEmail: email }
       });
       console.log("Successfully deleted request with ID: " + id);
-      onDelete(id); // כאן קורה הקריאה לפונקציה handleDeleteRequest
+      handleDeleteRequest(id); // כאן קורה הקריאה לפונקציה handleDeleteRequest
       handleClose();
       sendMessageToSlack(`request deleted by ${email} `);
 

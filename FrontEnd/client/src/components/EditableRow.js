@@ -9,7 +9,8 @@ import MenuItem from '@mui/material/MenuItem';
 import { priorityMap, finalDecisionMap } from '../utils/utils';
 import { quarters } from '../config/quarters';
 
-const EditableRow = ({ row, columns, onSave, emailRequestor, handleDeleteRequest, formatDate, showGroupColumns, groups, getStatusBackgroundColor, rowIndex, onDrop }) => {
+const EditableRow = ({ row, columns, onSave, emailRequestor,handleDeleteRequest
+  , formatDate, showGroupColumns, groups, getStatusBackgroundColor, rowIndex, onDrop }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState(row);
   const [statuses, setStatuses] = useState([]);
@@ -123,8 +124,8 @@ return (
       onDragOver={onDragOver}
       onDrop={(e) => onDrop(e, rowIndex)}>
       <TableCell>
-          <DeleteRequest id={row.ID} emailRequestor={emailRequestor} onDelete={handleDeleteRequest} />
-          <IconButton onClick={handleToggleEdit}>
+      <DeleteRequest id={row.ID} email={emailRequestor} handleDeleteRequest={handleDeleteRequest} />
+      <IconButton onClick={handleToggleEdit}>
               {isEditing ? <SaveIcon /> : <EditIcon />}
           </IconButton>
       </TableCell>
